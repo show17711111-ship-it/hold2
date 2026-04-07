@@ -328,6 +328,10 @@ h1{font-size:14px;font-weight:700;color:#4ade80;}
       <div class="pot-label">팟참여</div>
       <div class="pot-btns" id="pot-btns"></div>
     </div>
+    <div class="pot-g">
+      <div class="pot-label">사이콜</div>
+      <div class="pot-btns" id="limp-btns"></div>
+    </div>
     <div id="brk-wrap">
       <input type="text" class="ti" id="brk-t-in" value="15:00" maxlength="5" style="width:36px;height:25px;font-size:9px;">
       <button id="brk-btn" onclick="toggleBreak()">☕</button>
@@ -489,25 +493,123 @@ const HT={AA:1,KK:1,QQ:1,JJ:2,TT:2,'99':3,'88':3,'77':4,'66':4,'55':5,'44':5,'33
 AKs:1,AQs:2,AJs:2,ATs:3,A9s:4,A8s:4,A7s:4,A6s:5,A5s:4,A4s:5,A3s:5,A2s:5,
 KQs:2,KJs:3,KTs:4,K9s:5,QJs:3,QTs:4,JTs:3,J9s:4,T9s:4,'98s':4,'87s':5,'76s':5,'65s':6,'54s':6,
 AKo:1,AQo:2,AJo:3,ATo:4,KQo:3,KJo:4,KTo:5,QJo:4,JTo:4,T9o:5};
+/* ──────────────────────────────────────────
+   종합 팁 데이터: fi / vr / allin / rr 상황별
+   ────────────────────────────────────────── */
 const TIPS={
-'AA':'최강의 스타팅 핸드. 항상 레이즈, 3벳에는 4벳 올인. 소프트 콜 트랩도 가끔 유효.',
-'KK':'AA 다음 강력. 올인 가치 충분. A 텍스처 보드에서 팟 컨트롤 고려.',
-'QQ':'강하지만 A·K 플랍 주의. 포지션이 수익성 좌우.',
-'JJ':'오버카드(Q·K·A)에 취약. IP에서 수익성 극대화.',
-'TT':'오버페어/셋 목표. J↑ 보드에서 팟 컨트롤 필수.',
-'99':'EP 머징 관리 중요. 멀티웨이 팟에서 셋 위주.',
-'88':'EP 폴드 또는 프리미엄에만 콜. CO/BTN 적극 오픈.',
-'77':'LP 셋 마이닝. 딥스택 멀티웨이 효과적.',
-'AKs':'최강 수티드. 넛 플러시+스트레이트 드로. 모든 포지션 프리미엄.',
-'AQs':'LP 강력, EP도 가치. AK 도미네이트 주의.',
-'AKo':'프리플랍 최강 비수티드. 포스트플랍 페어 미스 시 주의.',
-'KQs':'브로드웨이 수티드. MP+ 강력, 블러프 캐처 우수.',
-'QJs':'강한 수티드 커넥터. MP+ 오픈, 포스트플랍 드로 최강.',
-'JTs':'최강 수티드 커넥터. LP에서 투기적이고 가치 높음.',
-'T9s':'CO+ 오픈. 멀티웨이 드로 파워 강력.',
-'A5s':'넛 플러시+휠(A-5) 가능. 3벳 블러프로도 활용.',
-default:'포지션이 늦을수록 오픈 레인지가 넓어집니다. 딥스택일수록 수티드 커넥터 가치 상승.'
+/* 프리미엄 페어 */
+'AA':{fi:'절대 림프 금지. 무조건 3BB+ 레이즈. 3벳에 4벳 올인. EP 트랩 가능하지만 기본은 올인.',vr:'레이즈 크기 무관 4벳 올인. 단 100BB+ 딥스택에서는 4벳 후 반응 확인.',allin:'에쿼티 85%+. 무조건 콜.',rr:'5벳 올인. 예외 없음.'},
+'KK':{fi:'무조건 레이즈. A 플랍 두려워 말고 프리플랍 밸류 극대화.',vr:'4벳 올인 기본. A 오버카드 없는 플랍에서 풀 밸류.',allin:'에쿼티 80%+. AA 아니면 콜.',rr:'5벳 올인. 딥스택 4벳 후 올인도 OK.'},
+'QQ':{fi:'모든 포지션 레이즈. EP에서 3벳 직면 시 4벳 or 콜 선택.',vr:'3벳 기본. A·K 오버카드 보드에서 팟 컨트롤.',allin:'에쿼티 72%+. 콜 기본.',rr:'4벳 올인. A·K 없으면 강하게.'},
+/* 강한 페어 */
+'JJ':{fi:'레이즈. Q/K/A 보드에서 수동적으로. IP에서 수익성 극대화.',vr:'3벳 or 폴드. Q↑ 오버페어 보드에서 콜 지양.',allin:'에쿼티 60%+. IP에서 콜, OOP 타이트.',rr:'4벳 또는 폴드. QQ↑에 약함을 인지.'},
+'TT':{fi:'레이즈. J↑ 보드에서 팟 컨트롤 필수. 셋 없으면 원팟 마인드.',vr:'IP 3벳, OOP 콜 or 폴드. 보드에 오버카드 많으면 빠르게 폴드.',allin:'BB+수 고려. 단기전(≤25BB) 콜, 딥스택 신중.',rr:'폴드 고려. QQ+ 대부분.'},
+/* 미드 페어 */
+'99':{fi:'EP에서도 레이즈. 셋 없는 J↑ 보드에서 원팟 마인드.',vr:'IP 3벳 믹스, OOP 콜 후 셋 노리기.',allin:'≤20BB 콜. 딥스택 신중.',rr:'폴드 기본. QQ+ 상대가 많음.'},
+'88':{fi:'EP 폴드. MP+ 레이즈. 셋 없으면 빠른 포기.',vr:'CO/BTN에서만 3벳. OOP 폴드 경향.',allin:'≤15BB 콜.',rr:'폴드.'},
+'77':{fi:'CO+ 레이즈. EP/MP 폴드.',vr:'BTN에서만 콜 or 폴드. 셋 없으면 포기.',allin:'≤12BB 콜.',rr:'폴드.'},
+'66':{fi:'BTN/SB 레이즈. 나머지 폴드.',vr:'폴드 기본. 딥스택 BTN 콜 정도.',allin:'≤10BB 콜.',rr:'폴드.'},
+'55':{fi:'BTN/SB 선택적 레이즈. 셋 없으면 포기.',vr:'BTN 딥스택 콜만. 대부분 폴드.',allin:'≤9BB 콜.',rr:'폴드.'},
+'44':{fi:'BTN에서만 선택적. 셋 마이닝 목적.',vr:'딥스택 BTN 콜 정도.',allin:'≤8BB 콜.',rr:'폴드.'},
+'33':{fi:'BTN에서만 선택적.',vr:'딥스택에서만 콜.',allin:'≤7BB 콜.',rr:'폴드.'},
+'22':{fi:'BTN에서만.',vr:'딥스택에서만 콜.',allin:'≤6BB 콜.',rr:'폴드.'},
+/* AK/AQ */
+'AKs':{fi:'모든 포지션 레이즈. 수티드 특성으로 넛 플러시+스트레이트 드로 포텐셜.',vr:'3벳 or 4벳. 강력한 세미블러프. 페어 미스해도 드로 존재.',allin:'에쿼티 55%+. 콜.',rr:'4벳 올인 또는 3벳 후 올인.'},
+'AKo':{fi:'모든 포지션 레이즈. 프리플랍 최강. 포스트플랍 페어 미스 시 밸류 감소 인지.',vr:'3벳 or 4벳. 페어 미스해도 에쿼티 강함.',allin:'에쿼티 55%+. 콜.',rr:'4벳 올인.'},
+'AQs':{fi:'모든 포지션 레이즈. AK에 도미네이트 주의.',vr:'3벳. EP 오퍼 상대 시 4벳 신중.',allin:'50%+ 에쿼티. 콜.',rr:'3벳 or 폴드. AK/KK 상대 어려움.'},
+'AQo':{fi:'EP 선택적, CO+ 적극 레이즈.',vr:'CO+ 3벳. OOP 콜 or 폴드.',allin:'50%+ 에쿼티.',rr:'폴드 or 3벳. 포지션에 따라.'},
+'AJs':{fi:'MP+ 레이즈. EP 선택적.',vr:'CO+ 3벳. OOP 콜 after.',allin:'45%+ 에쿼티.',rr:'폴드 기본.'},
+'AJo':{fi:'CO+ 레이즈. EP/MP 폴드.',vr:'BTN/CO에서만 3벳.',allin:'신중. AK/AQ/AA/KK에 약함.',rr:'폴드.'},
+'ATs':{fi:'MP+ 레이즈.',vr:'CO+ 3벳 믹스. OOP 콜.',allin:'40%+.',rr:'폴드.'},
+'ATo':{fi:'CO+ 레이즈.',vr:'BTN에서만 3벳.',allin:'신중.',rr:'폴드.'},
+/* 수티드 에이스 */
+'A9s':{fi:'CO+ 레이즈.',vr:'BTN/SB 3벳 믹스. 넛 플러시 포텐셜.',allin:'신중.',rr:'폴드.'},
+'A8s':{fi:'BTN/SB 레이즈.',vr:'BTN 3벳 블러프 소재.',allin:'신중.',rr:'폴드.'},
+'A7s':{fi:'BTN/SB 레이즈.',vr:'블러프 3벳 소재.',allin:'신중.',rr:'폴드.'},
+'A6s':{fi:'BTN/SB 선택적.',vr:'블러프 3벳 소재.',allin:'신중.',rr:'폴드.'},
+'A5s':{fi:'CO+ 레이즈. 휠(A-2-3-4-5)+넛 플러시 드로로 강력한 블러프 핸드.',vr:'3벳 블러프 최강. 폴드 에쿼티+드로 두 가지 아웃.',allin:'폴드.',rr:'3벳 블러프 가능.'},
+'A4s':{fi:'BTN/SB 레이즈.',vr:'3벳 블러프 소재.',allin:'폴드.',rr:'폴드.'},
+'A3s':{fi:'BTN/SB 선택적.',vr:'블러프 3벳.',allin:'폴드.',rr:'폴드.'},
+'A2s':{fi:'BTN에서 선택적.',vr:'블러프 3벳 소재.',allin:'폴드.',rr:'폴드.'},
+/* 오프수트 에이스 하위 */
+'A9o':{fi:'BTN/SB 선택적. 대부분 폴드.',vr:'폴드.',allin:'폴드.',rr:'폴드.'},
+'A8o':{fi:'BTN에서만 선택적.',vr:'폴드.',allin:'폴드.',rr:'폴드.'},
+'A7o':{fi:'폴드.',vr:'폴드.',allin:'폴드.',rr:'폴드.'},
+/* KQ */
+'KQs':{fi:'MP+ 레이즈. 브로드웨이+수티드. 블러프 캐처로 우수.',vr:'CO+ 3벳. OOP 콜.',allin:'45%+ 에쿼티.',rr:'폴드 or 3벳 믹스.'},
+'KQo':{fi:'MP+ 레이즈.',vr:'CO+ 3벳. OOP 폴드 경향.',allin:'신중.',rr:'폴드.'},
+'KJs':{fi:'CO+ 레이즈.',vr:'BTN 3벳 믹스.',allin:'신중.',rr:'폴드.'},
+'KJo':{fi:'CO+ 레이즈.',vr:'BTN 3벳 믹스.',allin:'신중.',rr:'폴드.'},
+'KTs':{fi:'CO+ 레이즈.',vr:'BTN 콜.',allin:'신중.',rr:'폴드.'},
+'KTo':{fi:'BTN/SB 선택적.',vr:'BTN 콜.',allin:'신중.',rr:'폴드.'},
+'K9s':{fi:'BTN/SB 선택적.',vr:'BTN 콜 or 폴드.',allin:'폴드.',rr:'폴드.'},
+'K8s':{fi:'BTN에서만.',vr:'폴드.',allin:'폴드.',rr:'폴드.'},
+'K7s':{fi:'BTN에서만.',vr:'폴드.',allin:'폴드.',rr:'폴드.'},
+/* QJ/JT */
+'QJs':{fi:'MP+ 레이즈. 포스트플랍 드로 최강.',vr:'CO+ 3벳 믹스. BTN 콜.',allin:'신중.',rr:'폴드.'},
+'QJo':{fi:'CO+ 레이즈.',vr:'BTN 콜 or 폴드.',allin:'폴드.',rr:'폴드.'},
+'QTs':{fi:'CO+ 레이즈.',vr:'BTN 콜.',allin:'신중.',rr:'폴드.'},
+'Q9s':{fi:'BTN/SB 선택적.',vr:'폴드.',allin:'폴드.',rr:'폴드.'},
+'JTs':{fi:'MP+ 레이즈. 수티드 커넥터 최강급. 드로 포텐셜 막강.',vr:'CO+ 3벳 믹스. BTN 콜.',allin:'신중.',rr:'폴드.'},
+'JTo':{fi:'BTN/SB 선택적.',vr:'폴드.',allin:'폴드.',rr:'폴드.'},
+'J9s':{fi:'BTN/SB 선택적.',vr:'폴드.',allin:'폴드.',rr:'폴드.'},
+/* 수티드 커넥터 */
+'T9s':{fi:'CO+ 레이즈. 멀티웨이 드로 파워.',vr:'BTN 콜.',allin:'폴드.',rr:'폴드.'},
+'T9o':{fi:'BTN/SB 선택적.',vr:'폴드.',allin:'폴드.',rr:'폴드.'},
+'98s':{fi:'BTN/SB 레이즈.',vr:'BTN 콜.',allin:'폴드.',rr:'폴드.'},
+'87s':{fi:'BTN 레이즈.',vr:'폴드.',allin:'폴드.',rr:'폴드.'},
+'76s':{fi:'BTN 레이즈.',vr:'폴드.',allin:'폴드.',rr:'폴드.'},
+'65s':{fi:'SB/BB 선택적.',vr:'폴드.',allin:'폴드.',rr:'폴드.'},
+'54s':{fi:'SB/BB 선택적.',vr:'폴드.',allin:'폴드.',rr:'폴드.'},
 };
+
+/* ──────────────────────────────────────────
+   동적 팁 생성기: 상황별 맥락을 추가한 최종 팁
+   ────────────────────────────────────────── */
+function getTip(hand,pi,sc,stk){
+  const t=HT[hand]||7;
+  const bbCount=(stk&&stk.bbCount)||0;
+  const limpers=S.limpers||0;
+  const isShort=bbCount>0&&bbCount<=20;
+  const isCritical=bbCount>0&&bbCount<=12;
+  const isDeep=bbCount>60;
+  const posN=['EP','MP','CO','BTN','SB','BB'][pi];
+  const isBB=pi===5;
+
+  // 기본 팁 선택
+  const tipObj=TIPS[hand];
+  const scKey=sc==='fi'?'fi':sc==='allin'?'allin':sc==='rr'?'rr':'vr';
+  let base=tipObj?(tipObj[scKey]||tipObj.fi||''):
+    t<=2?'프리미엄 핸드. 레이즈 or 올인.':
+    t<=4?'강한 핸드. 포지션에 따라 레이즈.':
+    t<=5?'중간 핸드. 레이즈 or 폴드 이분법.':
+    t<=6?'투기적 핸드. LP에서만 레이즈.':
+    '약한 핸드. 대부분 폴드.';
+
+  // 스택 깊이 추가
+  const stackNote=isCritical?` ⚡ ${bbCount}BB 단기전: 올인 or 폴드만.`:
+    isShort?` 🟡 ${bbCount}BB 단기: 2.5BB 오픈권.`:
+    isDeep?' 💙 딥스택: 수티드 커넥터·셋 마이닝 가치 상승.':'';
+
+  // 사이콜 컨텍스트
+  let limpNote='';
+  if(limpers>0){
+    if(sc==='fi'){
+      limpNote=t<=3?` 🎯 앞에 ${limpers}명 림프: 5BB 아이소 레이즈로 스퀴즈.`:
+               t<=5?` ⚡ 앞에 ${limpers}명 림프: 강하면 아이소 레이즈, 약하면 폴드.`:
+               ` ✂️ 앞에 ${limpers}명 림프: 폴드. 멀티웨이에서 엣지 없음.`;
+    }else{
+      limpNote=t<=2?` 🚀 ${limpers}명 콜 후 내 차례: 스퀴즈 올인 찬스!`:
+               t<=4?` ⚡ ${limpers}명 콜 확인: 스퀴즈 3벳 or 폴드. 콜 금지.`:
+               ` ✂️ ${limpers}명 콜 확인: 폴드. 스퀴즈 에쿼티 없음.`;
+    }
+  }
+
+  // 포지션별 추가 멘트
+  const posNote=sc==='fi'&&!isBB&&t>=5&&pi<=1?' EP에서는 이 핸드 기본 폴드.':'';
+
+  return base+stackNote+limpNote+posNote;
+}
 
 /* ════════════════ 상태 ════════════════ */
 let S={
@@ -519,6 +621,7 @@ let S={
   timerRunning:false,timerTotal:270,timerLeft:270,timerInterval:null,
   buyIn:0,curChip:0,
   potPlayers:2,
+  limpers:0,
   breakActive:false,breakTotal:900,breakLeft:900,breakInterval:null,
   flopCards:['','',''],
   pickerTarget:-1,pickerRank:'',pickerSuit:''
@@ -587,26 +690,91 @@ function applyMultiway(acts, sc, hand, n){
 
 function getActs(hand,pi,sc,nPlayers){
   nPlayers=nPlayers||S.potPlayers;
+  const limpers=S.limpers||0;
   const isPub=S.mode==='pub';
+  const t=HT[hand]||7;
+  const isBB=pi===5;
+
+  /* ── 첫 액션: 레이즈 OR 폴드 (림프 없음, BB 체크만 예외) ── */
   if(sc==='fi'){
-    const t=HT[hand]||7,mFI=[3,3,5,6,5,6];
-    let a=baseFi(hand,pi);
+    const mFI=[3,3,5,6,5,6];
+    let[r,al,l,f]=baseFi(hand,pi);
+
+    // ① 림프→폴드 전환 (BB 제외)
+    if(!isBB){ f+=l; l=0; }
+
+    // ② 펍 모드: 약간 넓게
     if(isPub){
       const gap=t-mFI[pi];
-      if(gap===1)a=[0,0,45,55];
-      else if(gap===2)a=[0,0,20,80];
-      else if(gap>2)a=[0,0,0,100];
-      else{let[r,al,l,f]=a;if(f<100){const bn=Math.min(f*.32,22);a=[Math.round(r+bn*.5),al,Math.round(l+bn*.5),Math.round(f-bn)];}}
+      if(gap===1&&isBB)l=Math.min(30,l+20); // BB만 림프 소량
+      else if(gap<=0&&f>0){
+        const bn=Math.min(f*.22,14);
+        r=Math.round(r+bn); f=Math.max(0,100-r-al-l);
+      }
     }
+
+    // ③ 사이 림퍼 보정: 아이소 레이즈 or 폴드
+    if(limpers>0){
+      if(t<=3){r=Math.min(r+limpers*4,92);al=Math.min(al+limpers*2,30);}
+      else if(t<=5){const tight=limpers*7;r=Math.max(0,r-tight*.4);f=Math.min(98,f+tight*.6);}
+      else{f=Math.min(98,f+limpers*10);r=Math.max(0,100-f-al-l);}
+      f=Math.max(0,100-r-al-l);
+    }
+
+    // ④ 멀티웨이
+    let a=[r,al,l,f];
     a=applyMultiway(a,sc,hand,nPlayers);
     return a;
   }
+
+  /* ── 레이즈 직면: 3벳/올인 OR 폴드, 콜은 최소화 ── */
   let[tv,cv,fv]=baseVr(hand,pi);
   const adj=RADJ[sc]||{t:1,c:1};
   tv=Math.min(90,Math.round(tv*adj.t));
-  cv=Math.min(72,Math.round(cv*adj.c));
+  // 콜 40% 감소 (과도한 콜 방지, 이전 25% → 40%로 강화)
+  cv=Math.min(50,Math.round(cv*adj.c*.60));
   fv=Math.max(0,100-tv-cv);
-  if(isPub){const bn=Math.round(Math.min(fv*.24,20));cv=Math.min(cv+bn,72);fv=Math.max(0,100-tv-cv);}
+
+  // 프리미엄 핸드(QQ+/AKs) 기본 3벳 보정: 너무 콜하지 않도록
+  if(t<=1&&sc!=='allin'){
+    // QQ+ : 3벳 최소 55% 이상 보장
+    tv=Math.max(tv,55);
+    cv=Math.min(cv,35);
+    fv=Math.max(0,100-tv-cv);
+  }else if(t===2&&sc!=='allin'){
+    // JJ/AKs: 3벳 최소 40% 이상
+    tv=Math.max(tv,40);
+    cv=Math.min(cv,45);
+    fv=Math.max(0,100-tv-cv);
+  }
+
+  // 펍 모드: 약간 콜 확대
+  if(isPub){const bn=Math.round(Math.min(fv*.15,10));cv=Math.min(cv+bn,55);fv=Math.max(0,100-tv-cv);}
+
+  // ★ 사이콜 스퀴즈 보정 (가장 중요) ★
+  // 콜러가 많을수록 → 가치 핸드는 올인/스퀴즈, 나머지 폴드
+  if(limpers>0&&sc!=='allin'){
+    if(t<=1){
+      // QQ+ : 콜러 1명당 3벳+12%, 콜−10%
+      // 콜러 4명 = 3벳 ~80%+, 콜 5% 이하
+      tv=Math.min(88, tv+limpers*12);
+      cv=Math.max(0, limpers>=3?0:cv-limpers*10);
+    }else if(t<=2){
+      // JJ/AKs: 콜러 1명당 3벳+8%, 콜−8%
+      tv=Math.min(82, tv+limpers*8);
+      cv=Math.max(0, cv-limpers*8);
+    }else if(t<=4){
+      // TT~AJs: 타이트 스퀴즈
+      tv=Math.max(0,tv-limpers*4);
+      cv=Math.max(0,cv-limpers*10);
+    }else{
+      // 나머지: 사이 콜이면 거의 폴드
+      cv=Math.max(0,cv-limpers*12);
+      tv=Math.max(0,tv-limpers*5);
+    }
+    fv=Math.max(0,100-tv-cv);
+  }
+
   let a=[tv,cv,fv];
   if(sc==='allin')a=[cv,Math.max(0,100-cv)];
   a=applyMultiway(a,sc,hand,nPlayers);
@@ -781,7 +949,7 @@ function renderMatrix(){
 function renderLegend(){
   const fi=S.sc==='fi',al=S.sc==='allin';
   let it;
-  if(fi)it=[['#fca5a5','올인'],['#fbbf24','레이즈'],['#4ade80','림프/체크'],['#1e6128','림프믹스'],['#181818','폴드']];
+  if(fi)it=[['#fca5a5','올인'],['#fbbf24','레이즈'],['#4ade80','BB체크'],['#181818','폴드']];
   else if(al)it=[['#60a5fa','콜'],['#181818','폴드']];
   else it=[['#fb923c','3벳/4벳'],['#60a5fa','콜'],['#7c3d0e','3벳믹스'],['#3b6ca8','콜믹스'],['#181818','폴드']];
   document.getElementById('legend').innerHTML=it.map(([c,l])=>`<div class="li"><div class="ld" style="background:${c};"></div>${l}</div>`).join('');
@@ -795,7 +963,7 @@ function renderSheet(){
   const type=isP?'포켓 페어':hand.endsWith('s')?'수티드':'오프수트';
   const scLabel=SC_LIST.find(s=>s.key===sc)?.l1||sc;
   document.getElementById('s-hand').textContent=hand;
-  document.getElementById('s-sub').textContent=`${type} · ${PFULL[pi]} · ${scLabel} · ${S.mode==='trn'?'🏆대회':'🍺펍'} · 팟${S.potPlayers}명`;
+  document.getElementById('s-sub').textContent=`${type} · ${PFULL[pi]} · ${scLabel} · ${S.mode==='trn'?'🏆대회':'🍺펍'} · 팟${S.potPlayers}명`+(S.limpers>0?` · 사이콜${S.limpers}명`:'');
   // 스택 정보
   const stk=getStackInfo();
   const bbNow=S.bbNow||2000;
@@ -808,7 +976,11 @@ function renderSheet(){
     if(sc==='r3')stkHtml+=` · 3벳≈<b style="color:#fb923c">${fmtC(bbNow*9)}</b>`;
     if(sc==='rr')stkHtml+=` · 4벳≈<b style="color:#E24B4A">${fmtC(bbNow*16)}</b>`;
     if(S.curChip>0)stkHtml+=` · 현재<b style="color:#ddd">${fmtC(S.curChip)}</b>`;
-    if(S.potPlayers>2)stkHtml+=` · <span style="color:#fb923c">멀티웨이 ${S.potPlayers}명 보정 적용</span>`;
+    if(S.potPlayers>2)stkHtml+=` · <span style="color:#fb923c">멀티웨이 ${S.potPlayers}명</span>`;
+  if(S.limpers>0){
+    const limpColor=S.limpers>=3?'#E24B4A':'#f97316';
+    stkHtml+=` · <span style="color:${limpColor}">사이콜 ${S.limpers}명 → ${S.limpers>=3?'스퀴즈 or 폴드':'타이트 스퀴즈'}</span>`;
+  }
   }else{
     stkHtml='<span style="color:#2a2a2a">현재칩 입력 시 베팅금액이 계산됩니다</span>';
   }
@@ -873,7 +1045,7 @@ function renderSheet(){
       <td><div class="mini-bar-wrap"><div class="mini-bar-r" style="width:${d.raise}%;"></div><div class="mini-bar-c" style="width:${d.call_limp}%;"></div><div class="mini-bar-f" style="width:${d.fold}%;"></div></div></td>
     </tr>`).join('')}</tbody>
   </table>`;
-  document.getElementById('s-tip').textContent=TIPS[hand]||TIPS.default;
+  document.getElementById('s-tip').textContent=getTip(hand,pi,sc,getStackInfo());
   document.getElementById('sheet').classList.add('open');
   // 플랍 분석 업데이트
   if(S.flopCards.filter(c=>c).length===3)runFlopAnalysis();
@@ -922,7 +1094,7 @@ function setPlayers(n){
 }
 function renderSeatBtns(){
   let h='';
-  for(let i=1;i<=S.players;i++)h+=`<button class="sb2${i===S.seatNum?' on':''}" onclick="setSeat(${i})">${i}</button>`;
+  for(let i=1;i<=12;i++)h+=`<button class="sb2${i===S.seatNum?' on':''}" onclick="setSeat(${i})">${i}</button>`;
   document.getElementById('seat-btns').innerHTML=h;
 }
 function setSeat(n){
@@ -932,6 +1104,12 @@ function setSeat(n){
 function setPotPlayers(n){
   S.potPlayers=n;
   document.querySelectorAll('#pot-btns .potb').forEach(b=>b.classList.toggle('on',+b.dataset.n===n));
+  renderMatrix();
+  if(S.hand)renderSheet();
+}
+function setLimpers(n){
+  S.limpers=n;
+  document.querySelectorAll('#limp-btns .potb').forEach(b=>b.classList.toggle('on',+b.dataset.n===n));
   renderMatrix();
   if(S.hand)renderSheet();
 }
@@ -1285,6 +1463,13 @@ for(let i=2;i<=8;i++){
   const b=document.createElement('button');
   b.className='potb'+(i===2?' on':'');b.dataset.n=i;b.textContent=i;
   b.onclick=()=>setPotPlayers(i);potWrap.appendChild(b);
+}
+// 사이콜 버튼 초기화
+const limpWrap=document.getElementById('limp-btns');
+for(let i=0;i<=6;i++){
+  const b=document.createElement('button');
+  b.className='potb'+(i===0?' on':'');b.dataset.n=i;b.textContent=i;
+  b.onclick=()=>setLimpers(i);limpWrap.appendChild(b);
 }
 // 카드 피커 초기화
 renderSeatBtns();renderScBar();selectByIdx(3);resetTimer();
