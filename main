@@ -1,0 +1,1295 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#000">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="Hold'em">
+<link rel="manifest" href="manifest.json">
+<title>Hold'em Strategy</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;background:#000;color:#ddd;font-family:-apple-system,BlinkMacSystemFont,'Pretendard',sans-serif;overflow:hidden;}
+button{font-family:inherit;border:none;cursor:pointer;background:none;}
+input{-webkit-appearance:none;appearance:none;font-family:inherit;border:none;outline:none;}
+input[type=number]{-moz-appearance:textfield;}
+input::-webkit-inner-spin-button,input::-webkit-outer-spin-button{-webkit-appearance:none;}
+#app{display:flex;flex-direction:column;height:100vh;height:100dvh;}
+#hdr{background:#080808;border-bottom:0.5px solid #1a1a1a;flex-shrink:0;padding-top:env(safe-area-inset-top,0);}
+#content{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;}
+#sheet{background:#090909;border-top:1.5px solid #14532d;overflow:hidden;transition:max-height .3s cubic-bezier(.4,0,.2,1);max-height:0;flex-shrink:0;padding-bottom:env(safe-area-inset-bottom,0);}
+#sheet.open{max-height:520px;}
+
+/* ─ 헤더 rows ─ */
+#r1{display:flex;align-items:center;justify-content:space-between;padding:8px 11px 5px;}
+h1{font-size:14px;font-weight:700;color:#4ade80;}
+#r1r{display:flex;align-items:center;gap:4px;}
+#mode-tog{display:flex;background:#0f0f0f;border-radius:5px;border:0.5px solid #1a1a1a;overflow:hidden;}
+.mtb{padding:4px 8px;font-size:10px;font-weight:700;color:#333;}
+.mtb.on{background:#1e3a5f;color:#7dd3fc;}
+.mtb.onp{background:#3b1c00;color:#fb923c;}
+#pos-badge{font-size:11px;font-weight:700;font-family:monospace;color:#f0c040;background:#16110a;padding:2px 6px;border-radius:4px;border:0.5px solid #2a1f00;}
+#zone-badge{font-size:9px;padding:2px 6px;border-radius:4px;background:#0f0f0f;border:0.5px solid #1a1a1a;color:#333;white-space:nowrap;}
+.ibt{width:27px;height:27px;border-radius:5px;background:#0f0f0f;border:0.5px solid #1a1a1a;color:#333;font-size:13px;display:flex;align-items:center;justify-content:center;}
+
+/* ─ 인원 ─ */
+#r2{padding:0 11px 5px;display:flex;align-items:center;gap:5px;}
+.slbl{font-size:9px;color:#2a2a2a;flex-shrink:0;}
+.p-btns{display:flex;gap:2px;overflow-x:auto;scrollbar-width:none;}
+.p-btns::-webkit-scrollbar{display:none;}
+.pb{min-width:27px;height:24px;border-radius:4px;border:0.5px solid #1a1a1a;background:#0d0d0d;color:#4ade80;font-size:10px;font-weight:700;flex-shrink:0;}
+.pb.on{background:#14532d;color:#86efac;border-color:#166534;}
+
+/* ─ 블라인드+타이머 ─ */
+#r3{padding:0 11px 5px;display:flex;gap:6px;align-items:stretch;}
+#blind-box{display:flex;flex-direction:column;gap:3px;}
+.brow{display:flex;align-items:center;gap:3px;}
+.bl{font-size:9px;color:#2a2a2a;width:13px;flex-shrink:0;}
+.bi{width:80px;height:27px;background:#0f0f0f;border:0.5px solid #1a1a1a;border-radius:5px;color:#ddd;font-size:13px;font-weight:700;text-align:center;font-family:monospace;}
+.bi:focus{border-color:#166534;}
+#timer-box{flex:1;display:flex;flex-direction:column;gap:3px;}
+.ti-row{display:flex;align-items:center;gap:3px;}
+.ti-l{font-size:9px;color:#2a2a2a;white-space:nowrap;}
+.ti{width:42px;height:27px;background:#0f0f0f;border:0.5px solid #1a1a1a;border-radius:5px;color:#ddd;font-size:11px;text-align:center;font-family:monospace;}
+.ti:focus{border-color:#166534;}
+#tc{display:flex;align-items:center;gap:3px;}
+#tdsp{flex:1;background:#0f0f0f;border-radius:5px;height:27px;display:flex;align-items:center;gap:4px;padding:0 6px;border:0.5px solid #1a1a1a;min-width:0;overflow:hidden;}
+#t-time{font-size:13px;font-weight:700;font-family:monospace;color:#f0c040;flex-shrink:0;}
+#t-lvl{font-size:8px;color:#2a2a2a;}
+#t-blind{font-size:8px;color:#4ade80;flex:1;text-align:right;font-family:monospace;white-space:nowrap;overflow:hidden;}
+#t-play{width:27px;height:27px;border-radius:5px;background:#14532d;border:0.5px solid #166534;color:#86efac;font-size:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+#t-play.pause{background:#3d1400;border-color:#7c2d12;color:#fdba74;}
+#t-rst{width:23px;height:27px;border-radius:5px;background:#0f0f0f;border:0.5px solid #1a1a1a;color:#2a2a2a;font-size:11px;display:flex;align-items:center;justify-content:center;}
+
+/* ─ 칩 + 팟참여 + 브레이크 ─ */
+#r3b{padding:0 11px 5px;display:flex;gap:5px;align-items:center;}
+.cg{display:flex;flex-direction:column;gap:1px;flex:1;}
+.cg-top{display:flex;align-items:center;gap:3px;}
+.cl{font-size:8px;color:#2a2a2a;white-space:nowrap;flex-shrink:0;}
+.ci{flex:1;height:25px;background:#0f0f0f;border:0.5px solid #1a1a1a;border-radius:4px;color:#ddd;font-size:11px;font-weight:600;text-align:center;font-family:monospace;min-width:0;}
+.ci:focus{border-color:#166534;}
+.cg-bb{font-size:8px;color:#444;text-align:center;height:9px;}
+.pot-g{display:flex;flex-direction:column;gap:1px;flex-shrink:0;}
+.pot-label{font-size:8px;color:#2a2a2a;text-align:center;}
+.pot-btns{display:flex;gap:1px;}
+.potb{width:19px;height:25px;border-radius:3px;border:0.5px solid #1a1a1a;background:#0d0d0d;color:#2a2a2a;font-size:9px;font-weight:700;}
+.potb.on{background:#14532d;color:#86efac;border-color:#166534;}
+#brk-wrap{display:flex;flex-direction:column;gap:2px;flex-shrink:0;}
+#brk-t-in{width:38px;height:25px;background:#0f0f0f;border:0.5px solid #1a1a1a;border-radius:4px;color:#ddd;font-size:9px;text-align:center;font-family:monospace;}
+#brk-btn{height:25px;padding:0 6px;border-radius:4px;background:#161200;border:0.5px solid #2a2000;color:#c8a000;font-size:9px;font-weight:700;white-space:nowrap;}
+#brk-btn.active{background:#1a0800;border-color:#f97316;color:#f97316;}
+
+#tbar-w{height:2px;background:#080808;}
+#tbar{height:2px;background:#4ade80;transition:width .8s linear;width:100%;}
+#r4{padding:5px 11px 6px;display:flex;align-items:center;gap:5px;border-top:0.5px solid #141414;background:#060606;}
+#seat-btns{display:flex;gap:2px;flex:1;overflow-x:auto;scrollbar-width:none;}
+#seat-btns::-webkit-scrollbar{display:none;}
+.sb2{min-width:22px;height:22px;border-radius:3px;border:0.5px solid #1a1a1a;background:#0d0d0d;color:#272727;font-size:9px;font-weight:700;flex-shrink:0;}
+.sb2.on{background:#16110a;color:#f0c040;border-color:#2a1f00;}
+#next-btn{display:flex;align-items:center;gap:3px;padding:0 8px;height:30px;background:#14532d;border-radius:6px;border:0.5px solid #166534;color:#86efac;font-size:11px;font-weight:700;white-space:nowrap;flex-shrink:0;}
+#next-lbl{font-size:9px;color:#4ade80;font-family:monospace;}
+
+/* ─ 시나리오 바 ─ */
+#sc-bar{display:flex;gap:3px;padding:6px 11px;overflow-x:auto;scrollbar-width:none;border-bottom:0.5px solid #141414;background:#040404;}
+#sc-bar::-webkit-scrollbar{display:none;}
+.scpill{display:flex;flex-direction:column;align-items:center;padding:4px 7px;border-radius:5px;border:0.5px solid #1a1a1a;background:#0d0d0d;cursor:pointer;flex-shrink:0;min-width:44px;}
+.scpill .sp1{font-size:9px;font-weight:700;color:#2e2e2e;}
+.scpill .sp2{font-size:6px;color:#1e1e1e;margin-top:1px;}
+.scpill.on{background:#14532d;border-color:#166534;}
+.scpill.on .sp1{color:#86efac;}
+.scpill.on .sp2{color:#4ade80;}
+
+/* ─ 포지션 바 ─ */
+#pos-bar{display:flex;gap:4px;padding:6px 11px;overflow-x:auto;scrollbar-width:none;border-bottom:0.5px solid #141414;}
+#pos-bar::-webkit-scrollbar{display:none;}
+.pp{display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:46px;height:42px;border-radius:7px;border:0.5px solid #1a1a1a;background:#0c0c0c;flex-shrink:0;position:relative;}
+.pp .pn{font-size:9px;font-weight:700;font-family:monospace;color:#4ade80;}
+.pp .pr{font-size:6px;color:#222;margin-top:1px;}
+.pp.on{background:#14532d;border-color:#166534;box-shadow:0 0 0 1px #166534;}
+.pp.on .pn{color:#86efac;}
+.pp.on .pr{color:#4ade80;}
+.pp.nxt{opacity:.35;}
+.pp.nxt .pn{color:#444;}
+.pp.is-btn::after{content:'D';position:absolute;top:-4px;right:-3px;width:11px;height:11px;border-radius:50%;background:#f0c040;color:#000;font-size:6px;font-weight:800;line-height:11px;text-align:center;}
+
+/* ─ 매트릭스 ─ */
+#matrix-wrap{padding:7px 9px 3px;overflow-x:auto;-webkit-overflow-scrolling:touch;}
+.mgrid{display:inline-grid;grid-template-columns:14px repeat(13,22px);grid-template-rows:14px repeat(13,22px);gap:1px;}
+.ml{display:flex;align-items:center;justify-content:center;font-size:7px;color:#1e1e1e;font-family:monospace;}
+.mc{display:flex;align-items:center;justify-content:center;border-radius:2px;font-size:6px;font-family:monospace;cursor:pointer;user-select:none;-webkit-user-select:none;transition:transform .08s;position:relative;}
+.mc:active{transform:scale(.85);}
+.mc.sel::after{content:'';position:absolute;inset:0;border-radius:2px;outline:2px solid #f0c040;outline-offset:-1px;}
+.c-out{background:#040404;color:#0d0d0d;}
+.c-weak{background:#0c0c0c;color:#181818;}
+.c-allin{background:#3d0e0e;color:#fca5a5;}
+.c-raise{background:#2c1800;color:#fbbf24;}
+.c-tbet{background:#2c0f00;color:#fb923c;}
+.c-tbet-w{background:#1a0900;color:#7c3d0e;}
+.c-call{background:#0a1a32;color:#60a5fa;}
+.c-call-w{background:#060f1e;color:#3b6ca8;}
+.c-limp{background:#091e0c;color:#4ade80;}
+.c-limp-w{background:#060f07;color:#1e6128;}
+
+/* ─ 범례 ─ */
+#legend{display:flex;flex-wrap:wrap;gap:3px 7px;padding:5px 11px;border-top:0.5px solid #141414;}
+.li{display:flex;align-items:center;gap:3px;font-size:8px;color:#252525;}
+.ld{width:8px;height:8px;border-radius:1px;flex-shrink:0;}
+
+/* ─ 플랍 분석 섹션 ─ */
+#flop-section{margin:8px 11px;border:0.5px solid #1a1a1a;border-radius:8px;overflow:hidden;}
+#flop-hdr{display:flex;align-items:center;justify-content:space-between;padding:7px 10px;background:#0c0c0c;cursor:pointer;}
+#flop-hdr-left{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:700;color:#4ade80;}
+#flop-hdr-right{display:flex;align-items:center;gap:6px;}
+#flop-toggle{font-size:10px;color:#2a2a2a;}
+#flop-body{background:#080808;padding:10px;}
+#flop-body.hidden{display:none;}
+.flop-row{display:flex;align-items:center;gap:6px;margin-bottom:8px;}
+.flop-row-label{font-size:9px;color:#2a2a2a;flex-shrink:0;width:48px;}
+/* 카드 입력 */
+.card-slot{display:flex;align-items:center;gap:3px;background:#0f0f0f;border:0.5px solid #1a1a1a;border-radius:6px;padding:4px 6px;cursor:pointer;}
+.card-rank{font-size:13px;font-weight:700;font-family:monospace;}
+.card-suit{font-size:13px;}
+.card-slot.active{border-color:#4ade80;}
+/* 카드 선택 패널 */
+#card-picker{background:#0f0f0f;border:0.5px solid #1a1a1a;border-radius:7px;padding:8px;margin-bottom:8px;display:none;}
+#card-picker.show{display:block;}
+.picker-ranks{display:flex;flex-wrap:wrap;gap:3px;margin-bottom:6px;}
+.pr-btn{width:30px;height:28px;border-radius:4px;background:#141414;border:0.5px solid #1a1a1a;color:#4ade80;font-size:11px;font-weight:700;font-family:monospace;}
+.pr-btn.on{background:#14532d;color:#86efac;}
+.picker-suits{display:flex;gap:4px;}
+.ps-btn{width:36px;height:28px;border-radius:4px;background:#141414;border:0.5px solid #1a1a1a;font-size:16px;}
+.ps-btn.on{border-color:#4ade80;background:#0a1a0e;}
+/* 플랍 분석 결과 */
+#flop-result{margin-top:2px;}
+.fr-texture{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:8px;}
+.tex-badge{padding:2px 7px;border-radius:4px;font-size:9px;font-weight:700;}
+.fr-section-title{font-size:9px;color:#2a2a2a;margin-bottom:4px;margin-top:6px;}
+.range-item{display:flex;align-items:center;gap:6px;padding:5px 7px;background:#0c0c0c;border-radius:5px;margin-bottom:3px;border:0.5px solid #141414;}
+.ri-hand{font-size:11px;font-weight:700;font-family:monospace;min-width:70px;}
+.ri-bar-wrap{flex:1;height:6px;background:#141414;border-radius:3px;overflow:hidden;}
+.ri-bar{height:100%;border-radius:3px;}
+.ri-prob{font-size:9px;font-weight:700;min-width:26px;text-align:right;}
+.ri-desc{font-size:8px;color:#2a2a2a;min-width:60px;}
+/* 내 핸드 평가 */
+#my-hand-eval{padding:7px;background:#0c0c0c;border-radius:5px;border:0.5px solid #141414;margin-top:6px;}
+#mhe-title{font-size:9px;color:#2a2a2a;margin-bottom:4px;}
+#mhe-result{font-size:13px;font-weight:700;}
+#mhe-equity{font-size:10px;margin-top:3px;}
+#mhe-action{font-size:10px;color:#f0c040;margin-top:3px;}
+
+/* ─ 시트 ─ */
+#si{padding:10px 13px 12px;overflow-y:auto;max-height:520px;}
+#sh{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;}
+#s-hand{font-size:24px;font-weight:700;font-family:monospace;color:#86efac;line-height:1;}
+#s-sub{font-size:9px;color:#2a2a2a;margin-top:2px;}
+#s-stack-info{margin-bottom:8px;padding:5px 8px;background:#0c1a10;border-radius:5px;border:0.5px solid #1a3a20;font-size:9px;color:#4ade80;line-height:1.6;}
+#close-btn{width:24px;height:24px;border-radius:50%;background:#161616;color:#444;font-size:16px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+
+/* 메인 액션 바 */
+.sheet-section-title{font-size:9px;color:#2a2a2a;margin-bottom:4px;margin-top:8px;letter-spacing:.3px;}
+#acts .ar{display:flex;align-items:center;gap:6px;margin:4px 0;}
+.albl{font-size:10px;font-weight:700;width:90px;flex-shrink:0;line-height:1.2;}
+.anote{font-size:8px;font-weight:400;color:#444;display:block;}
+.abg{flex:1;height:18px;background:#141414;border-radius:3px;overflow:hidden;position:relative;}
+.abar{height:100%;border-radius:3px;transition:width .3s cubic-bezier(.4,0,.2,1);}
+.a-pct-in{position:absolute;left:5px;top:50%;transform:translateY(-50%);font-size:9px;font-weight:700;color:rgba(0,0,0,.7);mix-blend-mode:normal;z-index:1;}
+.apct{font-size:11px;font-weight:700;width:32px;text-align:right;flex-shrink:0;}
+
+/* 레이즈 크기 비교 패널 (이미지 스타일) */
+#raise-compare{display:flex;gap:6px;margin-top:8px;}
+.rc-panel{flex:1;background:#0c0c0c;border-radius:6px;border:0.5px solid #1a1a1a;padding:7px;min-width:0;}
+.rc-title{font-size:9px;color:#2a2a2a;margin-bottom:5px;text-align:center;}
+.rc-row{display:flex;align-items:center;gap:4px;margin:3px 0;}
+.rc-lbl{font-size:9px;font-weight:700;width:46px;flex-shrink:0;}
+.rc-bar-wrap{flex:1;height:14px;background:#141414;border-radius:2px;overflow:hidden;}
+.rc-bar{height:100%;border-radius:2px;}
+.rc-num{font-size:9px;font-weight:700;width:24px;text-align:right;flex-shrink:0;}
+
+/* 포지션별 비교 테이블 */
+#pos-table{margin-top:8px;overflow-x:auto;}
+.pt-table{width:100%;border-collapse:collapse;}
+.pt-table th{font-size:8px;color:#2a2a2a;padding:3px 4px;text-align:center;font-weight:700;border-bottom:0.5px solid #141414;}
+.pt-table td{font-size:9px;padding:3px 4px;text-align:center;border-bottom:0.5px solid #0d0d0d;}
+.pt-table tr.cur-row td{background:#0a1a0e;}
+.pt-table td:first-child{font-family:monospace;font-weight:700;color:#4ade80;text-align:left;}
+.pt-table tr.cur-row td:first-child{color:#86efac;}
+.mini-bar-wrap{height:8px;background:#141414;border-radius:2px;overflow:hidden;display:flex;}
+.mini-bar-r{height:100%;background:#ba7517;}
+.mini-bar-c{height:100%;background:#378aDD;}
+.mini-bar-f{height:100%;background:#1e1e1e;}
+
+#s-tip{padding:6px 8px;background:#0c0c0c;border-radius:5px;font-size:9px;color:#4ade80;line-height:1.6;border-left:2px solid #14532d;margin-top:8px;}
+
+/* ─ 오버레이 / 모달 ─ */
+#shield{display:none;position:fixed;inset:0;background:#000;z-index:9999;flex-direction:column;align-items:center;justify-content:center;}
+#shield.on{display:flex;}
+#sh-hint{color:#111;font-size:12px;transition:opacity 2s;}
+#sh-hint.fade{opacity:0;}
+
+#balert{display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#0e0800;border:1px solid #f97316;border-radius:12px;padding:18px 24px;text-align:center;z-index:8000;}
+#balert.show{display:block;animation:pop .25s ease;}
+#ba-lbl{font-size:11px;color:#f97316;font-weight:700;margin-bottom:4px;}
+#ba-val{font-size:22px;font-weight:700;font-family:monospace;color:#fbbf24;}
+#ba-sub{font-size:9px;color:#555;margin-top:3px;}
+
+/* 🚀 올인 찬스 팝업 */
+#allin-popup{display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:8500;background:#1a0000;border:2px solid #ef4444;border-radius:16px;padding:18px 28px;text-align:center;min-width:200px;}
+#allin-popup.show{display:block;animation:pop .2s ease;}
+#ap-icon{font-size:36px;margin-bottom:4px;}
+#ap-title{font-size:18px;font-weight:700;color:#ef4444;margin-bottom:6px;}
+#ap-pct{font-size:32px;font-weight:700;font-family:monospace;color:#fca5a5;}
+#ap-sub{font-size:10px;color:#666;margin-top:4px;}
+#ap-ok{margin-top:14px;padding:8px 24px;background:#ef4444;color:#000;border-radius:8px;font-size:13px;font-weight:700;}
+
+#brkovl{display:none;position:fixed;inset:0;background:rgba(0,0,0,.94);z-index:7000;flex-direction:column;align-items:center;justify-content:center;}
+#brkovl.on{display:flex;}
+#brk-cd{font-size:56px;font-weight:700;font-family:monospace;color:#f0c040;margin:12px 0;}
+#brk-end-btn{margin-top:16px;padding:8px 22px;background:#222;border-radius:8px;color:#888;font-size:12px;font-weight:700;}
+
+@keyframes pop{from{transform:translate(-50%,-50%) scale(.8);opacity:0}to{transform:translate(-50%,-50%) scale(1);opacity:1}}
+</style>
+</head>
+<body>
+
+<div id="shield" onclick="unshield()"><div id="sh-hint">화면을 탭하면 해제됩니다</div></div>
+<div id="balert">
+  <div id="ba-lbl">⚠️ 블라인드 업!</div>
+  <div id="ba-val"></div><div id="ba-sub"></div>
+  <button style="margin-top:10px;padding:6px 20px;background:#f97316;color:#000;border-radius:7px;font-size:12px;font-weight:700;" onclick="document.getElementById('balert').classList.remove('show')">확인</button>
+</div>
+<div id="allin-popup">
+  <div id="ap-icon">🚀</div>
+  <div id="ap-title">올인 찬스!</div>
+  <div id="ap-pct"></div>
+  <div id="ap-sub"></div>
+  <button id="ap-ok" onclick="document.getElementById('allin-popup').classList.remove('show')">확인</button>
+</div>
+<div id="brkovl">
+  <div style="font-size:40px;">☕</div>
+  <div id="brk-cd">15:00</div>
+  <div style="font-size:14px;color:#555;">브레이크 타임</div>
+  <button id="brk-end-btn" onclick="endBreak()">브레이크 종료</button>
+</div>
+
+<div id="app">
+<div id="hdr">
+  <div id="r1">
+    <h1>🃏 Hold'em</h1>
+    <div id="r1r">
+      <div id="mode-tog">
+        <button class="mtb on" id="m-trn" onclick="setMode('trn')">🏆 대회</button>
+        <button class="mtb" id="m-pub" onclick="setMode('pub')">🍺 펍</button>
+      </div>
+      <span id="pos-badge">BTN</span>
+      <span id="zone-badge">—</span>
+      <button class="ibt" onclick="activateShield()">👁</button>
+    </div>
+  </div>
+  <div id="r2">
+    <span class="slbl">인원</span>
+    <div class="p-btns" id="pbtn"></div>
+  </div>
+  <div id="r3">
+    <div id="blind-box">
+      <div class="brow"><span class="bl">SB</span><input type="number" class="bi" id="sb" value="1000" inputmode="numeric" onchange="onBlindChg()"></div>
+      <div class="brow"><span class="bl">BB</span><input type="number" class="bi" id="bb" value="2000" inputmode="numeric" onchange="onBlindChg()"></div>
+    </div>
+    <div id="timer-box">
+      <div class="ti-row">
+        <span class="ti-l">1레벨</span>
+        <input type="text" class="ti" id="t1" value="04:30" maxlength="5" oninput="fmtTime(this)">
+        <span class="ti-l">이후</span>
+        <input type="text" class="ti" id="tn" value="06:00" maxlength="5" oninput="fmtTime(this)">
+      </div>
+      <div id="tc">
+        <div id="tdsp">
+          <span id="t-time">04:30</span>
+          <span id="t-lvl">Lv.1</span>
+          <span id="t-blind">1K/2K</span>
+        </div>
+        <button id="t-play" onclick="toggleTimer()">▶</button>
+        <button id="t-rst" onclick="resetTimer()">↺</button>
+      </div>
+    </div>
+  </div>
+  <!-- 칩+팟참여+브레이크 -->
+  <div id="r3b">
+    <div class="cg">
+      <div class="cg-top"><span class="cl">바인</span><input type="number" class="ci" id="buy-in" placeholder="0" inputmode="numeric" onchange="onChipChg()"></div>
+      <div class="cg-bb" id="bi-bb">—</div>
+    </div>
+    <div class="cg">
+      <div class="cg-top"><span class="cl">현재칩</span><input type="number" class="ci" id="cur-chip" placeholder="0" inputmode="numeric" onchange="onChipChg()"></div>
+      <div class="cg-bb" id="cc-bb">—</div>
+    </div>
+    <div class="pot-g">
+      <div class="pot-label">팟참여</div>
+      <div class="pot-btns" id="pot-btns"></div>
+    </div>
+    <div id="brk-wrap">
+      <input type="text" class="ti" id="brk-t-in" value="15:00" maxlength="5" style="width:36px;height:25px;font-size:9px;">
+      <button id="brk-btn" onclick="toggleBreak()">☕</button>
+    </div>
+  </div>
+  <div id="tbar-w"><div id="tbar"></div></div>
+  <div id="r4">
+    <span class="slbl">내자리</span>
+    <div id="seat-btns"></div>
+    <button id="next-btn" onclick="nextHand()">다음핸드 <span id="next-lbl">→ SB</span></button>
+  </div>
+</div>
+
+<div id="content">
+  <div id="sc-bar"></div>
+  <div id="pos-bar"></div>
+  <div id="matrix-wrap"><div id="mtx"></div></div>
+  <div id="legend"></div>
+  <!-- 플랍 분석 -->
+  <div id="flop-section">
+    <div id="flop-hdr" onclick="toggleFlop()">
+      <div id="flop-hdr-left">🎴 플랍 분석 <span id="flop-cards-preview" style="font-size:10px;color:#4ade80;font-family:monospace;margin-left:4px;"></span></div>
+      <span id="flop-toggle">▼</span>
+    </div>
+    <div id="flop-body" class="hidden">
+      <!-- 카드 선택 -->
+      <div class="flop-row">
+        <span class="flop-row-label">플랍 카드</span>
+        <div style="display:flex;gap:5px;align-items:center;">
+          <div class="card-slot" id="cs0" onclick="openPicker(0)"><span class="card-rank" id="cr0">?</span><span class="card-suit" id="csuit0">?</span></div>
+          <div class="card-slot" id="cs1" onclick="openPicker(1)"><span class="card-rank" id="cr1">?</span><span class="card-suit" id="csuit1">?</span></div>
+          <div class="card-slot" id="cs2" onclick="openPicker(2)"><span class="card-rank" id="cr2">?</span><span class="card-suit" id="csuit2">?</span></div>
+          <button onclick="clearFlop()" style="font-size:10px;color:#2a2a2a;padding:3px 6px;background:#0f0f0f;border:0.5px solid #1a1a1a;border-radius:4px;">초기화</button>
+        </div>
+      </div>
+      <!-- 카드 선택 피커 -->
+      <div id="card-picker">
+        <div class="picker-ranks" id="picker-ranks"></div>
+        <div class="picker-suits" id="picker-suits"></div>
+      </div>
+      <!-- 분석 결과 -->
+      <div id="flop-result"></div>
+    </div>
+  </div>
+  <div style="height:8px;"></div>
+</div>
+
+<div id="sheet">
+  <div id="si">
+    <div id="sh">
+      <div><div id="s-hand">AA</div><div id="s-sub">—</div></div>
+      <button id="close-btn" onclick="closeSheet()">×</button>
+    </div>
+    <div id="s-stack-info"></div>
+    <!-- 메인 액션 -->
+    <div class="sheet-section-title">▶ 현재 시나리오 액션 추천</div>
+    <div id="acts"></div>
+    <!-- 레이즈 크기 비교 -->
+    <div id="raise-compare-wrap">
+      <div class="sheet-section-title">▶ 레이즈 크기별 비교</div>
+      <div id="raise-compare"></div>
+    </div>
+    <!-- 포지션별 비교 -->
+    <div class="sheet-section-title">▶ 포지션별 행동 확률</div>
+    <div id="pos-table"></div>
+    <div id="s-tip"></div>
+  </div>
+</div>
+</div>
+
+<script>
+/* ════════════════ 상수 ════════════════ */
+const RANKS=['A','K','Q','J','T','9','8','7','6','5','4','3','2'];
+const RVAL={A:14,K:13,Q:12,J:11,T:10,9:9,8:8,7:7,6:6,5:5,4:4,3:3,2:2};
+const SUIT_DISP={s:'♠',h:'♥',d:'♦',c:'♣'};
+const SUIT_COL={s:'#60a5fa',h:'#f87171',d:'#f87171',c:'#4ade80'};
+const PK={EP:0,MP:1,CO:2,BTN:3,SB:4,BB:5};
+const PFULL=['얼리(UTG)','미들(HJ)','컷오프','버튼','스몰블라인드','빅블라인드'];
+const PRANGE=['~12%','~18%','~25%','~40%','~28%','디펜스'];
+const SEATS={
+  2:[{l:'BTN',k:'BTN'},{l:'BB',k:'BB'}],
+  3:[{l:'BTN',k:'BTN'},{l:'SB',k:'SB'},{l:'BB',k:'BB'}],
+  4:[{l:'BTN',k:'BTN'},{l:'SB',k:'SB'},{l:'BB',k:'BB'},{l:'CO',k:'CO'}],
+  5:[{l:'BTN',k:'BTN'},{l:'SB',k:'SB'},{l:'BB',k:'BB'},{l:'UTG',k:'EP'},{l:'CO',k:'CO'}],
+  6:[{l:'BTN',k:'BTN'},{l:'SB',k:'SB'},{l:'BB',k:'BB'},{l:'UTG',k:'EP'},{l:'HJ',k:'MP'},{l:'CO',k:'CO'}],
+  7:[{l:'BTN',k:'BTN'},{l:'SB',k:'SB'},{l:'BB',k:'BB'},{l:'UTG',k:'EP'},{l:'UTG+1',k:'EP'},{l:'HJ',k:'MP'},{l:'CO',k:'CO'}],
+  8:[{l:'BTN',k:'BTN'},{l:'SB',k:'SB'},{l:'BB',k:'BB'},{l:'UTG',k:'EP'},{l:'UTG+1',k:'EP'},{l:'LJ',k:'MP'},{l:'HJ',k:'MP'},{l:'CO',k:'CO'}],
+  9:[{l:'BTN',k:'BTN'},{l:'SB',k:'SB'},{l:'BB',k:'BB'},{l:'UTG',k:'EP'},{l:'UTG+1',k:'EP'},{l:'UTG+2',k:'EP'},{l:'LJ',k:'MP'},{l:'HJ',k:'MP'},{l:'CO',k:'CO'}],
+  10:[{l:'BTN',k:'BTN'},{l:'SB',k:'SB'},{l:'BB',k:'BB'},{l:'UTG',k:'EP'},{l:'UTG+1',k:'EP'},{l:'UTG+2',k:'EP'},{l:'MP1',k:'EP'},{l:'MP2',k:'MP'},{l:'HJ',k:'MP'},{l:'CO',k:'CO'}],
+  11:[{l:'BTN',k:'BTN'},{l:'SB',k:'SB'},{l:'BB',k:'BB'},{l:'UTG',k:'EP'},{l:'UTG+1',k:'EP'},{l:'UTG+2',k:'EP'},{l:'MP1',k:'EP'},{l:'MP2',k:'EP'},{l:'MP3',k:'MP'},{l:'HJ',k:'MP'},{l:'CO',k:'CO'}],
+  12:[{l:'BTN',k:'BTN'},{l:'SB',k:'SB'},{l:'BB',k:'BB'},{l:'UTG',k:'EP'},{l:'UTG+1',k:'EP'},{l:'UTG+2',k:'EP'},{l:'MP1',k:'EP'},{l:'MP2',k:'EP'},{l:'MP3',k:'MP'},{l:'MP4',k:'MP'},{l:'HJ',k:'MP'},{l:'CO',k:'CO'}]
+};
+
+const SC_LIST=[
+  {key:'fi',    l1:'첫 액션',  l2:'First In'},
+  {key:'r2',    l1:'2BB↑',    l2:'레이즈직면'},
+  {key:'r3',    l1:'3BB↑',    l2:'레이즈직면'},
+  {key:'r4',    l1:'4BB↑',    l2:'레이즈직면'},
+  {key:'r5',    l1:'5BB↑',    l2:'레이즈직면'},
+  {key:'r10',   l1:'10BB↑',   l2:'레이즈직면'},
+  {key:'allin', l1:'올인직면', l2:'Facing Shove'},
+  {key:'rr',    l1:'리레이즈', l2:'3Bet Pot'},
+];
+const RADJ={r2:{t:1.05,c:1.45},r3:{t:1.0,c:1.0},r4:{t:.95,c:.80},r5:{t:.88,c:.58},r10:{t:.70,c:.22},allin:{t:0,c:.10},rr:{t:.55,c:.15}};
+
+/* ─ 핸드 데이터 ─ */
+const HA={
+'AA':{fi:[[83,17,0,0],[81,19,0,0],[75,23,2,0],[68,25,7,0],[58,29,13,0],[53,32,15,0]],vr:[[10,88,2],[12,86,2],[15,83,2],[20,78,2],[30,68,2],[38,60,2]]},
+'KK':{fi:[[84,16,0,0],[82,18,0,0],[77,21,2,0],[70,24,6,0],[61,27,12,0],[56,28,16,0]],vr:[[12,86,2],[14,84,2],[17,81,2],[22,76,2],[32,66,2],[40,58,2]]},
+'QQ':{fi:[[85,13,0,2],[83,15,0,2],[80,17,2,1],[74,20,5,1],[65,22,13,0],[59,24,17,0]],vr:[[35,63,2],[38,60,2],[42,56,2],[48,50,2],[54,44,2],[60,38,2]]},
+'JJ':{fi:[[90,7,0,3],[88,9,0,3],[85,11,2,2],[79,13,5,3],[71,13,13,3],[64,15,18,3]],vr:[[28,65,7],[32,62,6],[36,58,6],[40,52,8],[46,42,12],[50,38,12]]},
+'TT':{fi:[[92,5,0,3],[90,7,0,3],[86,9,2,3],[81,11,5,3],[74,11,13,2],[67,13,17,3]],vr:[[18,72,10],[22,67,11],[26,62,12],[30,57,13],[36,47,17],[40,42,18]]},
+'99':{fi:[[91,2,0,7],[89,3,0,8],[86,4,2,8],[82,5,4,9],[75,5,13,7],[67,7,17,9]],vr:[[8,62,30],[10,60,30],[13,57,30],[16,52,32],[20,45,35],[24,41,35]]},
+'88':{fi:[[0,0,0,100],[87,2,0,11],[85,3,2,10],[81,4,4,11],[74,5,13,8],[66,6,17,11]],vr:[[0,0,100],[6,52,42],[8,52,40],[11,47,42],[16,40,44],[20,37,43]]},
+'77':{fi:[[0,0,0,100],[0,0,0,100],[83,1,2,14],[79,2,4,15],[72,3,13,12],[64,4,17,15]],vr:[[0,0,100],[0,0,100],[4,41,55],[6,42,52],[11,34,55],[16,30,54]]},
+'66':{fi:[[0,0,0,100],[0,0,0,100],[0,0,0,100],[77,1,5,17],[69,2,13,16],[61,2,17,20]],vr:[[0,0,100],[0,0,100],[0,0,100],[4,36,60],[8,27,65],[13,24,63]]},
+'55':{fi:[[0,0,0,100],[0,0,0,100],[0,0,0,100],[75,0,5,20],[67,0,13,20],[59,0,17,24]],vr:[[0,0,100],[0,0,100],[0,0,100],[0,31,69],[4,22,74],[8,20,72]]},
+'44':{fi:[[0,0,0,100],[0,0,0,100],[0,0,0,100],[73,0,5,22],[65,0,13,22],[57,0,17,26]],vr:[[0,0,100],[0,0,100],[0,0,100],[0,29,71],[2,20,78],[6,17,77]]},
+'33':{fi:[[0,0,0,100],[0,0,0,100],[0,0,0,100],[71,0,5,24],[63,0,13,24],[55,0,17,28]],vr:[[0,0,100],[0,0,100],[0,0,100],[0,26,74],[0,17,83],[4,14,82]]},
+'22':{fi:[[0,0,0,100],[0,0,0,100],[0,0,0,100],[69,0,5,26],[61,0,13,26],[53,0,17,30]],vr:[[0,0,100],[0,0,100],[0,0,100],[0,23,77],[0,14,86],[2,12,86]]},
+'AKs':{fi:[[82,18,0,0],[80,20,0,0],[74,24,2,0],[66,28,6,0],[57,28,15,0],[51,33,16,0]],vr:[[18,80,2],[20,78,2],[24,74,2],[28,70,2],[37,61,2],[44,54,2]]},
+'AQs':{fi:[[88,8,0,4],[86,9,0,5],[83,10,2,5],[78,12,5,5],[71,10,13,6],[63,12,17,8]],vr:[[23,70,7],[26,67,7],[30,63,7],[36,56,8],[43,47,10],[50,40,10]]},
+'AJs':{fi:[[90,5,0,5],[88,6,0,6],[85,7,2,6],[81,8,5,6],[73,8,13,6],[65,9,17,9]],vr:[[13,62,25],[16,59,25],[20,55,25],[26,49,25],[33,42,25],[40,35,25]]},
+'ATs':{fi:[[0,0,0,100],[90,3,0,7],[87,5,2,6],[83,6,4,7],[75,6,13,6],[67,7,17,9]],vr:[[0,0,100],[8,52,40],[11,50,39],[16,44,40],[23,37,40],[30,30,40]]},
+'A9s':{fi:[[0,0,0,100],[0,0,0,100],[85,2,2,11],[81,3,4,12],[73,3,13,11],[65,3,17,15]],vr:[[0,0,100],[0,0,100],[4,36,60],[6,34,60],[13,27,60],[20,20,60]]},
+'A8s':{fi:[[0,0,0,100],[0,0,0,100],[84,1,2,13],[80,2,4,14],[72,2,13,13],[64,2,17,17]],vr:[[0,0,100],[0,0,100],[2,33,65],[4,31,65],[10,24,66],[16,17,67]]},
+'A7s':{fi:[[0,0,0,100],[0,0,0,100],[83,1,2,14],[79,1,4,16],[71,1,13,15],[63,2,17,18]],vr:[[0,0,100],[0,0,100],[1,29,70],[2,28,70],[8,22,70],[13,15,72]]},
+'A6s':{fi:[[0,0,0,100],[0,0,0,100],[0,0,0,100],[77,1,4,18],[69,1,13,17],[61,2,17,20]],vr:[[0,0,100],[0,0,100],[0,0,100],[0,23,77],[5,17,78],[10,12,78]]},
+'A5s':{fi:[[0,0,0,100],[0,0,0,100],[83,1,2,14],[79,2,4,15],[71,2,13,14],[63,2,17,18]],vr:[[0,0,100],[0,0,100],[7,31,62],[9,29,62],[17,23,60],[24,16,60]]},
+'A4s':{fi:[[0,0,0,100],[0,0,0,100],[0,0,0,100],[76,1,4,19],[68,1,13,18],[60,1,17,22]],vr:[[0,0,100],[0,0,100],[0,0,100],[4,24,72],[10,20,70],[16,14,70]]},
+'A3s':{fi:[[0,0,0,100],[0,0,0,100],[0,0,0,100],[75,1,4,20],[67,1,13,19],[59,1,17,23]],vr:[[0,0,100],[0,0,100],[0,0,100],[2,21,77],[7,17,76],[12,12,76]]},
+'A2s':{fi:[[0,0,0,100],[0,0,0,100],[0,0,0,100],[74,1,4,21],[66,1,13,20],[58,1,17,24]],vr:[[0,0,100],[0,0,100],[0,0,100],[1,19,80],[5,15,80],[10,10,80]]},
+'AKo':{fi:[[85,13,0,2],[83,14,0,3],[80,15,2,3],[75,18,4,3],[66,18,13,3],[60,20,17,3]],vr:[[13,82,5],[15,80,5],[18,77,5],[23,72,5],[31,64,5],[38,57,5]]},
+'AQo':{fi:[[88,5,0,7],[86,6,0,8],[83,7,2,8],[78,9,4,9],[70,8,13,9],[63,9,17,11]],vr:[[18,57,25],[21,54,25],[25,50,25],[31,44,25],[38,37,25],[46,29,25]]},
+'AJo':{fi:[[0,0,0,100],[89,2,0,9],[86,4,2,8],[81,5,4,10],[73,4,13,10],[65,5,17,13]],vr:[[0,0,100],[6,44,50],[8,42,50],[13,37,50],[20,30,50],[28,22,50]]},
+'ATo':{fi:[[0,0,0,100],[0,0,0,100],[84,2,2,12],[80,2,4,14],[72,2,13,13],[64,3,17,16]],vr:[[0,0,100],[0,0,100],[2,29,69],[4,28,68],[10,22,68],[16,15,69]]},
+'KQs':{fi:[[88,5,0,7],[86,5,0,9],[83,6,2,9],[79,9,4,8],[71,8,13,8],[64,9,17,10]],vr:[[13,60,27],[16,57,27],[20,53,27],[26,47,27],[33,40,27],[40,33,27]]},
+'KJs':{fi:[[0,0,0,100],[87,2,0,11],[84,4,2,10],[81,5,4,10],[73,5,13,9],[65,6,17,12]],vr:[[0,0,100],[6,42,52],[8,40,52],[12,35,53],[18,28,54],[25,21,54]]},
+'KTs':{fi:[[0,0,0,100],[0,0,0,100],[83,2,2,13],[80,2,4,14],[72,2,13,13],[64,4,17,15]],vr:[[0,0,100],[0,0,100],[4,31,65],[5,30,65],[11,24,65],[16,17,67]]},
+'K9s':{fi:[[0,0,0,100],[0,0,0,100],[0,0,0,100],[78,1,4,17],[70,1,13,16],[62,2,17,19]],vr:[[0,0,100],[0,0,100],[0,0,100],[1,19,80],[5,15,80],[10,10,80]]},
+'QJs':{fi:[[0,0,0,100],[85,2,0,13],[82,3,2,13],[79,3,4,14],[71,3,13,13],[63,4,17,16]],vr:[[0,0,100],[4,36,60],[5,35,60],[8,30,62],[14,23,63],[20,16,64]]},
+'QTs':{fi:[[0,0,0,100],[0,0,0,100],[81,2,2,15],[78,2,4,16],[70,2,13,15],[62,3,17,18]],vr:[[0,0,100],[0,0,100],[2,28,70],[4,26,70],[8,20,72],[13,14,73]]},
+'JTs':{fi:[[0,0,0,100],[84,2,0,14],[81,2,2,15],[78,2,4,16],[70,2,13,15],[62,3,17,18]],vr:[[0,0,100],[4,33,63],[5,31,64],[6,27,67],[11,21,68],[16,15,69]]},
+'J9s':{fi:[[0,0,0,100],[0,0,0,100],[80,1,2,17],[76,1,4,19],[68,1,13,18],[60,2,17,21]],vr:[[0,0,100],[0,0,100],[1,20,79],[2,18,80],[5,13,82],[8,8,84]]},
+'T9s':{fi:[[0,0,0,100],[0,0,0,100],[80,1,2,17],[76,1,4,19],[68,1,13,18],[60,2,17,21]],vr:[[0,0,100],[0,0,100],[1,20,79],[2,18,80],[5,13,82],[8,8,84]]},
+'98s':{fi:[[0,0,0,100],[0,0,0,100],[78,0,2,20],[74,1,4,21],[66,1,13,20],[58,1,17,24]],vr:[[0,0,100],[0,0,100],[0,17,83],[1,15,84],[4,10,86],[6,7,87]]},
+'87s':{fi:[[0,0,0,100],[0,0,0,100],[0,0,0,100],[72,0,4,24],[64,0,13,23],[56,1,17,26]],vr:[[0,0,100],[0,0,100],[0,0,100],[0,12,88],[2,8,90],[4,5,91]]},
+'76s':{fi:[[0,0,0,100],[0,0,0,100],[0,0,0,100],[70,0,4,26],[62,0,13,25],[54,0,17,29]],vr:[[0,0,100],[0,0,100],[0,0,100],[0,9,91],[1,6,93],[3,3,94]]},
+'65s':{fi:[[0,0,0,100],[0,0,0,100],[0,0,0,100],[0,0,0,100],[60,0,13,27],[52,0,17,31]],vr:[[0,0,100],[0,0,100],[0,0,100],[0,0,100],[0,4,96],[1,2,97]]},
+'54s':{fi:[[0,0,0,100],[0,0,0,100],[0,0,0,100],[0,0,0,100],[58,0,13,29],[50,0,17,33]],vr:[[0,0,100],[0,0,100],[0,0,100],[0,0,100],[0,3,97],[0,2,98]]},
+'KQo':{fi:[[0,0,0,100],[84,2,0,14],[81,3,2,14],[78,3,4,15],[70,3,13,14],[62,4,17,17]],vr:[[0,0,100],[4,36,60],[5,35,60],[8,30,62],[14,23,63],[20,16,64]]},
+'KJo':{fi:[[0,0,0,100],[0,0,0,100],[81,1,2,16],[77,2,4,17],[69,2,13,16],[61,2,17,20]],vr:[[0,0,100],[0,0,100],[1,21,78],[3,19,78],[7,14,79],[12,8,80]]},
+'KTo':{fi:[[0,0,0,100],[0,0,0,100],[0,0,0,100],[75,1,4,20],[67,1,13,19],[59,1,17,23]],vr:[[0,0,100],[0,0,100],[0,0,100],[0,11,89],[3,8,89],[6,4,90]]},
+'QJo':{fi:[[0,0,0,100],[0,0,0,100],[0,0,0,100],[74,1,4,21],[66,1,13,20],[58,1,17,24]],vr:[[0,0,100],[0,0,100],[0,0,100],[0,13,87],[4,9,87],[7,5,88]]},
+'JTo':{fi:[[0,0,0,100],[0,0,0,100],[0,0,0,100],[72,0,4,24],[64,0,13,23],[56,1,17,26]],vr:[[0,0,100],[0,0,100],[0,0,100],[0,10,90],[2,7,91],[5,3,92]]},
+'T9o':{fi:[[0,0,0,100],[0,0,0,100],[0,0,0,100],[0,0,0,100],[61,0,13,26],[53,0,17,30]],vr:[[0,0,100],[0,0,100],[0,0,100],[0,0,100],[0,3,97],[1,2,97]]}
+};
+const HT={AA:1,KK:1,QQ:1,JJ:2,TT:2,'99':3,'88':3,'77':4,'66':4,'55':5,'44':5,'33':5,'22':5,
+AKs:1,AQs:2,AJs:2,ATs:3,A9s:4,A8s:4,A7s:4,A6s:5,A5s:4,A4s:5,A3s:5,A2s:5,
+KQs:2,KJs:3,KTs:4,K9s:5,QJs:3,QTs:4,JTs:3,J9s:4,T9s:4,'98s':4,'87s':5,'76s':5,'65s':6,'54s':6,
+AKo:1,AQo:2,AJo:3,ATo:4,KQo:3,KJo:4,KTo:5,QJo:4,JTo:4,T9o:5};
+const TIPS={
+'AA':'최강의 스타팅 핸드. 항상 레이즈, 3벳에는 4벳 올인. 소프트 콜 트랩도 가끔 유효.',
+'KK':'AA 다음 강력. 올인 가치 충분. A 텍스처 보드에서 팟 컨트롤 고려.',
+'QQ':'강하지만 A·K 플랍 주의. 포지션이 수익성 좌우.',
+'JJ':'오버카드(Q·K·A)에 취약. IP에서 수익성 극대화.',
+'TT':'오버페어/셋 목표. J↑ 보드에서 팟 컨트롤 필수.',
+'99':'EP 머징 관리 중요. 멀티웨이 팟에서 셋 위주.',
+'88':'EP 폴드 또는 프리미엄에만 콜. CO/BTN 적극 오픈.',
+'77':'LP 셋 마이닝. 딥스택 멀티웨이 효과적.',
+'AKs':'최강 수티드. 넛 플러시+스트레이트 드로. 모든 포지션 프리미엄.',
+'AQs':'LP 강력, EP도 가치. AK 도미네이트 주의.',
+'AKo':'프리플랍 최강 비수티드. 포스트플랍 페어 미스 시 주의.',
+'KQs':'브로드웨이 수티드. MP+ 강력, 블러프 캐처 우수.',
+'QJs':'강한 수티드 커넥터. MP+ 오픈, 포스트플랍 드로 최강.',
+'JTs':'최강 수티드 커넥터. LP에서 투기적이고 가치 높음.',
+'T9s':'CO+ 오픈. 멀티웨이 드로 파워 강력.',
+'A5s':'넛 플러시+휠(A-5) 가능. 3벳 블러프로도 활용.',
+default:'포지션이 늦을수록 오픈 레인지가 넓어집니다. 딥스택일수록 수티드 커넥터 가치 상승.'
+};
+
+/* ════════════════ 상태 ════════════════ */
+let S={
+  players:6,mode:'trn',sc:'fi',
+  rotIdx:0,posLabel:'BTN',posKey:'BTN',posIdx:3,
+  seatNum:1,hand:null,
+  sbBase:1000,bbBase:2000,sbNow:1000,bbNow:2000,
+  blindLevel:1,
+  timerRunning:false,timerTotal:270,timerLeft:270,timerInterval:null,
+  buyIn:0,curChip:0,
+  potPlayers:2,
+  breakActive:false,breakTotal:900,breakLeft:900,breakInterval:null,
+  flopCards:['','',''],
+  pickerTarget:-1,pickerRank:'',pickerSuit:''
+};
+
+/* ════════════════ 핸드 계산 ════════════════ */
+function handName(r,c){
+  if(r===c)return RANKS[r]+RANKS[r];
+  if(r<c)return RANKS[r]+RANKS[c]+'s';
+  return RANKS[c]+RANKS[r]+'o';
+}
+function baseFi(hand,pi){
+  if(HA[hand])return[...HA[hand].fi[pi]];
+  const t=HT[hand]||7,mFI=[3,3,5,6,5,6];
+  if(t>mFI[pi])return[0,0,0,100];
+  const b=[88,90,88,85,80,75][Math.min(t-1,5)];
+  const a0=[15,5,0,0,0,0][Math.min(t-1,5)];
+  const al=Math.min(35,a0+pi*2),ra=Math.max(50,Math.min(95,b+pi-al+a0));
+  return[ra,al,0,Math.max(0,100-ra-al)];
+}
+function baseVr(hand,pi){
+  if(HA[hand])return[...HA[hand].vr[pi]];
+  const t=HT[hand]||7,mVR=[2,2,4,4,4,5];
+  if(t>mVR[pi])return[0,0,100];
+  const b3=[80,40,15,3,0,0][Math.min(t-1,5)];
+  const bC=[18,55,60,30,0,0][Math.min(t-1,5)];
+  const tb=Math.min(90,b3+pi*3),ca=Math.min(70,Math.max(0,bC-pi*2));
+  return[tb,ca,Math.max(0,100-tb-ca)];
+}
+
+/* 팟 멀티웨이 보정: 멀티웨이일수록 한계핸드 폴드↑, 프리미엄 드로↑ */
+function applyMultiway(acts, sc, hand, n){
+  if(n<=2)return acts;
+  const extra=n-2;
+  const t=HT[hand]||7;
+  const isStrong=t<=2;
+  const isMarginal=t>=5;
+  if(sc==='fi'){
+    let[r,al,l,f]=acts;
+    if(isStrong)return acts; // 프리미엄: 변화 없음
+    if(isMarginal){
+      // 한계 핸드: 폴드↑ (멀티웨이에서 셋/드로 없이 어려움)
+      const fBonus=Math.min(f+extra*7,95);
+      const diff=fBonus-f;
+      l=Math.max(0,l-Math.round(diff*.6));
+      r=Math.max(0,r-Math.round(diff*.4));
+      f=Math.max(0,100-r-al-l);
+    }else{
+      // 중간 핸드: 약간 조정
+      const bonus=extra*4;
+      f=Math.min(f+Math.round(bonus*.5),95);
+      r=Math.max(0,100-f-al-l);
+    }
+    return[r,al,l,f];
+  }else{
+    let[t2,c,f]=acts;
+    if(isStrong)return acts;
+    // 멀티웨이 레이즈 직면: 콜 범위 줄이고 폴드↑
+    const fBonus=extra*5;
+    c=Math.max(0,c-Math.round(fBonus*.4));
+    t2=Math.max(0,t2-Math.round(fBonus*.3));
+    f=Math.max(0,100-t2-c);
+    return[t2,c,f];
+  }
+}
+
+function getActs(hand,pi,sc,nPlayers){
+  nPlayers=nPlayers||S.potPlayers;
+  const isPub=S.mode==='pub';
+  if(sc==='fi'){
+    const t=HT[hand]||7,mFI=[3,3,5,6,5,6];
+    let a=baseFi(hand,pi);
+    if(isPub){
+      const gap=t-mFI[pi];
+      if(gap===1)a=[0,0,45,55];
+      else if(gap===2)a=[0,0,20,80];
+      else if(gap>2)a=[0,0,0,100];
+      else{let[r,al,l,f]=a;if(f<100){const bn=Math.min(f*.32,22);a=[Math.round(r+bn*.5),al,Math.round(l+bn*.5),Math.round(f-bn)];}}
+    }
+    a=applyMultiway(a,sc,hand,nPlayers);
+    return a;
+  }
+  let[tv,cv,fv]=baseVr(hand,pi);
+  const adj=RADJ[sc]||{t:1,c:1};
+  tv=Math.min(90,Math.round(tv*adj.t));
+  cv=Math.min(72,Math.round(cv*adj.c));
+  fv=Math.max(0,100-tv-cv);
+  if(isPub){const bn=Math.round(Math.min(fv*.24,20));cv=Math.min(cv+bn,72);fv=Math.max(0,100-tv-cv);}
+  let a=[tv,cv,fv];
+  if(sc==='allin')a=[cv,Math.max(0,100-cv)];
+  a=applyMultiway(a,sc,hand,nPlayers);
+  return a;
+}
+
+function cellCls(hand,pi,sc){
+  const a=getActs(hand,pi,sc);
+  if(sc==='fi'){
+    const[r,al,l,f]=a;
+    if(f>=99)return'out'; if(f>=72)return'weak';
+    if(al>=12)return'allin'; if(r+al>=55)return'raise';
+    if(l>=25)return'limp'; if(l>=8)return'limp-w';
+    return'weak';
+  }
+  if(sc==='allin'){const[c]=a;if(c<8)return'out';if(c<18)return'call-w';return'call';}
+  const[t,c,f]=a;
+  if(f>=98)return'out'; if(f>=80)return'weak';
+  if(t>=25)return'tbet'; if(c>=25)return'call';
+  if(t>=10)return'tbet-w'; if(c>=10)return'call-w';
+  return'weak';
+}
+
+/* ─ 상세 액션 계산 ─ */
+function fmtC(n){if(n>=1000000)return(n/1000000).toFixed(1)+'M';if(n>=1000)return Math.round(n/100)/10+'K';return n;}
+function getStackInfo(){
+  const bb=S.bbNow||2000,chips=S.curChip||0;
+  if(chips<=0)return{bbCount:0,zone:'unknown'};
+  const bbCount=Math.round(chips/bb);
+  return{bbCount,zone:bbCount<=10?'critical':bbCount<=20?'short':bbCount<=40?'normal':'deep'};
+}
+function zoneBadge(stk){
+  const z={critical:{txt:`🔴 ${stk.bbCount}BB`,col:'#fca5a5',bg:'#2d0808'},short:{txt:`🟡 ${stk.bbCount}BB`,col:'#fbbf24',bg:'#2d1800'},normal:{txt:`🟢 ${stk.bbCount}BB`,col:'#4ade80',bg:'#091e0c'},deep:{txt:`💙 ${stk.bbCount}BB`,col:'#60a5fa',bg:'#06101e'}};
+  return z[stk.zone]||{txt:'?',col:'#aaa',bg:'#111'};
+}
+function updateZoneBadge(){
+  const stk=getStackInfo(),z=stk.bbCount>0?zoneBadge(stk):{txt:'칩 미입력',col:'#2a2a2a',bg:'#0f0f0f'};
+  const el=document.getElementById('zone-badge');
+  el.textContent=z.txt;el.style.color=z.col;el.style.background=z.bg;el.style.borderColor=z.col+'33';
+}
+function updateBBDisplay(){
+  const bb=S.bbNow||2000;
+  const bi=S.buyIn,cc=S.curChip;
+  document.getElementById('bi-bb').textContent=bi>0?(Math.round(bi/bb)+'BB'):'—';
+  document.getElementById('cc-bb').textContent=cc>0?(Math.round(cc/bb)+'BB'):'—';
+}
+
+/* 시트용 상세 액션 */
+function getDetailedBars(hand,pi,sc){
+  const raw=getActs(hand,pi,sc);
+  const stk=getStackInfo();
+  const bbNow=S.bbNow||2000,chips=S.curChip||0;
+  const bbCount=stk.bbCount;
+  const note=v=>chips>0?fmtC(v):'';
+
+  if(sc==='fi'){
+    const[r,al,l,f]=raw;
+    const mult=bbCount>0&&bbCount<=30?2.5:3;
+    const raAmt=bbNow*mult;
+    const isBB=pi===5;
+    const items=[];
+    if(bbCount>0&&bbCount<=12){
+      // ≤12BB: 올인 or 폴드
+      const push=Math.min(93,al+r);
+      return[{l:'올인 (push)',v:Math.round(push),c:'#E24B4A',eq:62,note:chips?fmtC(chips):'전체'},{l:'폴드',v:100-Math.round(push),c:'#555',eq:0}].filter(b=>b.v>0);
+    }
+    if(al>0)items.push({l:'올인',v:al,c:'#E24B4A',eq:68,note:chips?fmtC(chips):'전체'});
+    if(r>0)items.push({l:`오픈 ${mult}x`,v:r,c:'#ba7517',eq:56,note:chips?`≈${fmtC(raAmt)}`:`${mult}BB`});
+    if(l>0)items.push({l:isBB?'체크':'림프',v:l,c:'#4ade80',eq:48,note:isBB?'무료플랍':(chips?fmtC(bbNow):`1BB`)});
+    if(f>0)items.push({l:'폴드',v:f,c:'#555',eq:0});
+    return items.filter(b=>b.v>0);
+  }
+  if(sc==='allin'){
+    const[c,f]=raw;
+    return[{l:'콜 (올인)',v:c,c:'#378ADD',eq:45,note:chips?fmtC(chips):'전체'},{l:'폴드',v:f,c:'#555',eq:0}].filter(b=>b.v>0);
+  }
+  let[t,c,f]=raw;
+  const rBB={r2:2,r3:3,r4:4,r5:5,r10:10}[sc]||3;
+  const items=[];
+  if(sc==='rr'){
+    const fourBet=Math.round(t*.55);
+    const shove=t-fourBet;
+    if(bbCount>0&&bbCount<=35){
+      items.push({l:'올인 (5벳shove)',v:t,c:'#E24B4A',eq:55,note:chips?fmtC(chips):'전체'});
+    }else{
+      if(fourBet>0)items.push({l:'4벳 리레이즈',v:fourBet,c:'#E24B4A',eq:52,note:chips?`≈${fmtC(bbNow*16)}`:'16BB'});
+      if(shove>0)items.push({l:'올인 (5벳)',v:shove,c:'#D85A30',eq:48,note:'전체'});
+    }
+    if(c>0)items.push({l:'콜 (flat)',v:c,c:'#378ADD',eq:44,note:'트랩 전략'});
+  }else if(sc==='r10'){
+    const shove=Math.round(t*.7);
+    if(shove>0)items.push({l:'올인/3벳shove',v:shove,c:'#E24B4A',eq:50,note:chips?fmtC(chips):'전체'});
+    const cc=Math.round(c*.5);
+    if(cc>0)items.push({l:'콜',v:cc,c:'#378ADD',eq:40,note:chips?fmtC(bbNow*10):`${rBB}BB`});
+    const ff=Math.max(0,100-shove-cc);
+    if(ff>0)items.push({l:'폴드',v:ff,c:'#555',eq:0});
+    return items.filter(b=>b.v>0);
+  }else{
+    const shoveTop=Math.round(t*.25);
+    const threeBet=t-shoveTop;
+    if(shoveTop>0)items.push({l:'올인 (4벳shove)',v:shoveTop,c:'#E24B4A',eq:55,note:chips?fmtC(chips):'전체'});
+    if(threeBet>0)items.push({l:'3벳',v:threeBet,c:'#D85A30',eq:50,note:chips?`≈${fmtC(bbNow*rBB*3)}`:`${rBB*3}BB`});
+    if(c>0)items.push({l:'콜',v:c,c:'#378ADD',eq:44,note:chips?fmtC(bbNow*rBB):`${rBB}BB`});
+  }
+  if(f>0)items.push({l:'폴드',v:f,c:'#555',eq:0});
+  return items.filter(b=>b.v>0);
+}
+
+/* ─ 레이즈 크기별 비교 데이터 ─ */
+function getRaiseCompareData(hand,pi){
+  const panelsSmall=['r2','r3'],panelsBig=['r5','r10'];
+  function panel(sc){
+    const a=getActs(hand,pi,sc);
+    const[t,c,f]=a;
+    const lbl=sc==='r2'?'2BB':sc==='r3'?'3BB':sc==='r5'?'5BB':'10BB';
+    const shove=Math.round(t*.25),threebet=t-shove;
+    return{lbl,shove,threebet,call:c,fold:f};
+  }
+  return{small:panel('r3'),big:panel('r5')};
+}
+
+/* ─ 포지션별 비교 테이블 ─ */
+function getPosTableData(hand,sc){
+  return[0,1,2,3,4,5].map(pi=>{
+    const a=getActs(hand,pi,sc);
+    if(sc==='fi'){
+      const[r,al,l,f]=a;
+      const raise=r+al,call_limp=l;
+      return{pi,raise,call_limp,fold:f};
+    }
+    if(sc==='allin'){const[c,f]=a;return{pi,raise:0,call_limp:c,fold:f};}
+    const[t,c,f]=a;
+    return{pi,raise:t,call_limp:c,fold:f};
+  });
+}
+
+/* ════════════════ 렌더 ════════════════ */
+function renderScBar(){
+  document.getElementById('sc-bar').innerHTML=SC_LIST.map(s=>
+    `<div class="scpill${S.sc===s.key?' on':''}" onclick="setSc('${s.key}')"><div class="sp1">${s.l1}</div><div class="sp2">${s.l2}</div></div>`).join('');
+}
+function renderPositions(){
+  const seats=SEATS[S.players],N=seats.length;
+  const nextIdx=(S.rotIdx-1+N)%N;
+  let h='';
+  seats.forEach((s,i)=>{
+    const on=i===S.rotIdx,nxt=i===nextIdx&&!on,isBtn=s.k==='BTN';
+    h+=`<div class="pp${on?' on':''}${nxt?' nxt':''}${isBtn?' is-btn':''}" onclick="selectByIdx(${i})"><div class="pn">${s.l}</div><div class="pr">${on?'◀현재':nxt?'▷다음':PRANGE[PK[s.k]]}</div></div>`;
+  });
+  document.getElementById('pos-bar').innerHTML=h;
+  document.getElementById('pos-badge').textContent=seats[S.rotIdx].l;
+  document.getElementById('next-lbl').textContent='→'+seats[nextIdx].l;
+}
+function renderMatrix(){
+  const pi=S.posIdx,sc=S.sc;
+  let h=`<div class="mgrid"><div class="ml"></div>`;
+  for(let c=0;c<13;c++)h+=`<div class="ml">${RANKS[c]}</div>`;
+  for(let r=0;r<13;r++){
+    h+=`<div class="ml">${RANKS[r]}</div>`;
+    for(let c=0;c<13;c++){
+      const hand=handName(r,c),cls='c-'+cellCls(hand,pi,sc);
+      const sel=S.hand===hand?' sel':'';
+      const lbl=r===c?RANKS[r]+RANKS[r]:(r<c?RANKS[r]+RANKS[c]+'s':RANKS[c]+RANKS[r]+'o');
+      const show=lbl.length>3?lbl.substring(0,2):lbl;
+      h+=`<div class="mc ${cls}${sel}" onclick="selectHand('${hand}')" data-hand="${hand}">${show}</div>`;
+    }
+  }
+  h+=`</div>`;
+  document.getElementById('mtx').innerHTML=h;
+  renderLegend();
+}
+function renderLegend(){
+  const fi=S.sc==='fi',al=S.sc==='allin';
+  let it;
+  if(fi)it=[['#fca5a5','올인'],['#fbbf24','레이즈'],['#4ade80','림프/체크'],['#1e6128','림프믹스'],['#181818','폴드']];
+  else if(al)it=[['#60a5fa','콜'],['#181818','폴드']];
+  else it=[['#fb923c','3벳/4벳'],['#60a5fa','콜'],['#7c3d0e','3벳믹스'],['#3b6ca8','콜믹스'],['#181818','폴드']];
+  document.getElementById('legend').innerHTML=it.map(([c,l])=>`<div class="li"><div class="ld" style="background:${c};"></div>${l}</div>`).join('');
+}
+
+/* ─ 시트 렌더 ─ */
+function renderSheet(){
+  if(!S.hand){closeSheet();return;}
+  const hand=S.hand,pi=S.posIdx,sc=S.sc;
+  const isP=hand.length===2&&hand[0]===hand[1];
+  const type=isP?'포켓 페어':hand.endsWith('s')?'수티드':'오프수트';
+  const scLabel=SC_LIST.find(s=>s.key===sc)?.l1||sc;
+  document.getElementById('s-hand').textContent=hand;
+  document.getElementById('s-sub').textContent=`${type} · ${PFULL[pi]} · ${scLabel} · ${S.mode==='trn'?'🏆대회':'🍺펍'} · 팟${S.potPlayers}명`;
+  // 스택 정보
+  const stk=getStackInfo();
+  const bbNow=S.bbNow||2000;
+  let stkHtml='';
+  if(stk.bbCount>0){
+    const z=zoneBadge(stk);
+    stkHtml=`<span style="color:${z.col}">${z.txt}</span>`;
+    const mult=stk.bbCount<=30?2.5:3;
+    if(sc==='fi')stkHtml+=` · 오픈${mult}x=<b style="color:#fbbf24">${fmtC(bbNow*mult)}</b>`;
+    if(sc==='r3')stkHtml+=` · 3벳≈<b style="color:#fb923c">${fmtC(bbNow*9)}</b>`;
+    if(sc==='rr')stkHtml+=` · 4벳≈<b style="color:#E24B4A">${fmtC(bbNow*16)}</b>`;
+    if(S.curChip>0)stkHtml+=` · 현재<b style="color:#ddd">${fmtC(S.curChip)}</b>`;
+    if(S.potPlayers>2)stkHtml+=` · <span style="color:#fb923c">멀티웨이 ${S.potPlayers}명 보정 적용</span>`;
+  }else{
+    stkHtml='<span style="color:#2a2a2a">현재칩 입력 시 베팅금액이 계산됩니다</span>';
+  }
+  document.getElementById('s-stack-info').innerHTML=stkHtml;
+  // 메인 액션 바
+  const bars=getDetailedBars(hand,pi,sc);
+  document.getElementById('acts').innerHTML=bars.map(b=>`
+    <div class="ar">
+      <div class="albl" style="color:${b.c};">${b.l}${b.note?`<span class="anote">${b.note}</span>`:''}</div>
+      <div class="abg">
+        <div class="abar" style="width:${b.v}%;background:${b.c};"></div>
+        ${b.v>10?`<span class="a-pct-in" style="color:${b.c};">${b.eq>0?b.eq+'%eq':''}</span>`:''}
+      </div>
+      <div class="apct" style="color:${b.c};">${b.v}%</div>
+    </div>`).join('');
+
+  // 🚀 올인 찬스 팝업
+  const topBar=bars.reduce((a,b)=>b.v>a.v?b:a,{v:0});
+  if((topBar.l.includes('올인')||topBar.l.includes('push'))&&topBar.v>=55){
+    setTimeout(()=>{
+      document.getElementById('ap-pct').textContent=topBar.v+'%';
+      document.getElementById('ap-sub').textContent=`${hand} · ${PFULL[pi]} · ${fmtC(S.curChip)||'올인'}`;
+      document.getElementById('allin-popup').classList.add('show');
+      if(navigator.vibrate)navigator.vibrate([150,80,150]);
+    },400);
+  }
+
+  // 레이즈 비교 패널 (fi 제외)
+  const rcWrap=document.getElementById('raise-compare-wrap');
+  if(sc!=='fi'&&sc!=='allin'){
+    const cd=getRaiseCompareData(hand,pi);
+    rcWrap.style.display='';
+    const rcHtml=(d,title)=>{
+      const rows=[
+        {l:'올인',v:d.shove,c:'#E24B4A'},
+        {l:'3벳',v:d.threebet,c:'#D85A30'},
+        {l:'콜',v:d.call,c:'#378ADD'},
+        {l:'폴드',v:d.fold,c:'#555'},
+      ].filter(r=>r.v>0);
+      return`<div class="rc-panel">
+        <div class="rc-title">${title}</div>
+        ${rows.map(r=>`<div class="rc-row"><div class="rc-lbl" style="color:${r.c};">${r.l}</div><div class="rc-bar-wrap"><div class="rc-bar" style="width:${r.v}%;background:${r.c};"></div></div><div class="rc-num" style="color:${r.c};">${r.v}</div></div>`).join('')}
+      </div>`;
+    };
+    document.getElementById('raise-compare').innerHTML=rcHtml(cd.small,'레이즈 작을 때 (3BB)')+rcHtml(cd.big,'레이즈 클 때 (5BB)');
+  }else{
+    rcWrap.style.display='none';
+  }
+
+  // 포지션별 비교 테이블
+  const ptData=getPosTableData(hand,sc);
+  const poNames=['UTG','HJ','CO','BTN','SB','BB'];
+  const rLabel=sc==='fi'?'레이즈':sc==='allin'?'콜':'3벳';
+  const cLabel=sc==='fi'?'림프':sc==='allin'?'폴드':'콜';
+  document.getElementById('pos-table').innerHTML=`<table class="pt-table">
+    <thead><tr><th>포지션</th><th>${rLabel}</th><th>${cLabel}</th><th>폴드</th><th style="width:70px;">분포</th></tr></thead>
+    <tbody>${ptData.map((d,i)=>`<tr${i===pi?' class="cur-row"':''}>
+      <td>${poNames[i]}${i===pi?'◀':''}</td>
+      <td style="color:#ba7517;">${d.raise}%</td>
+      <td style="color:#378ADD;">${d.call_limp}%</td>
+      <td style="color:#555;">${d.fold}%</td>
+      <td><div class="mini-bar-wrap"><div class="mini-bar-r" style="width:${d.raise}%;"></div><div class="mini-bar-c" style="width:${d.call_limp}%;"></div><div class="mini-bar-f" style="width:${d.fold}%;"></div></div></td>
+    </tr>`).join('')}</tbody>
+  </table>`;
+  document.getElementById('s-tip').textContent=TIPS[hand]||TIPS.default;
+  document.getElementById('sheet').classList.add('open');
+  // 플랍 분석 업데이트
+  if(S.flopCards.filter(c=>c).length===3)runFlopAnalysis();
+}
+function closeSheet(){
+  document.getElementById('sheet').classList.remove('open');
+  S.hand=null;
+  document.querySelectorAll('.mc.sel').forEach(el=>el.classList.remove('sel'));
+}
+function selectHand(hand){
+  if(S.hand===hand){closeSheet();return;}
+  S.hand=hand;
+  document.querySelectorAll('.mc').forEach(el=>el.classList.toggle('sel',el.dataset.hand===hand));
+  renderSheet();
+}
+
+/* ════════════════ 포지션/시나리오/모드 ════════════════ */
+function selectByIdx(idx){
+  const seat=SEATS[S.players][idx];
+  S.rotIdx=idx;S.posLabel=seat.l;S.posKey=seat.k;S.posIdx=PK[seat.k];S.hand=null;
+  renderPositions();renderMatrix();
+  document.getElementById('sheet').classList.remove('open');
+}
+function setSc(sc){
+  S.sc=sc;S.hand=null;renderScBar();renderMatrix();
+  document.getElementById('sheet').classList.remove('open');
+}
+function setMode(m){
+  S.mode=m;S.hand=null;
+  document.getElementById('m-trn').className='mtb'+(m==='trn'?' on':'');
+  document.getElementById('m-pub').className='mtb'+(m==='pub'?' onp':'');
+  renderMatrix();
+  if(S.hand)renderSheet();
+}
+function nextHand(){
+  if(navigator.vibrate)navigator.vibrate(20);
+  const N=SEATS[S.players].length;
+  selectByIdx((S.rotIdx-1+N)%N);
+}
+function setPlayers(n){
+  S.players=n;
+  document.querySelectorAll('#pbtn .pb').forEach(b=>b.classList.toggle('on',+b.dataset.n===n));
+  renderSeatBtns();
+  if(S.rotIdx>=SEATS[n].length)S.rotIdx=0;
+  selectByIdx(S.rotIdx);
+}
+function renderSeatBtns(){
+  let h='';
+  for(let i=1;i<=S.players;i++)h+=`<button class="sb2${i===S.seatNum?' on':''}" onclick="setSeat(${i})">${i}</button>`;
+  document.getElementById('seat-btns').innerHTML=h;
+}
+function setSeat(n){
+  S.seatNum=n;
+  document.querySelectorAll('#seat-btns .sb2').forEach(b=>b.classList.toggle('on',+b.textContent===n));
+}
+function setPotPlayers(n){
+  S.potPlayers=n;
+  document.querySelectorAll('#pot-btns .potb').forEach(b=>b.classList.toggle('on',+b.dataset.n===n));
+  renderMatrix();
+  if(S.hand)renderSheet();
+}
+
+/* ════════════════ 칩 / 블라인드 ════════════════ */
+function onChipChg(){
+  S.buyIn=+document.getElementById('buy-in').value||0;
+  S.curChip=+document.getElementById('cur-chip').value||0;
+  updateZoneBadge();updateBBDisplay();
+  if(S.hand)renderSheet();
+}
+function onBlindChg(){
+  S.sbBase=+document.getElementById('sb').value||0;
+  S.bbBase=+document.getElementById('bb').value||0;
+  S.sbNow=S.sbBase;S.bbNow=S.bbBase;
+  updateTimerUI();updateZoneBadge();updateBBDisplay();
+}
+
+/* ════════════════ 타이머 ════════════════ */
+function parseMM(s){const m=s.match(/^(\d{1,2}):?(\d{0,2})$/);return m?(+m[1]*60+(+m[2]||0)):0;}
+function fmtSec(s){return String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0');}
+function fmtTime(el){
+  let v=el.value.replace(/\D/g,'').substring(0,4);
+  if(v.length>=3)v=v.substring(0,2)+':'+v.substring(2);
+  el.value=v;
+  if(el.id==='brk-t-in')return;
+  if(!S.timerRunning)resetTimer();
+}
+function updateTimerUI(){
+  const isB=S.breakActive;
+  const left=isB?S.breakLeft:S.timerLeft;
+  const el=document.getElementById('t-time');
+  el.textContent=fmtSec(left);
+  el.style.color=left<=30?'#f87171':isB?'#d4a017':'#f0c040';
+  document.getElementById('t-lvl').textContent=isB?'☕':('Lv.'+S.blindLevel);
+  const fmt=n=>n>=1000?Math.round(n/100)/10+'K':n;
+  document.getElementById('t-blind').textContent=fmt(S.sbNow)+'/'+fmt(S.bbNow);
+  const total=isB?S.breakTotal:S.timerTotal;
+  const pct=total>0?left/total*100:0;
+  const bar=document.getElementById('tbar');
+  bar.style.width=pct+'%';
+  bar.style.background=left<=30?'#ef4444':left<=60?'#f97316':isB?'#d4a017':'#4ade80';
+}
+function resetTimer(){
+  clearInterval(S.timerInterval);S.timerRunning=false;
+  S.blindLevel=1;S.sbNow=S.sbBase;S.bbNow=S.bbBase;
+  S.timerTotal=parseMM(document.getElementById('t1').value)||270;
+  S.timerLeft=S.timerTotal;
+  const btn=document.getElementById('t-play');btn.textContent='▶';btn.className='';
+  updateTimerUI();
+  document.getElementById('sb').value=S.sbBase;
+  document.getElementById('bb').value=S.bbBase;
+}
+function toggleTimer(){
+  if(S.timerRunning){
+    clearInterval(S.timerInterval);S.timerRunning=false;
+    const btn=document.getElementById('t-play');btn.textContent='▶';btn.className='';
+  }else{
+    S.timerRunning=true;
+    const btn=document.getElementById('t-play');btn.textContent='⏸';btn.classList.add('pause');
+    S.timerInterval=setInterval(()=>{
+      if(S.breakActive)return;
+      S.timerLeft--;
+      if(S.timerLeft<=0){
+        S.blindLevel++;S.sbNow*=2;S.bbNow*=2;
+        S.timerTotal=parseMM(document.getElementById('tn').value)||360;
+        S.timerLeft=S.timerTotal;
+        document.getElementById('sb').value=S.sbNow;
+        document.getElementById('bb').value=S.bbNow;
+        const fmt=n=>n>=1000?Math.round(n/100)/10+'K':n;
+        document.getElementById('ba-val').textContent=fmt(S.sbNow)+' / '+fmt(S.bbNow);
+        document.getElementById('ba-sub').textContent='레벨 '+S.blindLevel+' 시작';
+        document.getElementById('balert').classList.add('show');
+        if(navigator.vibrate)navigator.vibrate([100,60,100,60,200]);
+        updateZoneBadge();updateBBDisplay();
+      }
+      updateTimerUI();
+    },1000);
+  }
+}
+function toggleBreak(){
+  if(S.breakActive){endBreak();return;}
+  S.breakTotal=parseMM(document.getElementById('brk-t-in').value)||900;
+  S.breakLeft=S.breakTotal;
+  S.breakActive=true;
+  document.getElementById('brk-btn').classList.add('active');
+  document.getElementById('brkovl').classList.add('on');
+  document.getElementById('brk-cd').textContent=fmtSec(S.breakLeft);
+  S.breakInterval=setInterval(()=>{
+    S.breakLeft--;
+    document.getElementById('brk-cd').textContent=fmtSec(Math.max(0,S.breakLeft));
+    updateTimerUI();
+    if(S.breakLeft<=0)endBreak(true);
+  },1000);
+}
+function endBreak(auto=false){
+  clearInterval(S.breakInterval);S.breakActive=false;
+  document.getElementById('brk-btn').classList.remove('active');
+  document.getElementById('brkovl').classList.remove('on');
+  updateTimerUI();
+  if(auto){if(navigator.vibrate)navigator.vibrate([200,100,200,100,400]);}
+}
+
+/* ════════════════ 플랍 분석 ════════════════ */
+const FLOPOPEN={'flop-body':false};
+function toggleFlop(){
+  const body=document.getElementById('flop-body');
+  const tog=document.getElementById('flop-toggle');
+  const hidden=body.classList.toggle('hidden');
+  tog.textContent=hidden?'▼':'▲';
+}
+function openPicker(idx){
+  S.pickerTarget=idx;
+  const cur=S.flopCards[idx];
+  S.pickerRank=cur?cur[0]:'';
+  S.pickerSuit=cur?cur[1]:'';
+  document.querySelectorAll('.card-slot').forEach((el,i)=>el.classList.toggle('active',i===idx));
+  renderPicker();
+  document.getElementById('card-picker').classList.add('show');
+}
+function renderPicker(){
+  const rr=RANKS;
+  document.getElementById('picker-ranks').innerHTML=rr.map(r=>`<button class="pr-btn${S.pickerRank===r?' on':''}" onclick="pickRank('${r}')">${r}</button>`).join('');
+  document.getElementById('picker-suits').innerHTML=['s','h','d','c'].map(s=>`<button class="ps-btn${S.pickerSuit===s?' on':''}" style="color:${SUIT_COL[s]};" onclick="pickSuit('${s}')">${SUIT_DISP[s]}</button>`).join('');
+}
+function pickRank(r){
+  S.pickerRank=r;
+  renderPicker();
+  if(S.pickerSuit)commitCard();
+}
+function pickSuit(s){
+  S.pickerSuit=s;
+  renderPicker();
+  if(S.pickerRank)commitCard();
+}
+function commitCard(){
+  const card=S.pickerRank+S.pickerSuit;
+  // 중복 체크
+  const others=S.flopCards.filter((_,i)=>i!==S.pickerTarget).filter(c=>c);
+  if(others.includes(card))return;
+  S.flopCards[S.pickerTarget]=card;
+  updateCardUI();
+  document.getElementById('card-picker').classList.remove('show');
+  document.querySelectorAll('.card-slot').forEach(el=>el.classList.remove('active'));
+  if(S.flopCards.filter(c=>c).length===3)runFlopAnalysis();
+  else document.getElementById('flop-result').innerHTML='';
+  updateFlopPreview();
+}
+function updateCardUI(){
+  S.flopCards.forEach((c,i)=>{
+    const rEl=document.getElementById('cr'+i),sEl=document.getElementById('csuit'+i);
+    if(c){
+      rEl.textContent=c[0];rEl.style.color='#ddd';
+      sEl.textContent=SUIT_DISP[c[1]];sEl.style.color=SUIT_COL[c[1]];
+    }else{
+      rEl.textContent='?';rEl.style.color='#222';
+      sEl.textContent='?';sEl.style.color='#222';
+    }
+  });
+}
+function updateFlopPreview(){
+  const prev=S.flopCards.filter(c=>c).map(c=>`<span style="color:${SUIT_COL[c[1]]};">${c[0]}${SUIT_DISP[c[1]]}</span>`).join(' ');
+  document.getElementById('flop-cards-preview').innerHTML=prev;
+}
+function clearFlop(){
+  S.flopCards=['','',''];
+  updateCardUI();updateFlopPreview();
+  document.getElementById('flop-result').innerHTML='';
+  document.getElementById('card-picker').classList.remove('show');
+}
+
+/* ─ 보드 텍스처 분석 ─ */
+function analyzeBoard(cards){
+  const parsed=cards.map(c=>({r:RVAL[c[0]],s:c[1],str:c}));
+  const rs=parsed.map(c=>c.r).sort((a,b)=>b-a);
+  const ss=parsed.map(c=>c.s);
+  // 수트
+  const sc={};ss.forEach(s=>sc[s]=(sc[s]||0)+1);
+  const maxS=Math.max(...Object.values(sc));
+  const mono=maxS===3,twoTone=maxS===2,rainbow=maxS===1;
+  // 페어
+  const paired=rs[0]===rs[1]||rs[1]===rs[2];
+  const trips=rs[0]===rs[1]&&rs[1]===rs[2];
+  // 연결성 (스트레이트 드로 가능성)
+  const gaps=[rs[0]-rs[1],rs[1]-rs[2]];
+  const connected=gaps.every(g=>g<=2);
+  const oneGap=gaps.some(g=>g===0)||gaps.filter(g=>g===1).length>=2;
+  // 높이
+  const highCard=rs[0]>=12?'broadway':rs[0]>=10?'hi':rs[0]>=7?'mid':'low';
+  return{parsed,rs,ss,paired,trips,mono,twoTone,rainbow,connected,oneGap,highCard,sc};
+}
+
+/* ─ 상대 레인지 추론 ─ */
+function inferOpponentRanges(tex,potPlayers,posKey){
+  const{rs,paired,trips,mono,twoTone,connected,highCard}=tex;
+  const ranges=[];
+  const piKey=posKey||'BTN';
+  // 포지션별 레인지 특성
+  const tight=piKey==='EP';
+  const wide=piKey==='BTN'||piKey==='SB';
+
+  // 셋 가능 핸드
+  if(!trips){
+    rs.forEach(r=>{
+      const rank=RANKS[14-r]||r;
+      const pct=tight?8:wide?15:11;
+      ranges.push({hand:`${RANKS[14-r]}${RANKS[14-r]} (셋)`,pct,c:'#E24B4A',desc:'레인지 내 포켓페어'});
+    });
+  }
+  // 투페어
+  if(!paired){
+    const pct=tight?6:wide?12:9;
+    ranges.push({hand:`투페어`,pct,c:'#D85A30',desc:'두 보드카드 히트'});
+  }
+  // 탑페어
+  {
+    const topR=RANKS[14-rs[0]];
+    const pct=tight?18:wide?28:22;
+    ranges.push({hand:`탑페어 (${topR}x)`,pct,c:'#ba7517',desc:`${topR} 히트 핸드`});
+  }
+  // 오버페어 (보드 최고카드보다 높은 포켓페어)
+  if(rs[0]<13){
+    const pct=tight?12:wide?9:10;
+    ranges.push({hand:`오버페어 (AA~${RANKS[14-rs[0]-1]}${RANKS[14-rs[0]-1]})`,pct,c:'#7c3d0e',desc:'보드 위 포켓페어'});
+  }
+  // 플러시 드로
+  if(mono||twoTone){
+    const pct=tight?10:wide?18:14;
+    ranges.push({hand:'플러시 드로',pct,c:'#378ADD',desc:mono?'모노톤 보드':'투톤 보드'});
+  }
+  // 스트레이트 드로
+  if(connected){
+    const pct=tight?8:wide?14:10;
+    ranges.push({hand:'스트레이트 드로',pct,c:'#4ade80',desc:'커넥티드 보드 드로'});
+  }
+  // 에어/오버카드
+  {
+    const pct=tight?38:wide?24:32;
+    ranges.push({hand:'에어/오버카드',pct,c:'#444',desc:'미스 or 백도어'});
+  }
+  // 총합 100으로 정규화
+  const total=ranges.reduce((s,r)=>s+r.pct,0);
+  return ranges.map(r=>({...r,pct:Math.round(r.pct/total*100)})).sort((a,b)=>b.pct-a.pct);
+}
+
+/* ─ 내 핸드 평가 ─ */
+function evalMyHandOnBoard(handStr,boardCards){
+  if(!handStr)return null;
+  const bCards=boardCards.map(c=>({r:RVAL[c[0]],s:c[1]}));
+  const bRanks=bCards.map(c=>c.r).sort((a,b)=>b-a);
+  const isPair=handStr.length===2&&handStr[0]===handStr[1];
+  const isSuited=handStr.endsWith('s');
+  const r1=RVAL[handStr[0]],r2=RVAL[handStr[1]];
+  const myRanks=isPair?[r1,r1]:[r1,r2];
+
+  // 셋
+  if(isPair&&bRanks.includes(r1))return{strength:9,name:'셋!',emoji:'🎯',col:'#E24B4A',action:'밸류 올인/레이즈'};
+  // 투페어
+  const hits=myRanks.filter((r,i,arr)=>i===0&&bRanks.includes(r));
+  const hits2=myRanks.filter(r=>bRanks.includes(r));
+  if(!isPair&&hits2.length>=2)return{strength:8,name:'투페어',emoji:'💪',col:'#D85A30',action:'레이즈/3벳'};
+  // 탑페어
+  if(hits2.length===1&&hits2[0]===bRanks[0])return{strength:7,name:'탑페어',emoji:'👍',col:'#ba7517',action:'베팅/콜'};
+  // 미드/바텀 페어
+  if(hits2.length===1)return{strength:5,name:`미드/바텀페어(${RANKS[14-hits2[0]]})`,emoji:'😐',col:'#444',action:'팟 컨트롤'};
+  // 오버페어
+  if(isPair&&r1>bRanks[0])return{strength:7,name:`오버페어(${handStr})`,emoji:'💪',col:'#ba7517',action:'레이즈/베팅'};
+  // 플러시 드로 / 플러시
+  if(isSuited){
+    const mySuit=handStr[handStr.length-1];
+    const boardSuit=bCards.filter(c=>c.s===mySuit).length;
+    if(boardSuit===3)return{strength:9,name:'플러시!',emoji:'🎨',col:'#E24B4A',action:'밸류 올인/레이즈'};
+    if(boardSuit===2)return{strength:6,name:'넛 플러시 드로',emoji:'🎨',col:'#378ADD',action:'세미블러프/콜'};
+  }
+  // 스트레이트 드로 (간략)
+  const allRanks=[...myRanks,...bRanks].sort((a,b)=>b-a);
+  const uniq=[...new Set(allRanks)];
+  let maxRun=1,curRun=1;
+  for(let i=1;i<uniq.length;i++){if(uniq[i-1]-uniq[i]<=2)curRun++;else curRun=1;maxRun=Math.max(maxRun,curRun);}
+  if(maxRun>=4)return{strength:6,name:'스트레이트 드로',emoji:'🎰',col:'#60a5fa',action:'세미블러프/콜'};
+  // 오버카드
+  const overs=myRanks.filter(r=>r>bRanks[0]).length;
+  if(overs===2)return{strength:4,name:'오버카드 2장',emoji:'🤔',col:'#2a4a2a',action:'블러프 가능'};
+  if(overs===1)return{strength:3,name:'오버카드 1장',emoji:'😕',col:'#1e1e1e',action:'체크/폴드 경향'};
+  return{strength:2,name:'에어 (미스)',emoji:'😰',col:'#1e1e1e',action:'블러프 or 폴드'};
+}
+
+function runFlopAnalysis(){
+  const cards=S.flopCards.filter(c=>c);
+  if(cards.length!==3)return;
+  const tex=analyzeBoard(cards);
+  const ranges=inferOpponentRanges(tex,S.potPlayers,S.posKey);
+  const myHandEval=S.hand?evalMyHandOnBoard(S.hand,cards):null;
+
+  // 텍스처 뱃지
+  const badges=[];
+  if(tex.trips)badges.push({t:'트리플!',c:'#E24B4A',bg:'#2d0808'});
+  else if(tex.paired)badges.push({t:'페어드',c:'#D85A30',bg:'#2d1000'});
+  if(tex.mono)badges.push({t:'모노톤♣♦',c:'#60a5fa',bg:'#060f1e'});
+  else if(tex.twoTone)badges.push({t:'투톤',c:'#3b6ca8',bg:'#040a12'});
+  else badges.push({t:'레인보우',c:'#4ade80',bg:'#061006'});
+  if(tex.connected)badges.push({t:'커넥티드',c:'#fbbf24',bg:'#1a1000'});
+  if(tex.highCard==='broadway')badges.push({t:'하이보드',c:'#fca5a5',bg:'#1a0808'});
+  else if(tex.highCard==='low')badges.push({t:'로우보드',c:'#4ade80',bg:'#061006'});
+
+  let html=`<div class="fr-texture">${badges.map(b=>`<span class="tex-badge" style="color:${b.c};background:${b.bg};border:0.5px solid ${b.c}33;">${b.t}</span>`).join('')}</div>`;
+
+  // 내 핸드 평가
+  if(myHandEval){
+    html+=`<div id="my-hand-eval">
+      <div id="mhe-title">내 핸드 (${S.hand}) 보드 평가</div>
+      <div id="mhe-result" style="color:${myHandEval.col};">${myHandEval.emoji} ${myHandEval.name}</div>
+      <div id="mhe-action" style="color:#f0c040;">추천: ${myHandEval.action}</div>
+    </div>`;
+  }
+
+  // 상대 예상 핸드
+  html+=`<div class="fr-section-title">상대 예상 핸드 분포 (${PFULL[S.posIdx]} vs ${S.potPlayers}명)</div>`;
+  html+=ranges.map(r=>`<div class="range-item">
+    <div class="ri-hand" style="color:${r.c};">${r.hand}</div>
+    <div class="ri-bar-wrap"><div class="ri-bar" style="width:${r.pct}%;background:${r.c};"></div></div>
+    <div class="ri-prob" style="color:${r.c};">${r.pct}%</div>
+    <div class="ri-desc">${r.desc}</div>
+  </div>`).join('');
+
+  document.getElementById('flop-result').innerHTML=html;
+}
+
+/* ════════════════ 눈팅방지 ════════════════ */
+let sht=null;
+function activateShield(){
+  document.getElementById('shield').classList.add('on');
+  const h=document.getElementById('sh-hint');
+  h.style.opacity='1';h.classList.remove('fade');
+  clearTimeout(sht);sht=setTimeout(()=>h.classList.add('fade'),2200);
+}
+function unshield(){document.getElementById('shield').classList.remove('on');}
+document.addEventListener('visibilitychange',()=>{if(document.hidden)activateShield();});
+
+/* ════════════════ 초기화 ════════════════ */
+// 인원수 버튼
+const pb=document.getElementById('pbtn');
+for(let i=2;i<=12;i++){
+  const b=document.createElement('button');
+  b.className='pb'+(i===6?' on':'');b.dataset.n=i;b.textContent=i+'인';
+  b.onclick=()=>setPlayers(i);pb.appendChild(b);
+}
+// 팟 참여 버튼
+const potWrap=document.getElementById('pot-btns');
+for(let i=2;i<=8;i++){
+  const b=document.createElement('button');
+  b.className='potb'+(i===2?' on':'');b.dataset.n=i;b.textContent=i;
+  b.onclick=()=>setPotPlayers(i);potWrap.appendChild(b);
+}
+// 카드 피커 초기화
+renderSeatBtns();renderScBar();selectByIdx(3);resetTimer();
+updateZoneBadge();updateBBDisplay();
+if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
+</script>
+</body>
+</html>
