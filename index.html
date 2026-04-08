@@ -329,6 +329,11 @@ input::-webkit-inner-spin-button,input::-webkit-outer-spin-button{-webkit-appear
 
 @keyframes pop{from{transform:translate(-50%,-50%) scale(.8);opacity:0}to{transform:translate(-50%,-50%) scale(1);opacity:1}}
 
+
+/* ─ 상황 분석 바 ─ */
+#situation-bar{display:none;flex-direction:row;flex-wrap:wrap;}
+#situation-bar.show{display:flex;}
+.sit-badge{display:flex;align-items:center;gap:3px;padding:3px 7px;border-radius:4px;font-size:9px;font-weight:700;flex-shrink:0;border:0.5px solid;}
 /* ─ 하단 눈팅방지 버튼 ─ */
 #shield-fixed-btn{position:fixed;bottom:env(safe-area-inset-bottom,0);left:0;right:0;z-index:5500;background:#0a0a0a;border-top:0.5px solid #1a1a1a;padding:8px 0 calc(8px + env(safe-area-inset-bottom,0));display:flex;justify-content:center;}
 #shield-fixed-btn button{width:100%;max-width:100%;margin:0 11px;height:36px;background:#111;border:0.5px solid #2a2a2a;border-radius:8px;color:#666;font-size:12px;font-weight:700;letter-spacing:.3px;}
@@ -478,6 +483,7 @@ input::-webkit-inner-spin-button,input::-webkit-outer-spin-button{-webkit-appear
     <span class="slbl" style="margin-left:2px;" title="오픈 후 사이에 콜한 인원수">콜집</span>
     <div class="p-btns" id="limp-btns"></div>
   </div>
+  <div id="situation-bar" style="display:none;padding:5px 11px;background:#060606;border-bottom:0.5px solid #141414;flex-wrap:wrap;gap:4px;"></div>
   <div id="sc-bar"></div>
   <div id="pos-bar"></div>
   <div id="matrix-wrap"><div id="mtx"></div></div>
@@ -549,6 +555,7 @@ input::-webkit-inner-spin-button,input::-webkit-outer-spin-button{-webkit-appear
       <div id="raise-compare"></div>
     </div>
     <!-- 포지션별 비교: 하단 패널에 표시 -->
+    <div id="situation-analysis" style="margin-top:8px;"></div>
     <div id="s-tip"></div>
   </div>
 </div>
@@ -879,87 +886,351 @@ const ALLIN_HU={
   'QJo':62,'JTo':57,'T9o':52,
 };
 
-function getAllinCall(hand,nPlayers){
+/* ════════════════ GTO 헬퍼: 푸시/폴드 임계값 ════════════════ */
+function getPushThresh(pi, bbCount, mAdj, limpers, nPlayers) {
+  if (!bbCount || bbCount > 14) return -1;
+  // 10BB 기준 포지션별 임계값 [EP,MP,CO,BTN,SB,BB]
+  const base10 = [3, 3, 4, 5, 5, 6];
+  let thresh = base10[Math.min(pi, 5)];
+  if (bbCount <= 6) thresh += 2;
+  else if (bbCount <= 8) thresh += 1;
+  else if (bbCount <= 10) thresh += 0;
+  else if (bbCount <= 12) thresh -= 1;
+  else thresh -= 2;
+  if (mAdj.fi_fold > 8) thresh += 1;
+  if (mAdj.fi_fold < -5) thresh -= 1;
+  if (S.villain) thresh -= 2;
+  if (limpers > 0) thresh = Math.min(thresh + 1, 7);
+  const extra = Math.max(0, nPlayers - 2);
+  thresh -= extra;
+  return Math.max(0, Math.min(7, thresh));
+}
+
+function calcPushFold(t, pi, bbCount, limpers, nPlayers, mAdj) {
+  const thresh = getPushThresh(pi, bbCount, mAdj, limpers, nPlayers);
+  if (t <= thresh) {
+    const certainty = Math.max(70, 96 - (t - 1) * 7);
+    return [0, certainty, 0, 100 - certainty];
+  }
+  return [0, 0, 0, 100];
+}
+
+/* ════════════════ GTO 헬퍼: 스틸/스퀴즈/팟오즈 분석 ════════════════ */
+function getStealSuccess(pi, nPlayers, bbCount, mode) {
+  const posMap = {2:'CO', 3:'BTN', 4:'SB'};
+  const posName = posMap[pi];
+  if (!posName) return null;
+  const base = {
+    trn:{CO:72,BTN:68,SB:65}, pub:{CO:60,BTN:55,SB:52},
+    mini:{CO:52,BTN:48,SB:44}, daily:{CO:65,BTN:62,SB:58},
+    high:{CO:76,BTN:72,SB:70}, free:{CO:55,BTN:50,SB:47}
+  };
+  let rate = (base[mode] || base.trn)[posName];
+  if (bbCount > 0) {
+    if (bbCount <= 12) rate -= 6;
+    else if (bbCount <= 20) rate -= 3;
+    else if (bbCount > 60) rate += 5;
+  }
+  const playersLeft = Math.max(1, nPlayers - (pi === 4 ? 1 : pi === 3 ? 2 : 3));
+  const adjusted = Math.round(Math.pow(rate / 100, playersLeft) * 100);
+  return { rate: Math.max(20, Math.min(95, adjusted)), posName };
+}
+
+function getSqueezeInfo(pi, limpers, bbCount, bbNow) {
+  if (limpers === 0) return null;
+  const deadMoney = (1.5 + limpers).toFixed(1);
+  const sqSize = (3 + limpers * 1.5).toFixed(1);
+  const foldEq = Math.max(25, 65 - limpers * 9);
+  return { limpers, deadMoney, sqSize, foldEq, deadMoneyVal: Math.round((1.5 + limpers) * bbNow) };
+}
+
+function getPotOddsInfo(sc) {
+  const rBB = { r2:2, r3:3, r4:4, r5:5, r10:10, rr:12 }[sc];
+  if (!rBB) return null;
+  const dead = 1.5 + (S.limpers || 0);
+  const potAfterRaise = dead + rBB * (S.potPlayers - 1);
+  const callAmt = rBB - 1;
+  const potOddsPct = Math.round(callAmt / (potAfterRaise + callAmt) * 100);
+  return { rBB, potOddsPct, reqEquity: potOddsPct };
+}
+
+function getSituationAdvice(hand, pi, sc, stk, nPlayers, limpers) {
+  const bbCount = stk.bbCount;
+  const t = HT[hand] || 7;
+  const posNames = ['EP','MP','CO','BTN','SB','BB'];
+  const posName = posNames[pi];
+  const sections = [];
+
+  // 1. 스택 존
+  if (bbCount > 0) {
+    if (bbCount <= 8)       sections.push({icon:'🚨', title:`${bbCount}BB 극단기`, desc:'PUSH/FOLD 전용. 강한핸드 전체 올인, 나머지 즉시 폴드. 오픈 절대 금지.', col:'#fca5a5'});
+    else if (bbCount <= 14) sections.push({icon:'⚡', title:`${bbCount}BB 단기전`, desc:'올인 or 폴드. 포지션별 푸시레인지 차트 참고. 2.5BB 오픈 없음.', col:'#fbbf24'});
+    else if (bbCount <= 25) sections.push({icon:'🟡', title:`${bbCount}BB 쇼트`, desc:'2.5BB 오픈 or 쇼브. 콜 최소화. 강한핸드는 3벳-쇼브로.', col:'#fbbf24'});
+    else if (bbCount <= 60) sections.push({icon:'🟢', title:`${bbCount}BB 일반`, desc:'GTO 표준 플레이. 3BB 오픈 기준. 포지션 어드밴티지 활용.', col:'#4ade80'});
+    else sections.push({icon:'💙', title:`${bbCount}BB 딥스택`, desc:'수티드 커넥터·셋 마이닝 가치↑. 레인지 확장. IP 포지션 극대화.', col:'#60a5fa'});
+  }
+
+  // 2. 스틸 어드바이저
+  if (sc === 'fi' && limpers === 0 && (pi === 2 || pi === 3 || pi === 4)) {
+    const steal = getStealSuccess(pi, nPlayers, bbCount, S.mode);
+    if (steal) {
+      const q = steal.rate >= 65 ? '적극 스틸 추천' : steal.rate >= 50 ? '상황 따라 스틸' : '스틸 조심';
+      sections.push({icon:'🎯', title:`${posName} 스틸 성공률 ${steal.rate}%`, desc:`2.5BB 오픈으로 ${steal.rate}% 확률 팟 수집. ${q}. 스택별/상대별 폴드율 반영.`, col: steal.rate >= 65 ? '#4ade80' : steal.rate >= 50 ? '#fbbf24' : '#f87171'});
+    }
+  }
+
+  // 3. 스퀴즈 어드바이저
+  if (limpers > 0 && sc === 'fi') {
+    const sq = getSqueezeInfo(pi, limpers, bbCount, S.bbNow);
+    if (sq) {
+      const advice = t <= 2 ? '프리미엄 → 스퀴즈 강추' : t <= 3 ? '강한핸드 → LP 스퀴즈' : t <= 4 ? '중간핸드 → LP만 스퀴즈' : '약한핸드 → 폴드 권장';
+      sections.push({icon:'🗜️', title:`스퀴즈 찬스 (${limpers}명 콜)`, desc:`데드머니 ${sq.deadMoney}BB (≈${Math.round(sq.deadMoneyVal/100)*100}). 권장 사이즈 ${sq.sqSize}BB. 폴드에쿼티 ${sq.foldEq}%. ${advice}.`, col: t <= 3 ? '#4ade80' : t <= 4 ? '#fbbf24' : '#888'});
+    }
+  }
+
+  // 4. 팟 오즈 (레이즈 직면)
+  if (sc !== 'fi' && sc !== 'allin') {
+    const po = getPotOddsInfo(sc);
+    if (po) {
+      const quality = po.reqEquity <= 28 ? '팟오즈 양호 → 콜 고려' : po.reqEquity <= 38 ? '빠듯한 팟오즈 → 에쿼티 확인' : '팟오즈 불리 → 3벳 or 폴드';
+      sections.push({icon:'📐', title:`팟 오즈 분석 (${po.rBB}BB 레이즈)`, desc:`콜에 필요한 최소 에쿼티 ${po.reqEquity}%. ${quality}. 포지션·스택 고려해서 3벳-쇼브 판단.`, col: po.reqEquity <= 28 ? '#4ade80' : po.reqEquity <= 38 ? '#fbbf24' : '#f87171'});
+    }
+  }
+
+  // 5. 멀티웨이 분석
+  if (nPlayers >= 4) {
+    const mwAdj = nPlayers >= 6 ? '레인지 40%+ 축소' : nPlayers >= 5 ? '레인지 25% 축소' : '레인지 10-15% 축소';
+    const mwAdvice = t <= 2 ? '프리미엄은 그대로 밸류베팅' : t <= 4 ? '중간핸드는 투기성↓, 드로에 신중' : '한계핸드 대부분 폴드 권장';
+    sections.push({icon:'👥', title:`멀티웨이 ${nPlayers}명`, desc:`${mwAdj}. 넛핸드·강한드로 위주로 플레이. ${mwAdvice}.`, col:'#a78bfa'});
+  }
+
+  // 6. GTO 키 포인트
+  const pts = [];
+  if (bbCount > 0 && bbCount <= 14 && sc === 'fi') pts.push(`${bbCount}BB: 올인 or 폴드`);
+  if (limpers >= 2 && sc === 'fi') pts.push(`${limpers}명 림프 → ${(3 + limpers * 1.5).toFixed(1)}BB 스퀴즈`);
+  if (S.villain) pts.push('빌런: 비프리미엄 전부 폴드');
+  if (S.chipLeader) pts.push('칩리더: 레인지 확장·스틸 적극화');
+  if (pts.length > 0) sections.push({icon:'💡', title:'GTO 핵심 포인트', desc: pts.join(' · '), col:'#f0c040'});
+
+  return sections;
+}
+
+/* ════════════════ ALLIN 콜 테이블 (기존 유지) ════════════════ */
+function getAllinCall(hand, nPlayers){
   const baseCall=ALLIN_HU[hand]||(HT[hand]<=2?85:HT[hand]<=3?70:HT[hand]<=4?55:HT[hand]<=5?40:25);
   const multi=Math.max(0,nPlayers-2);
   const adj=multi*9;
   return Math.max(0,Math.min(100,baseCall-adj));
 }
 
-function getActs(hand,pi,sc,nPlayers){
-  nPlayers=nPlayers||S.potPlayers;
-  const limpers=S.limpers||0;
-  const isPub=S.mode==='pub'||S.mode==='mini'||S.mode==='daily';
-  const mAdj=getModeAdj();
-  const t=HT[hand]||7;
-  const isBB=pi===5;
+/* ════════════════ GTO 핵심: 완전 재설계된 getActs ════════════════ */
+function getActs(hand, pi, sc, nPlayers) {
+  nPlayers = nPlayers || S.potPlayers;
+  const limpers = S.limpers || 0;
+  const stk = getStackInfo();
+  const bbCount = stk.bbCount;
+  const t = HT[hand] || 7;
+  const isBB = pi === 5;
+  const mAdj = getModeAdj();
 
-  if(sc==='fi'){
-    const mFI=[3,3,5,6,5,6];
-    let[r,al,l,f]=baseFi(hand,pi);
-    if(!isBB){f+=l;l=0;}
+  /* ──── ALLIN 직면 ──── */
+  if (sc === 'allin') {
+    let c = getAllinCall(hand, nPlayers);
+    // 팟 커밋: 스택 짧을수록 더 쉽게 콜
+    if (bbCount > 0) {
+      if (bbCount <= 8)  c = Math.min(97, c + 16);
+      else if (bbCount <= 12) c = Math.min(95, c + 9);
+      else if (bbCount <= 20) c = Math.min(93, c + 4);
+    }
+    return [c, Math.max(0, 100 - c)];
+  }
+
+  /* ──── FIRST IN ──── */
+  if (sc === 'fi') {
+
+    // ① 극단기 PUSH/FOLD 존 (≤14BB)
+    if (bbCount > 0 && bbCount <= 14) {
+      return calcPushFold(t, pi, bbCount, limpers, nPlayers, mAdj);
+    }
+
+    // 기본 레인지 로드
+    let [r, al, l, f] = baseFi(hand, pi);
+    if (!isBB) { f += l; l = 0; } // BB 외: 림프 → 폴드
+
+    // ② 쇼트스택 (15-30BB): 쇼브 편향
+    if (bbCount > 0 && bbCount <= 30) {
+      const sf = (30 - bbCount) / 16; // 14BB=1.0, 30BB=0
+      if (t <= 2) {
+        const bonus = Math.round(sf * 28);
+        al = Math.min(al + bonus, 65); r = Math.max(0, r - Math.round(bonus * 0.7));
+      } else if (t <= 3) {
+        const bonus = Math.round(sf * 16);
+        al = Math.min(al + bonus, 45); r = Math.max(0, r - Math.round(bonus * 0.5));
+      } else if (t >= 5) {
+        const fBonus = Math.round(sf * 22);
+        f = Math.min(f + fBonus, 95); r = Math.max(0, r - Math.round(fBonus * 0.85));
+      }
+      f = Math.max(0, 100 - r - al - l);
+    }
+
+    // ③ 딥스택 (>80BB): 레인지 확장
+    if (bbCount > 80 && t <= 6 && pi >= 3 && f > 0) {
+      const bonus = Math.min(f * 0.16, 13);
+      if (t <= 4) r += Math.round(bonus);
+      else if (isBB) l += Math.round(bonus * 0.7);
+      else r += Math.round(bonus * 0.4);
+      f = Math.max(0, 100 - r - al - l);
+    }
+
+    // ④ 모드 조정
     {
-      const gap=t-mFI[pi];
-      const fd=mAdj.fi_fold;
-      if(gap===1&&isBB&&isPub)l=Math.min(30,l+20);
-      else if(gap<=0&&f>0&&fd>0){
-        const bn=Math.min(f*(fd/100)*2.2,fd*.8);
-        r=Math.round(r+bn*.6);if(isPub)l=Math.round(l+bn*.4);f=Math.max(0,100-r-al-l);
-      }else if(fd<0&&f<95){
-        const tight=Math.min(Math.abs(fd)*0.8,15);
-        f=Math.min(95,f+tight);r=Math.max(0,r-tight*.7);al=Math.max(0,al-tight*.3);
-      }
-      {const _a=applyAnteAdj([r,al,l,f],sc,pi,mAdj.ante);r=_a[0];al=_a[1];l=_a[2];f=_a[3];}
-      if(S.chipLeader&&f>0&&t<=6){
-        const bonus=Math.min(f*.20,14);
-        r=Math.round(r+bonus*.7);if(isBB)l=Math.round(l+bonus*.3);
-        f=Math.max(0,100-r-al-l);
+      const fd = mAdj.fi_fold;
+      if (fd > 0 && f > 0) {
+        const bn = Math.min(f * (fd / 100) * 2.6, fd * 0.95);
+        r = Math.round(r + bn * 0.65); if (isBB) l = Math.round(l + bn * 0.35);
+        f = Math.max(0, 100 - r - al - l);
+      } else if (fd < 0 && f < 95) {
+        const tight = Math.min(Math.abs(fd) * 0.88, 20);
+        f = Math.min(95, f + tight); r = Math.max(0, r - tight * 0.75); al = Math.max(0, al - tight * 0.25);
       }
     }
-    if(S.mode==='mini'&&!isBB&&f>0&&t<=4){
-      const bn=Math.min(f*.18,12);r=Math.round(r+bn);f=Math.max(0,100-r-al-l);
+    { const _a = applyAnteAdj([r,al,l,f], sc, pi, mAdj.ante); r=_a[0]; al=_a[1]; l=_a[2]; f=_a[3]; }
+
+    // ⑤ 칩리더
+    if (S.chipLeader && f > 0 && t <= 6) {
+      const bn = Math.min(f * 0.22, 16);
+      r = Math.round(r + bn * 0.72); if (isBB) l = Math.round(l + bn * 0.28);
+      f = Math.max(0, 100 - r - al - l);
     }
-    if(limpers>0){
-      if(t<=3){r=Math.min(r+limpers*4,92);al=Math.min(al+limpers*2,30);}
-      else if(t<=5){const tight=limpers*7;r=Math.max(0,r-tight*.4);f=Math.min(98,f+tight*.6);}
-      else{f=Math.min(98,f+limpers*10);r=Math.max(0,100-f-al-l);}
-      f=Math.max(0,100-r-al-l);
+
+    // ⑥ 미니 데일리
+    if (S.mode === 'mini' && !isBB && f > 0 && t <= 4) {
+      const bn = Math.min(f * 0.2, 14); r = Math.round(r + bn);
+      f = Math.max(0, 100 - r - al - l);
     }
-    let a=[r,al,l,f];
-    a=applyMultiway(a,sc,hand,nPlayers);
-    return a;
+
+    // ⑦ 림퍼 아이소레이즈 조정 (★핵심★)
+    if (limpers > 0) {
+      if (t <= 2) {
+        // 프리미엄: 아이소 쇼브
+        al = Math.min(al + limpers * 12 + 18, 88);
+        r = Math.max(0, r - Math.round(limpers * 8));
+      } else if (t <= 3) {
+        // 강한핸드: 아이소 레이즈 추가
+        r = Math.min(r + limpers * 4, 78); al = Math.min(al + limpers * 6, 45);
+        f = Math.max(0, 100 - r - al - l);
+      } else if (t <= 4) {
+        if (pi >= 2) { // LP: 아이소 시도
+          r = Math.max(0, r - limpers * 4); f = Math.min(f + limpers * 11, 88);
+        } else { // EP/MP: 강하게 폴드
+          f = Math.min(f + limpers * 17, 96); r = Math.max(0, r - limpers * 12);
+        }
+      } else if (t <= 5) {
+        f = Math.min(97, f + limpers * 18); r = Math.max(0, r - limpers * 13);
+      } else {
+        f = Math.min(99, f + limpers * 20); r = Math.max(0, 100 - f - al - l);
+      }
+      f = Math.max(0, 100 - r - al - l);
+    }
+
+    // ⑧ 멀티웨이 조정 (★강화★)
+    if (nPlayers > 2) {
+      const extra = nPlayers - 2;
+      if (t <= 1) {
+        // AA/KK 등 프리미엄: 변화 없음 (오히려 더 좋음)
+      } else if (t <= 2) {
+        f = Math.min(f + extra * 4, 35); r = Math.max(0, r - extra * 2);
+      } else if (t <= 3) {
+        f = Math.min(f + extra * 7, 58); r = Math.max(0, r - extra * 5); al = Math.max(0, al - extra * 2);
+      } else if (t <= 4) {
+        f = Math.min(f + extra * 10, 76); r = Math.max(0, r - extra * 7);
+      } else if (t <= 5) {
+        f = Math.min(f + extra * 14, 88); r = Math.max(0, r - extra * 9); l = Math.max(0, l - extra * 3);
+      } else {
+        f = Math.min(f + extra * 17, 95); r = Math.max(0, r - extra * 11); l = Math.max(0, l - extra * 5);
+      }
+      f = Math.max(0, 100 - r - al - l);
+    }
+
+    return [Math.round(r), Math.round(al), Math.round(l), Math.max(0, 100 - Math.round(r) - Math.round(al) - Math.round(l))];
   }
 
-  let[tv,cv,fv]=baseVr(hand,pi);
-  const adj=RADJ[sc]||{t:1,c:1};
-  tv=Math.min(90,Math.round(tv*adj.t));
-  cv=Math.min(50,Math.round(cv*adj.c*.60));
-  fv=Math.max(0,100-tv-cv);
-  if(t<=1&&sc!=='allin'){tv=Math.max(tv,55);cv=Math.min(cv,35);fv=Math.max(0,100-tv-cv);}
-  else if(t===2&&sc!=='allin'){tv=Math.max(tv,40);cv=Math.min(cv,45);fv=Math.max(0,100-tv-cv);}
-  tv=Math.min(88,Math.round(tv*mAdj.vr3));
-  cv=Math.min(60,Math.round(cv*mAdj.vrc));
-  fv=Math.max(0,100-tv-cv);
-  if(limpers>0&&sc!=='allin'){
-    if(t<=1){tv=Math.min(88,tv+limpers*12);cv=Math.max(0,limpers>=3?0:cv-limpers*10);}
-    else if(t<=2){tv=Math.min(82,tv+limpers*8);cv=Math.max(0,cv-limpers*8);}
-    else if(t<=4){tv=Math.max(0,tv-limpers*4);cv=Math.max(0,cv-limpers*10);}
-    else{cv=Math.max(0,cv-limpers*12);tv=Math.max(0,tv-limpers*5);}
-    fv=Math.max(0,100-tv-cv);
+  /* ──── 레이즈 직면 (vr) ──── */
+  let [tv, cv, fv] = baseVr(hand, pi);
+  const adj = RADJ[sc] || {t:1, c:1};
+  tv = Math.min(90, Math.round(tv * adj.t));
+  cv = Math.min(50, Math.round(cv * adj.c * 0.55));
+  fv = Math.max(0, 100 - tv - cv);
+
+  // 쇼트스택: 콜 금지 → 3벳-쇼브 or 폴드
+  if (bbCount > 0 && bbCount <= 20) {
+    const sf = Math.max(0, (20 - bbCount)) / 10; // 0 at 20BB, 1 at 10BB
+    const shift = Math.round(cv * sf * 0.75);
+    if (t <= 3) tv = Math.min(tv + shift, 85);
+    else fv += shift;
+    cv = Math.max(0, cv - shift);
+    fv = Math.max(0, 100 - tv - cv);
   }
-  let a=[tv,cv,fv];
-  if(sc==='allin'){
-    const huCall=getAllinCall(hand,nPlayers);
-    return[huCall,Math.max(0,100-huCall)];
+
+  // 프리미엄 최소 3벳 보장
+  if (t <= 1 && sc !== 'allin') { tv = Math.max(tv, 58); cv = Math.min(cv, 32); fv = Math.max(0, 100 - tv - cv); }
+  else if (t === 2 && sc !== 'allin') { tv = Math.max(tv, 42); cv = Math.min(cv, 44); fv = Math.max(0, 100 - tv - cv); }
+
+  // 모드 조정
+  tv = Math.min(88, Math.round(tv * mAdj.vr3));
+  cv = Math.min(60, Math.round(cv * mAdj.vrc));
+  fv = Math.max(0, 100 - tv - cv);
+
+  // 스퀴즈 조정 (★강화★)
+  if (limpers > 0 && sc !== 'allin') {
+    if (t <= 1) {
+      tv = Math.min(92, tv + limpers * 15); cv = Math.max(0, limpers >= 2 ? 0 : cv - limpers * 12);
+    } else if (t <= 2) {
+      tv = Math.min(85, tv + limpers * 11); cv = Math.max(0, cv - limpers * 11);
+    } else if (t <= 3) {
+      tv = Math.min(78, tv + limpers * 6); cv = Math.max(0, cv - limpers * 14);
+    } else if (t <= 4) {
+      tv = Math.max(0, tv - limpers * 6); cv = Math.max(0, cv - limpers * 14);
+    } else {
+      cv = Math.max(0, cv - limpers * 17); tv = Math.max(0, tv - limpers * 8);
+    }
+    fv = Math.max(0, 100 - tv - cv);
   }
-  a=applyMultiway(a,sc,hand,nPlayers);
-  return a;
+
+  // 멀티웨이 레이즈 직면 (더 강한 조정)
+  if (nPlayers > 2) {
+    const extra = nPlayers - 2;
+    if (t > 2) {
+      const tight = extra * 7;
+      cv = Math.max(0, cv - Math.round(tight * 0.55));
+      tv = Math.max(0, tv - Math.round(tight * 0.32));
+      fv = Math.min(98, fv + Math.round(tight * 0.87));
+    }
+    if (t > 4 && extra >= 2) { // 아주 많은 플레이어면 약한 핸드 강제 폴드
+      fv = Math.min(98, fv + extra * 4);
+      cv = Math.max(0, cv - extra * 3);
+    }
+    fv = Math.max(0, 100 - tv - cv);
+  }
+
+  return [Math.round(tv), Math.round(cv), Math.max(0, 100 - Math.round(tv) - Math.round(cv))];
 }
+
+
 
 function cellCls(hand,pi,sc){
   const a=getActs(hand,pi,sc);
+  const stk=getStackInfo();
+  const bbCount=stk.bbCount;
   if(sc==='fi'){
     const[r,al,l,f]=a;
+    // 푸시/폴드 존: 더 명확한 구분
+    if(bbCount>0&&bbCount<=14){
+      if(al>=60)return'allin';
+      if(al>=30)return'allin';
+      if(f>=95)return'out';
+      return'weak';
+    }
     if(f>=99)return'out';if(f>=72)return'weak';
     if(al>=12)return'allin';if(r+al>=55)return'raise';
     if(l>=25)return'limp';if(l>=8)return'limp-w';
@@ -1084,6 +1355,63 @@ function getPosTableData(hand,sc){
 }
 
 /* ════════════════ 렌더 ════════════════ */
+
+/* ════════════════ 상황 바 업데이트 ════════════════ */
+function updateSituationBar(pi, sc, stk) {
+  const bar = document.getElementById('situation-bar');
+  if (!bar) return;
+  const bbCount = stk.bbCount;
+  const limpers = S.limpers || 0;
+  const nPlayers = S.potPlayers;
+  const badges = [];
+
+  // 스택 존 뱃지
+  if (bbCount > 0) {
+    if (bbCount <= 8)       badges.push({t:`🚨 ${bbCount}BB PUSH/FOLD`, c:'#fca5a5', bg:'#2d0808', bc:'#7c2020'});
+    else if (bbCount <= 14) badges.push({t:`⚡ ${bbCount}BB 단기전`, c:'#fbbf24', bg:'#2d1800', bc:'#7c4a00'});
+    else if (bbCount <= 25) badges.push({t:`🟡 ${bbCount}BB 쇼트`, c:'#fbbf24', bg:'#1a1000', bc:'#3a2800'});
+    else if (bbCount <= 60) badges.push({t:`🟢 ${bbCount}BB`, c:'#4ade80', bg:'#061206', bc:'#166534'});
+    else badges.push({t:`💙 ${bbCount}BB 딥`, c:'#60a5fa', bg:'#060f1e', bc:'#1e3a5f'});
+  }
+
+  // 스틸 뱃지
+  if (sc === 'fi' && limpers === 0 && (pi === 2 || pi === 3 || pi === 4)) {
+    const steal = getStealSuccess(pi, nPlayers, bbCount, S.mode);
+    if (steal && steal.rate > 0) {
+      const col = steal.rate >= 65 ? '#4ade80' : steal.rate >= 50 ? '#fbbf24' : '#f87171';
+      badges.push({t:`🎯 스틸 ${steal.rate}%`, c:col, bg:'#0a0a0a', bc:col+'55'});
+    }
+  }
+
+  // 스퀴즈 뱃지
+  if (limpers > 0 && sc === 'fi') {
+    const sq = getSqueezeInfo(pi, limpers, bbCount, S.bbNow);
+    if (sq) badges.push({t:`🗜️ 스퀴즈 ×${limpers} (${sq.deadMoney}BB 데드)`, c:'#c084fc', bg:'#0d0a1a', bc:'#4a1a7a'});
+  }
+
+  // 멀티웨이 뱃지
+  if (nPlayers >= 4) {
+    badges.push({t:`👥 ${nPlayers}명 멀티웨이`, c:'#a78bfa', bg:'#0e0a1a', bc:'#3a1a6a'});
+  }
+
+  // 팟오즈 뱃지
+  if (sc !== 'fi' && sc !== 'allin') {
+    const po = getPotOddsInfo(sc);
+    if (po) {
+      const col = po.reqEquity <= 28 ? '#4ade80' : po.reqEquity <= 38 ? '#fbbf24' : '#f87171';
+      badges.push({t:`📐 팟오즈 ${po.reqEquity}% 필요`, c:col, bg:'#0a0a0a', bc:col+'55'});
+    }
+  }
+
+  if (badges.length > 0) {
+    bar.classList.add('show');
+    bar.innerHTML = badges.map(b => `<span class="sit-badge" style="color:${b.c};background:${b.bg};border-color:${b.bc};">${b.t}</span>`).join('');
+  } else {
+    bar.classList.remove('show');
+    bar.innerHTML = '';
+  }
+}
+
 function renderScBar(){
   const scb=document.getElementById('sc-bar');if(!scb)return;
   scb.innerHTML=SC_LIST.map(s=>`<div class="scpill${S.sc===s.key?' on':''}" onclick="setSc('${s.key}')"><div class="sp1">${s.l1}</div><div class="sp2">${s.l2}</div></div>`).join('');
@@ -1173,6 +1501,19 @@ function renderSheet(){
   const sheetEl=document.getElementById('sheet');
   if(sheetEl){sheetEl.style.borderColor=isAllin?'#ef4444':'#14532d';}
   if(isAllin&&navigator.vibrate)navigator.vibrate([80,40,80]);
+
+  // ── 상황 분석 패널 렌더 ──
+  const sitSections = getSituationAdvice(hand, pi, sc, stk, nPlayers, limpers);
+  const sitEl = document.getElementById('situation-analysis');
+  if (sitEl && sitSections.length > 0) {
+    sitEl.style.display = '';
+    sitEl.innerHTML = '<div style="font-size:9px;color:#aaa;margin-bottom:5px;font-weight:700;letter-spacing:.4px;">▶ 상황 분석</div>' +
+      sitSections.map(s => `<div style="display:flex;gap:8px;padding:7px 9px;background:#0a0a0a;border-radius:6px;margin-bottom:4px;border-left:2px solid ${s.col};"><span style="font-size:13px;flex-shrink:0;">${s.icon}</span><div><div style="font-size:9px;color:${s.col};font-weight:700;margin-bottom:2px;">${s.title}</div><div style="font-size:10px;color:#bbb;line-height:1.55;">${s.desc}</div></div></div>`).join('');
+  } else if (sitEl) { sitEl.style.display = 'none'; }
+
+  // ── 상황 바 렌더 (매트릭스 위) ──
+  updateSituationBar(pi, sc, stk);
+
   const ovl=document.getElementById('sheet-overlay');if(ovl)ovl.classList.add('open');
   updateHandInfoPanel(hand,pi,sc,bars,stk);
 }
@@ -1246,10 +1587,12 @@ function selectByIdx(idx){
   renderPositions();renderMatrix();
   const _sovl=document.getElementById('sheet-overlay');if(_sovl)_sovl.classList.remove('open');
   updateSummaryBar();
+  updateSituationBar(S.posIdx, S.sc, getStackInfo());
 }
 function setSc(sc){
   S.sc=sc;S.hand=null;renderScBar();renderMatrix();
   const _sovl=document.getElementById('sheet-overlay');if(_sovl)_sovl.classList.remove('open');
+  updateSituationBar(S.posIdx, sc, getStackInfo());
 }
 
 /* ════════════════ 빌런 모드 ════════════════ */
@@ -1327,12 +1670,14 @@ function setPotPlayers(n){
   document.querySelectorAll('#pot-btns .potb').forEach(b=>b.classList.toggle('on',+b.dataset.n===n));
   renderMatrix();
   if(S.hand)renderSheet();
+  updateSituationBar(S.posIdx, S.sc, getStackInfo());
 }
 function setLimpers(n){
   S.limpers=n;
   document.querySelectorAll('#limp-btns .potb').forEach(b=>b.classList.toggle('on',+b.dataset.n===n));
   renderMatrix();
   if(S.hand)renderSheet();
+  updateSituationBar(S.posIdx, S.sc, getStackInfo());
 }
 
 /* ════════════════ 칩 / 블라인드 ════════════════ */
@@ -1340,6 +1685,7 @@ function onChipChg(){
   S.buyIn=0;
   S.curChip=+document.getElementById('cur-chip').value||0;
   updateZoneBadge();updateBBDisplay();updateSummaryBar();
+  updateSituationBar(S.posIdx, S.sc, getStackInfo());
   if(S.hand)renderSheet();
 }
 function onBlindChg(){
@@ -1818,6 +2164,7 @@ setTimeout(()=>{
       const lw=document.getElementById('limp-btns');
       if(lw){lw.innerHTML='';for(let i=0;i<=6;i++){const b=document.createElement('button');b.className='potb'+(i===0?' on':'');b.dataset.n=i;b.textContent=i;b.onclick=()=>setLimpers(i);lw.appendChild(b);}}
     }
+  updateSituationBar(S.posIdx, S.sc, getStackInfo());
   }catch(e){const dm=document.getElementById('debug-msg');if(dm){dm.textContent='TO:'+e.message;dm.style.display='block';}}
 },200);
 </script>
