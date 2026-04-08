@@ -31,13 +31,16 @@ h1{font-size:14px;font-weight:700;color:#4ade80;}
 .mtb{padding:5px 10px;font-size:11px;font-weight:700;color:#888;}
 .mtb.on{background:#1e3a5f;color:#7dd3fc;}
 .mtb.onp{background:#3b1c00;color:#fb923c;}
+.mtb.onfree{background:#1a0a3b;color:#c084fc;}
 #pos-badge{font-size:12px;font-weight:700;font-family:monospace;color:#f0c040;background:#16110a;padding:3px 8px;border-radius:5px;border:0.5px solid #3a2800;}
 #zone-badge{font-size:10px;padding:3px 8px;border-radius:5px;background:#1a1a1a;border:0.5px solid #2a2a2a;color:#aaa;white-space:nowrap;}
 .ibt{width:30px;height:30px;border-radius:6px;background:#1a1a1a;border:0.5px solid #2a2a2a;color:#888;font-size:15px;display:flex;align-items:center;justify-content:center;}
 
+#hdr-settings{overflow:hidden;transition:max-height .25s ease;max-height:300px;}
+#hdr-settings.collapsed{max-height:0;}
 /* ─ 인원 ─ */
 #r2{padding:0 11px 5px;display:flex;align-items:center;gap:5px;}
-.slbl{font-size:10px;color:#999;flex-shrink:0;font-weight:600;}
+.slbl{font-size:10px;color:#ddd;flex-shrink:0;font-weight:600;}
 .p-btns{display:flex;gap:2px;overflow-x:auto;scrollbar-width:none;}
 .p-btns::-webkit-scrollbar{display:none;}
 .pb{min-width:31px;height:28px;border-radius:5px;border:0.5px solid #2a2a2a;background:#141414;color:#bbb;font-size:11px;font-weight:700;flex-shrink:0;}
@@ -47,18 +50,18 @@ h1{font-size:14px;font-weight:700;color:#4ade80;}
 #r3{padding:0 11px 5px;display:flex;gap:6px;align-items:stretch;}
 #blind-box{display:flex;flex-direction:column;gap:3px;}
 .brow{display:flex;align-items:center;gap:3px;}
-.bl{font-size:10px;color:#999;width:14px;flex-shrink:0;font-weight:600;}
+.bl{font-size:10px;color:#ddd;width:14px;flex-shrink:0;font-weight:600;}
 .bi{width:84px;height:30px;background:#141414;border:0.5px solid #2a2a2a;border-radius:6px;color:#fff;font-size:14px;font-weight:700;text-align:center;font-family:monospace;}
 .bi:focus{border-color:#166534;}
 #timer-box{flex:1;display:flex;flex-direction:column;gap:3px;}
 .ti-row{display:flex;align-items:center;gap:3px;}
-.ti-l{font-size:10px;color:#888;white-space:nowrap;font-weight:600;}
+.ti-l{font-size:10px;color:#ddd;white-space:nowrap;font-weight:600;}
 .ti{width:44px;height:29px;background:#141414;border:0.5px solid #2a2a2a;border-radius:5px;color:#ddd;font-size:11px;text-align:center;font-family:monospace;}
 .ti:focus{border-color:#166534;}
 #tc{display:flex;align-items:center;gap:3px;}
 #tdsp{flex:1;background:#0f0f0f;border-radius:5px;height:27px;display:flex;align-items:center;gap:4px;padding:0 6px;border:0.5px solid #1a1a1a;min-width:0;overflow:hidden;}
 #t-time{font-size:13px;font-weight:700;font-family:monospace;color:#f0c040;flex-shrink:0;}
-#t-lvl{font-size:9px;color:#888;}
+#t-lvl{font-size:9px;color:#ccc;}
 #t-blind{font-size:8px;color:#4ade80;flex:1;text-align:right;font-family:monospace;white-space:nowrap;overflow:hidden;}
 #t-play{width:27px;height:27px;border-radius:5px;background:#14532d;border:0.5px solid #166534;color:#86efac;font-size:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
 #t-play.pause{background:#3d1400;border-color:#7c2d12;color:#fdba74;}
@@ -68,12 +71,12 @@ h1{font-size:14px;font-weight:700;color:#4ade80;}
 #r3b{padding:0 11px 5px;display:flex;gap:5px;align-items:center;}
 .cg{display:flex;flex-direction:column;gap:1px;flex:1;}
 .cg-top{display:flex;align-items:center;gap:3px;}
-.cl{font-size:9px;color:#888;white-space:nowrap;flex-shrink:0;font-weight:600;}
+.cl{font-size:9px;color:#ddd;white-space:nowrap;flex-shrink:0;font-weight:600;}
 .ci{flex:1;height:28px;background:#141414;border:0.5px solid #2a2a2a;border-radius:5px;color:#fff;font-size:12px;font-weight:600;text-align:center;font-family:monospace;min-width:0;}
 .ci:focus{border-color:#166534;}
-.cg-bb{font-size:9px;color:#888;text-align:center;height:11px;}
+.cg-bb{font-size:9px;color:#aaa;text-align:center;height:11px;}
 .pot-g{display:flex;flex-direction:column;gap:1px;flex-shrink:0;}
-.pot-label{font-size:9px;color:#888;text-align:center;font-weight:600;}
+.pot-label{font-size:9px;color:#ddd;text-align:center;font-weight:600;}
 .pot-btns{display:flex;gap:1px;}
 .potb{width:23px;height:28px;border-radius:4px;border:0.5px solid #2a2a2a;background:#141414;color:#999;font-size:10px;font-weight:700;}
 .potb.on{background:#14532d;color:#86efac;border-color:#166534;}
@@ -97,7 +100,7 @@ h1{font-size:14px;font-weight:700;color:#4ade80;}
 #sc-bar::-webkit-scrollbar{display:none;}
 .scpill{display:flex;flex-direction:column;align-items:center;padding:5px 8px;border-radius:6px;border:0.5px solid #2a2a2a;background:#141414;cursor:pointer;flex-shrink:0;min-width:50px;}
 .scpill .sp1{font-size:9px;font-weight:700;color:#aaa;}
-.scpill .sp2{font-size:7px;color:#777;margin-top:1px;}
+.scpill .sp2{font-size:7px;color:#bbb;margin-top:1px;}
 .scpill.on{background:#14532d;border-color:#166534;}
 .scpill.on .sp1{color:#86efac;}
 .scpill.on .sp2{color:#4ade80;}
@@ -106,36 +109,36 @@ h1{font-size:14px;font-weight:700;color:#4ade80;}
 #pos-bar{display:flex;gap:4px;padding:6px 11px;overflow-x:auto;scrollbar-width:none;border-bottom:0.5px solid #141414;}
 #pos-bar::-webkit-scrollbar{display:none;}
 .pp{display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:52px;height:48px;border-radius:8px;border:0.5px solid #2a2a2a;background:#141414;flex-shrink:0;position:relative;}
-.pp .pn{font-size:11px;font-weight:700;font-family:monospace;color:#bbb;}
-.pp .pr{font-size:7px;color:#666;margin-top:2px;}
+.pp .pn{font-size:11px;font-weight:700;font-family:monospace;color:#e0e0e0;}
+.pp .pr{font-size:7px;color:#aaa;margin-top:2px;}
 .pp.on{background:#14532d;border-color:#166534;box-shadow:0 0 0 1px #166534;}
 .pp.on .pn{color:#86efac;}
 .pp.on .pr{color:#4ade80;}
-.pp.nxt{opacity:.5;}
-.pp.nxt .pn{color:#777;}
+.pp.nxt{opacity:.6;}
+.pp.nxt .pn{color:#bbb;}
 .pp.is-btn::after{content:'D';position:absolute;top:-4px;right:-3px;width:11px;height:11px;border-radius:50%;background:#f0c040;color:#000;font-size:6px;font-weight:800;line-height:11px;text-align:center;}
 
 /* ─ 매트릭스 ─ */
 #matrix-wrap{padding:6px 6px 3px;overflow-x:auto;-webkit-overflow-scrolling:touch;width:100%;}
 .mgrid{display:grid;grid-template-columns:var(--cl) repeat(13,var(--cs));grid-template-rows:var(--cl) repeat(13,var(--cs));gap:1px;width:100%;}
-.ml{display:flex;align-items:center;justify-content:center;font-size:8px;color:#555;font-family:monospace;}
-.mc{display:flex;align-items:center;justify-content:center;border-radius:2px;font-size:7px;font-family:monospace;cursor:pointer;user-select:none;-webkit-user-select:none;transition:transform .08s;position:relative;}
+.ml{display:flex;align-items:center;justify-content:center;font-size:var(--mf,8px);color:#777;font-family:monospace;}
+.mc{display:flex;align-items:center;justify-content:center;border-radius:2px;font-size:var(--mf,7px);font-family:monospace;cursor:pointer;user-select:none;-webkit-user-select:none;transition:transform .08s;position:relative;}
 .mc:active{transform:scale(.85);}
 .mc.sel::after{content:'';position:absolute;inset:0;border-radius:2px;outline:2px solid #f0c040;outline-offset:-1px;}
-.c-out{background:#040404;color:#1e1e1e;}
-.c-weak{background:#0c0c0c;color:#2a2a2a;}
+.c-out{background:#060606;color:#282828;}
+.c-weak{background:#0f0f0f;color:#333;}
 .c-allin{background:#3d0e0e;color:#fca5a5;}
 .c-raise{background:#2c1800;color:#fbbf24;}
 .c-tbet{background:#2c0f00;color:#fb923c;}
-.c-tbet-w{background:#1a0900;color:#7c3d0e;}
+.c-tbet-w{background:#1a0900;color:#c2621a;}
 .c-call{background:#0a1a32;color:#60a5fa;}
-.c-call-w{background:#060f1e;color:#3b6ca8;}
+.c-call-w{background:#060f1e;color:#5a8fd4;}
 .c-limp{background:#091e0c;color:#4ade80;}
 .c-limp-w{background:#060f07;color:#1e6128;}
 
 /* ─ 범례 ─ */
 #legend{display:flex;flex-wrap:wrap;gap:3px 7px;padding:5px 11px;border-top:0.5px solid #141414;}
-.li{display:flex;align-items:center;gap:3px;font-size:9px;color:#888;}
+.li{display:flex;align-items:center;gap:3px;font-size:9px;color:#ccc;}
 .ld{width:8px;height:8px;border-radius:1px;flex-shrink:0;}
 
 /* ─ 플랍 분석 섹션 ─ */
@@ -192,7 +195,7 @@ h1{font-size:14px;font-weight:700;color:#4ade80;}
 #sh{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;}
 
 /* 메인 액션 바 */
-.sheet-section-title{font-size:9px;color:#2a2a2a;margin-bottom:4px;margin-top:8px;letter-spacing:.3px;}
+.sheet-section-title{font-size:9px;color:#aaa;margin-bottom:4px;margin-top:8px;letter-spacing:.3px;}
 #acts .ar{display:flex;align-items:center;gap:6px;margin:4px 0;}
 .albl{font-size:10px;font-weight:700;width:90px;flex-shrink:0;line-height:1.2;}
 .anote{font-size:8px;font-weight:400;color:#444;display:block;}
@@ -204,7 +207,7 @@ h1{font-size:14px;font-weight:700;color:#4ade80;}
 /* 레이즈 크기 비교 패널 (이미지 스타일) */
 #raise-compare{display:flex;gap:6px;margin-top:8px;}
 .rc-panel{flex:1;background:#0c0c0c;border-radius:6px;border:0.5px solid #1a1a1a;padding:7px;min-width:0;}
-.rc-title{font-size:9px;color:#888;margin-bottom:5px;text-align:center;}
+.rc-title{font-size:9px;color:#ccc;margin-bottom:5px;text-align:center;}
 .rc-row{display:flex;align-items:center;gap:4px;margin:3px 0;}
 .rc-lbl{font-size:9px;font-weight:700;width:46px;flex-shrink:0;}
 .rc-bar-wrap{flex:1;height:14px;background:#141414;border-radius:2px;overflow:hidden;}
@@ -214,7 +217,7 @@ h1{font-size:14px;font-weight:700;color:#4ade80;}
 /* 포지션별 비교 테이블 */
 #pos-table{margin-top:8px;overflow-x:auto;}
 .pt-table{width:100%;border-collapse:collapse;}
-.pt-table th{font-size:8px;color:#888;padding:3px 4px;text-align:center;font-weight:700;border-bottom:0.5px solid #1a1a1a;}
+.pt-table th{font-size:8px;color:#ccc;padding:3px 4px;text-align:center;font-weight:700;border-bottom:0.5px solid #1a1a1a;}
 .pt-table td{font-size:9px;padding:3px 4px;text-align:center;border-bottom:0.5px solid #0d0d0d;}
 .pt-table tr.cur-row td{background:#0a1a0e;}
 .pt-table td:first-child{font-family:monospace;font-weight:700;color:#4ade80;text-align:left;}
@@ -280,17 +283,19 @@ h1{font-size:14px;font-weight:700;color:#4ade80;}
 <div id="app">
 <div id="hdr">
   <div id="r1">
-    <h1>🃏 Hold'em</h1>
+    <h1 onclick="toggleHdrSettings()" style="cursor:pointer;">🃏 Hold'em <span id="hdr-tog-arrow" style="font-size:10px;color:#4ade80;">▼</span></h1>
     <div id="r1r">
       <div id="mode-tog">
         <button class="mtb on" id="m-trn" onclick="setMode('trn')">🏆 대회</button>
         <button class="mtb" id="m-pub" onclick="setMode('pub')">🍺 펍</button>
+        <button class="mtb" id="m-free" onclick="setMode('free')">🎮 무료</button>
       </div>
       <span id="pos-badge">BTN</span>
       <span id="zone-badge">—</span>
       <button class="ibt" onclick="activateShield()">👁</button>
     </div>
   </div>
+  <div id="hdr-settings">
   <div id="r2">
     <span class="slbl">인원</span>
     <div class="p-btns" id="pbtn"></div>
@@ -341,12 +346,28 @@ h1{font-size:14px;font-weight:700;color:#4ade80;}
       <button id="brk-btn" onclick="toggleBreak()">☕</button>
     </div>
   </div>
+
+<!-- 무료토너 패널 -->
+<div id="free-panel" style="display:none;background:#0d0a1a;border-top:0.5px solid #2a1a4a;padding:8px 11px;flex-direction:column;gap:6px;">
+  <div style="display:flex;align-items:center;justify-content:space-between;">
+    <div style="display:flex;align-items:center;gap:8px;">
+      <span style="font-size:11px;color:#c084fc;font-weight:700;">&#127918; 무료토너</span>
+      <span id="free-start-time" style="font-size:10px;color:#888;">매일 19:00 스타트</span>
+    </div>
+    <div style="display:flex;gap:5px;align-items:center;">
+      <span id="free-until" style="font-size:10px;color:#c084fc;font-weight:700;"></span>
+      <button id="free-elim-btn" onclick="freeEliminate()" style="padding:3px 9px;background:#3d0e0e;border:0.5px solid #7c2020;border-radius:5px;color:#fca5a5;font-size:10px;font-weight:700;">탈락</button>
+    </div>
+  </div>
+  <div id="free-blind-table" style="display:flex;gap:3px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px;"></div>
+</div>
   <div id="tbar-w"><div id="tbar"></div></div>
   <div id="r4">
     <span class="slbl">내자리</span>
     <div id="seat-btns"></div>
     <button id="next-btn" onclick="nextHand()">다음핸드 <span id="next-lbl">→ SB</span></button>
   </div>
+  </div><!-- /hdr-settings -->
 </div>
 
 <div id="content">
@@ -640,6 +661,7 @@ let S={
   limpers:0,
   breakActive:false,breakTotal:900,breakLeft:900,breakInterval:null,
   flopCards:['','',''],
+  freeLevel:0,
   pickerTarget:-1,pickerRank:'',pickerSuit:''
 };
 
@@ -1104,6 +1126,20 @@ function setMode(m){
   S.mode=m;S.hand=null;
   document.getElementById('m-trn').className='mtb'+(m==='trn'?' on':'');
   document.getElementById('m-pub').className='mtb'+(m==='pub'?' onp':'');
+  const freeBtn=document.getElementById('m-free');
+  if(freeBtn)freeBtn.className='mtb'+(m==='free'?' onfree':'');
+  if(m==='free'){
+    initFreeLevelAtCurrentTime();
+    // 20k 칩 세팅
+    document.getElementById('buy-in').value=20000;
+    document.getElementById('cur-chip').value=20000;
+    S.buyIn=20000; S.curChip=20000;
+    updateBBDisplay(); updateZoneBadge();
+    initFreeMode();
+    startFreeLevel(S.freeLevel);
+  }else{
+    exitFreeMode();
+  }
   renderMatrix();
   if(S.hand)renderSheet();
 }
@@ -1465,6 +1501,125 @@ function runFlopAnalysis(){
   document.getElementById('flop-result').innerHTML=html;
 }
 
+
+/* ════════════════ 무료토너 모드 ════════════════ */
+const FREE_LEVELS=[
+  {sb:100,bb:200,min:6},{sb:200,bb:300,min:6},{sb:300,bb:600,min:6},
+  {sb:400,bb:800,min:6},{sb:500,bb:1000,min:6},
+  {sb:0,bb:0,min:6,brk:true}, // 브레이크
+  {sb:1000,bb:2000,min:6},{sb:2000,bb:3000,min:6},{sb:3000,bb:6000,min:6},
+  {sb:4000,bb:8000,min:6},{sb:5000,bb:10000,min:6}
+];
+const FREE_START_HOUR=19;
+let freeTimer=null,freeTickInterval=null,freeAutoInterval=null;
+
+function initFreeMode(){
+  const panel=document.getElementById('free-panel');
+  panel.style.display='flex';
+  // 블라인드 테이블 렌더
+  const tbl=document.getElementById('free-blind-table');
+  tbl.innerHTML=FREE_LEVELS.map((l,i)=>{
+    if(l.brk)return '<div style="display:flex;flex-direction:column;align-items:center;padding:4px 7px;background:#1a1400;border-radius:5px;border:0.5px solid #3a3000;flex-shrink:0;"><div style="font-size:8px;color:#f0c040;font-weight:700;">BRK</div><div style="font-size:8px;color:#888;">6분</div></div>';
+    const cur=S.freeLevel===i;
+    return '<div style="display:flex;flex-direction:column;align-items:center;padding:4px 7px;background:'+(cur?'#1a0a3b':'#111')+';border-radius:5px;border:0.5px solid '+(cur?'#7c3aed':'#1a1a1a')+';flex-shrink:0;"><div style="font-size:8px;color:'+(cur?'#c084fc':'#888')+';font-weight:700;">Lv.'+(i+1)+'</div><div style="font-size:8px;color:'+(cur?'#e0e0e0':'#666')+';white-space:nowrap;">'+(l.sb>=1000?l.sb/1000+'K':l.sb)+'/'+(l.bb>=1000?l.bb/1000+'K':l.bb)+'</div></div>';
+  }).join('');
+  updateFreeCountdown();
+  clearInterval(freeAutoInterval);
+  freeAutoInterval=setInterval(updateFreeCountdown,1000);
+}
+function exitFreeMode(){
+  document.getElementById('free-panel').style.display='none';
+  clearInterval(freeAutoInterval);
+  clearInterval(freeTickInterval);
+}
+function updateFreeCountdown(){
+  const now=new Date();
+  const target=new Date();
+  target.setHours(FREE_START_HOUR,0,0,0);
+  if(now>=target)target.setDate(target.getDate()+1);
+  const diff=Math.max(0,Math.floor((target-now)/1000));
+  const h=Math.floor(diff/3600),m=Math.floor((diff%3600)/60),s=diff%60;
+  const el=document.getElementById('free-until');
+  if(diff>0){
+    el.textContent='시작까지 '+h+'h '+String(m).padStart(2,'0')+'m '+String(s).padStart(2,'0')+'s';
+    el.style.color='#888';
+  }else{
+    el.textContent='진행중 Lv.'+(S.freeLevel+1);
+    el.style.color='#c084fc';
+  }
+}
+function startFreeLevel(lvl){
+  if(lvl>=FREE_LEVELS.length){
+    alert('무료 토너먼트 종료!'); freeEliminate(); return;
+  }
+  S.freeLevel=lvl;
+  clearInterval(freeTickInterval);
+  const level=FREE_LEVELS[lvl];
+  if(level.brk){
+    // 브레이크
+    S.sbNow=FREE_LEVELS[lvl-1].sb; S.bbNow=FREE_LEVELS[lvl-1].bb;
+    document.getElementById('sb').value=S.sbNow;
+    document.getElementById('bb').value=S.bbNow;
+    toggleBreak();
+    const dur=level.min*60;
+    let left=dur;
+    freeTickInterval=setInterval(()=>{
+      left--;
+      if(left<=0){clearInterval(freeTickInterval);startFreeLevel(lvl+1);}
+    },1000);
+    return;
+  }
+  S.sbNow=level.sb; S.bbNow=level.bb; S.blindLevel=lvl+1;
+  document.getElementById('sb').value=S.sbNow;
+  document.getElementById('bb').value=S.bbNow;
+  updateTimerUI(); updateZoneBadge(); updateBBDisplay();
+  // 블라인드업 알림
+  const fmt=n=>n>=1000?n/1000+'K':n;
+  document.getElementById('ba-val').textContent=fmt(S.sbNow)+' / '+fmt(S.bbNow);
+  document.getElementById('ba-sub').textContent='레벨 '+(lvl+1)+' 시작';
+  if(lvl>0)document.getElementById('balert').classList.add('show');
+  if(navigator.vibrate)navigator.vibrate([100,60,100,60,200]);
+  initFreeMode();
+  // 다음 레벨 자동 전환
+  const dur=level.min*60;
+  let left=dur;
+  S.timerTotal=dur; S.timerLeft=dur;
+  clearInterval(S.timerInterval); S.timerRunning=true;
+  const btn=document.getElementById('t-play'); btn.textContent='⏸'; btn.classList.add('pause');
+  freeTickInterval=setInterval(()=>{
+    left--;
+    S.timerLeft=left;
+    updateTimerUI();
+    if(left<=0){clearInterval(freeTickInterval); S.timerRunning=false; btn.textContent='▶'; btn.className=''; startFreeLevel(lvl+1);}
+  },1000);
+}
+function freeEliminate(){
+  if(!confirm('탈락 처리하시겠습니까? 무료 토너 모드를 초기화합니다.'))return;
+  clearInterval(freeTickInterval); clearInterval(freeAutoInterval);
+  S.timerRunning=false; document.getElementById('t-play').textContent='▶';
+  document.getElementById('t-play').className='';
+  clearInterval(S.timerInterval);
+  S.freeLevel=0;
+  setMode('trn');
+  resetTimer();
+  if(navigator.vibrate)navigator.vibrate([200,100,200]);
+}
+function initFreeLevelAtCurrentTime(){
+  // 현재 시각이 19:00 이후면 경과 시간 기준으로 레벨 계산
+  const now=new Date();
+  const start=new Date();
+  start.setHours(FREE_START_HOUR,0,0,0);
+  if(now<start){S.freeLevel=0;return;}
+  const elapsed=Math.floor((now-start)/1000);
+  let accum=0;
+  for(let i=0;i<FREE_LEVELS.length;i++){
+    const dur=FREE_LEVELS[i].min*60;
+    if(elapsed<accum+dur){S.freeLevel=i;return;}
+    accum+=dur;
+  }
+  S.freeLevel=FREE_LEVELS.length-1;
+}
+
 /* ════════════════ 눈팅방지 ════════════════ */
 let sht=null;
 function activateShield(){
@@ -1475,6 +1630,13 @@ function activateShield(){
 }
 function unshield(){document.getElementById('shield').classList.remove('on');}
 document.addEventListener('visibilitychange',()=>{if(document.hidden)activateShield();});
+
+function toggleHdrSettings(){
+  const el=document.getElementById('hdr-settings');
+  const arr=document.getElementById('hdr-tog-arrow');
+  const collapsed=el.classList.toggle('collapsed');
+  arr.textContent=collapsed?'▶':'▼';
+}
 
 /* ════════════════ 초기화 ════════════════ */
 // 인원수 버튼
@@ -1500,11 +1662,12 @@ for(let i=0;i<=6;i++){
 }
 // 매트릭스 동적 셀 크기 계산
 function calcMatrixSize(){
-  const w=window.innerWidth-12; // 좌우 패딩 6px씩
-  const cs=Math.floor((w-20)/14); // 14칸(레이블1+13열), 여백20px
-  const cl=Math.max(14,Math.round(cs*.65));
-  document.documentElement.style.setProperty('--cs',Math.min(Math.max(cs,24),34)+'px');
-  document.documentElement.style.setProperty('--cl',Math.min(Math.max(cl,14),22)+'px');
+  const w=window.innerWidth-12;
+  const cs=Math.floor((w-14)/14); // 13열+라벨1열, gap 1px씩 13개=13px
+  const cl=Math.max(12,Math.round(cs*.55));
+  document.documentElement.style.setProperty('--cs',Math.max(cs,22)+'px');
+  document.documentElement.style.setProperty('--cl',Math.max(cl,12)+'px');
+  document.documentElement.style.setProperty('--mf',Math.max(Math.round(cs*.3),7)+'px');
 }
 calcMatrixSize();
 window.addEventListener('resize',calcMatrixSize);
