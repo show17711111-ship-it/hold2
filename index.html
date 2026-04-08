@@ -19,9 +19,14 @@ input::-webkit-inner-spin-button,input::-webkit-outer-spin-button{-webkit-appear
 #app{display:flex;flex-direction:column;height:100vh;height:100dvh;}
 #hdr{background:#080808;border-bottom:0.5px solid #1a1a1a;flex-shrink:0;padding-top:env(safe-area-inset-top,0);}
 #content{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding-bottom:56px;}
-/* ── 핸드 배너: 하단 슬라이드업 ── */
-#sheet{position:fixed;bottom:54px;left:0;right:0;z-index:6000;background:#0a0a0a;border-top:2px solid #14532d;border-radius:16px 16px 0 0;padding-bottom:env(safe-area-inset-bottom,0);transform:translateY(100%);transition:transform .28s cubic-bezier(.4,0,.2,1);box-shadow:0 -4px 24px rgba(0,0,0,.8);}
-#sheet.open{transform:translateY(0);}
+/* ── 핸드 팝업: 화면 중앙 ── */
+#sheet-overlay{display:none;position:fixed;inset:0;z-index:6000;background:rgba(0,0,0,.75);align-items:center;justify-content:center;padding:16px;}
+#sheet-overlay.open{display:flex;animation:fadeIn .2s ease;}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+#sheet{background:#0d0d0d;border:1.5px solid #14532d;border-radius:16px;padding:16px 15px;max-width:440px;width:100%;box-shadow:0 8px 40px rgba(0,0,0,.95);max-height:82dvh;overflow-y:auto;}
+
+/* ── 차트 하단 고정 정보 패널 ── */
+#hand-info-panel{background:#080808;border-top:1.5px solid #166534;}
 
 /* ══ 헤더 전체 ══ */
 
@@ -88,6 +93,15 @@ input::-webkit-inner-spin-button,input::-webkit-outer-spin-button{-webkit-appear
 .mtb.on{background:#1e3a5f;color:#7dd3fc;}
 .mtb.onp{background:#3b1c00;color:#fb923c;}
 .mtb.onfree{background:#1a0a3b;color:#c084fc;}
+.mtb.onmini{background:#1a1a3b;color:#a5b4fc;}
+.mtb.ondaily{background:#0a2020;color:#34d399;}
+.mtb.onhigh{background:#2a1500;color:#fbbf24;}
+/* 빌런 버튼 */
+#villain-btn{padding:4px 8px;border-radius:5px;background:#1a0808;border:0.5px solid #7c2020;color:#f87171;font-size:10px;font-weight:700;flex-shrink:0;}
+#villain-btn.on{background:#3d0e0e;border-color:#ef4444;color:#fca5a5;animation:pulse .8s ease-in-out infinite;}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(239,68,68,.4);}50%{box-shadow:0 0 0 4px rgba(239,68,68,0);}}
+#villain-badge{display:none;font-size:9px;color:#f87171;background:#1a0808;border:0.5px solid #7c2020;padding:1px 6px;border-radius:4px;flex-shrink:0;}
+#villain-badge.on{display:inline-block;}
 
 /* 브레이크 */
 #brk-wrap{display:flex;gap:3px;align-items:center;flex-shrink:0;}
@@ -237,19 +251,19 @@ input::-webkit-inner-spin-button,input::-webkit-outer-spin-button{-webkit-appear
 #mhe-action{font-size:11px;color:#f0c040;margin-top:3px;font-weight:600;}
 
 /* ─ 시트 ─ */
-#si{padding:12px 14px 14px;overflow-y:auto;max-height:70dvh;}
+#si{padding:14px 14px 14px;}
 #sh{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;}
 #s-hand{font-size:24px;font-weight:700;font-family:monospace;color:#86efac;line-height:1;}
 #s-sub{font-size:9px;color:#2a2a2a;margin-top:2px;}
-#s-stack-info{margin-bottom:8px;padding:5px 8px;background:#0c1a10;border-radius:5px;border:0.5px solid #1a3a20;font-size:9px;color:#4ade80;line-height:1.6;}
+
 #close-btn{width:28px;height:28px;border-radius:50%;background:#1a1a1a;color:#888;font-size:18px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
 #s-top-action{font-size:13px;font-weight:700;padding:2px 10px;border-radius:5px;display:inline-block;}
-#s-hand{font-size:28px;font-weight:700;font-family:monospace;color:#86efac;line-height:1;}
-#sh{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;}
+#s-hand{font-size:30px;font-weight:700;font-family:monospace;color:#86efac;line-height:1;flex-shrink:0;}
+#sh{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;}
 
 /* 메인 액션 바 */
 .sheet-section-title{font-size:9px;color:#aaa;margin-bottom:4px;margin-top:8px;letter-spacing:.3px;}
-#acts .ar{display:flex;align-items:center;gap:6px;margin:4px 0;}
+.ar{display:flex;align-items:center;gap:6px;margin:4px 0;}
 .albl{font-size:10px;font-weight:700;width:90px;flex-shrink:0;line-height:1.2;}
 .anote{font-size:8px;font-weight:400;color:#444;display:block;}
 .abg{flex:1;height:18px;background:#141414;border-radius:3px;overflow:hidden;position:relative;}
@@ -280,7 +294,7 @@ input::-webkit-inner-spin-button,input::-webkit-outer-spin-button{-webkit-appear
 .mini-bar-c{height:100%;background:#378aDD;}
 .mini-bar-f{height:100%;background:#1e1e1e;}
 
-#s-tip{padding:9px 11px;background:#0a1a0e;border-radius:8px;font-size:11px;color:#86efac;line-height:1.65;border-left:3px solid #4ade80;margin-top:8px;}
+#s-tip{padding:9px 11px;background:#0a1a0e;border-radius:8px;font-size:11px;color:#e0e0e0;line-height:1.65;border-left:3px solid #4ade80;margin-top:8px;}
 
 /* ─ 오버레이 / 모달 ─ */
 #shield{display:none;position:fixed;inset:0;background:#000;z-index:9999;flex-direction:column;align-items:center;justify-content:center;}
@@ -348,16 +362,27 @@ input::-webkit-inner-spin-button,input::-webkit-outer-spin-button{-webkit-appear
   <div id="summary-bar" onclick="toggleSettings()">
     <div id="sum-left">
       <span id="sum-mode">대회</span>
+      <span id="sum-players" style="font-size:10px;color:#ddd;background:#1a1a1a;padding:2px 6px;border-radius:4px;flex-shrink:0;">6인</span>
       <span id="sum-pos">BTN</span>
       <span id="sum-blind">1K/2K</span>
+      <span id="sum-lvl-info" style="font-size:10px;color:#f0c040;font-family:monospace;flex-shrink:0;">Lv.1</span>
       <span id="sum-timer">04:30</span>
       <span id="sum-zone">칩미입력</span>
     </div>
-    <div id="sum-right">
-      <div id="mode-tog">
-        <button class="mtb on" id="m-trn" onclick="event.stopPropagation();setMode('trn')">대회</button>
-        <button class="mtb" id="m-pub" onclick="event.stopPropagation();setMode('pub')">펍</button>
-        <button class="mtb" id="m-free" onclick="event.stopPropagation();setMode('free')">무료</button>
+    <div id="sum-right" style="display:flex;align-items:center;gap:4px;">
+      <span id="villain-badge">🦹빌런</span>
+      <div style="display:flex;flex-direction:column;gap:2px;align-items:flex-end;">
+        <div id="mode-tog">
+          <button class="mtb on" id="m-trn" onclick="event.stopPropagation();setMode('trn')">🏆대회</button>
+          <button class="mtb" id="m-pub" onclick="event.stopPropagation();setMode('pub')">🍺펍</button>
+          <button class="mtb" id="m-free" onclick="event.stopPropagation();setMode('free')">🎮무료</button>
+        </div>
+        <div style="display:flex;gap:2px;">
+          <button class="mtb" id="m-mini" onclick="event.stopPropagation();setMode('mini')">🔥미니</button>
+          <button class="mtb" id="m-daily" onclick="event.stopPropagation();setMode('daily')">💎데일리</button>
+          <button class="mtb" id="m-high" onclick="event.stopPropagation();setMode('high')">👑하이롤</button>
+          <button id="villain-btn" onclick="event.stopPropagation();toggleVillain()">🦹빌런</button>
+        </div>
       </div>
       <span id="tog-arrow">▼</span>
     </div>
@@ -393,22 +418,21 @@ input::-webkit-inner-spin-button,input::-webkit-outer-spin-button{-webkit-appear
 
     <!-- 줄3: 바인칩 / 현재칩 / 브레이크 -->
     <div class="cfg-row">
-      <span class="cl">바인</span>
-      <input type="number" class="ci" id="buy-in" placeholder="0" inputmode="numeric" onchange="onChipChg()" style="width:52px;">
-      <span class="cg-bb" id="bi-bb">—</span>
-      <span class="cl" style="margin-left:6px;">현재칩</span>
-      <input type="number" class="ci" id="cur-chip" placeholder="0" inputmode="numeric" onchange="onChipChg()" style="width:52px;">
+      <span class="cl">현재칩</span>
+      <input type="number" class="ci" id="cur-chip" placeholder="0" inputmode="numeric" onchange="onChipChg()" style="width:80px;">
       <span class="cg-bb" id="cc-bb">—</span>
+      <button id="chip-leader-btn" onclick="toggleChipLeader()" style="padding:2px 9px;height:26px;border-radius:5px;background:#111;border:0.5px solid #222;color:#666;font-size:10px;font-weight:700;white-space:nowrap;margin-left:4px;">👑칩리더</button>
       <div id="brk-wrap" style="margin-left:auto;">
         <input type="text" class="ti" id="brk-t-in" value="15:00" maxlength="5" style="width:36px;height:26px;font-size:9px;">
         <button id="brk-btn" onclick="toggleBreak()">☕</button>
       </div>
     </div>
 
-    <!-- 줄4: 스타트 / 끝내기 -->
+    <!-- 줄4: 스타트 / 끝내기 / 모드 안내 -->
     <div class="cfg-row" style="gap:6px;">
       <button id="btn-start" onclick="onStart()">▶ 스타트</button>
       <button id="btn-end" onclick="onEnd()">✕ 끝내기</button>
+      <span id="mode-desc" style="font-size:9px;color:#666;flex:1;text-align:right;white-space:nowrap;overflow:hidden;"></span>
     </div>
 
     <!-- 줄5: 내자리 -->
@@ -447,7 +471,7 @@ input::-webkit-inner-spin-button,input::-webkit-outer-spin-button{-webkit-appear
   <div id="game-row-a">
     <span class="slbl">팟참여</span>
     <div class="p-btns" id="pot-btns"></div>
-    <span class="slbl" style="margin-left:2px;">사이콜</span>
+    <span class="slbl" style="margin-left:2px;" title="오픈 후 사이에 콜한 인원수">콜집</span>
     <div class="p-btns" id="limp-btns"></div>
   </div>
   <div id="sc-bar"></div>
@@ -481,28 +505,38 @@ input::-webkit-inner-spin-button,input::-webkit-outer-spin-button{-webkit-appear
     </div>
   </div>
   <div style="height:8px;"></div>
-</div>
-
-<div id="sheet">
-  <!-- 드래그바 -->
-  <div style="display:flex;justify-content:center;padding:8px 0 4px;" onclick="closeSheet()">
-    <div style="width:36px;height:4px;border-radius:2px;background:#2a2a2a;"></div>
+  <!-- ── 하단 고정 핸드 정보 패널 ── -->
+  <div id="hand-info-panel" style="display:none;">
+    <div style="padding:10px 11px 4px;border-top:1px solid #1a1a1a;">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+        <span id="hip-hand" style="font-size:22px;font-weight:700;font-family:monospace;color:#86efac;"></span>
+        <span id="hip-top-act" style="font-size:12px;font-weight:700;padding:3px 10px;border-radius:6px;"></span>
+        <span id="hip-sub" style="font-size:9px;color:#555;flex:1;text-align:right;"></span>
+      </div>
+      <div id="hip-acts" style="margin-bottom:8px;"></div>
+      <div id="hip-pos-table" style="overflow-x:auto;"></div>
+      <div style="height:6px;"></div>
+    </div>
   </div>
+</div><!-- /content -->
+
+<div id="sheet-overlay" onclick="closeSheet()">
+<div id="sheet" onclick="event.stopPropagation()">
   <div id="si">
-    <!-- 핸드명 + 닫기 -->
+    <!-- 팝업 헤더: 핸드명 + 닫기 -->
     <div id="sh">
-      <div style="display:flex;align-items:center;gap:10px;">
-        <div id="s-hand" style="font-size:32px;font-weight:700;font-family:monospace;"></div>
-        <div>
+      <div style="display:flex;align-items:center;gap:10px;flex:1;min-width:0;">
+        <div id="s-hand"></div>
+        <div style="flex:1;min-width:0;">
           <div id="s-top-action"></div>
-          <div id="s-sub" style="font-size:9px;color:#555;margin-top:2px;"></div>
+          <div id="s-sub" style="font-size:9px;color:#666;margin-top:3px;"></div>
         </div>
       </div>
       <button id="close-btn" onclick="closeSheet()">×</button>
     </div>
-    <!-- 스택 정보 -->
-    <div id="s-stack-info"></div>
-    <!-- 메인 액션 -->
+    <!-- 스택/멀티웨이 정보 -->
+    <div id="s-stack-info" style="font-size:10px;color:#4ade80;background:#0a1a0e;border-radius:7px;padding:6px 9px;margin-bottom:10px;line-height:1.7;border:0.5px solid #166534;"></div>
+    <!-- 액션 확률 -->
     <div class="sheet-section-title">▶ 액션 확률</div>
     <div id="acts"></div>
     <!-- 레이즈 크기 비교 -->
@@ -510,9 +544,7 @@ input::-webkit-inner-spin-button,input::-webkit-outer-spin-button{-webkit-appear
       <div class="sheet-section-title">▶ 레이즈 크기별 비교</div>
       <div id="raise-compare"></div>
     </div>
-    <!-- 포지션별 비교 -->
-    <div class="sheet-section-title">▶ 포지션별 행동 확률</div>
-    <div id="pos-table"></div>
+    <!-- 포지션별 비교: 하단 패널에 표시 -->
     <div id="s-tip"></div>
   </div>
 </div>
@@ -724,7 +756,23 @@ function getTip(hand,pi,sc,stk){
   // 포지션별 추가 멘트
   const posNote=sc==='fi'&&!isBB&&t>=5&&pi<=1?' EP에서는 이 핸드 기본 폴드.':'';
 
-  return base+stackNote+limpNote+posNote;
+  // 모드별 멘트
+  let modeNote='';
+  const mAdj2=getModeAdj();
+  if(S.villain){
+    modeNote=' 🦹 빌런 대응: 비프리미엄 모두 폴드. 강한 핸드만 올인/3벳. 콜 금지.';
+  }else if(S.mode==='mini'){
+    modeNote=' 🔥 미니데일리: 어그레시브 테이블. 림프어 많으면 아이소 레이즈 필수. 블러프 캐처 조심.';
+  }else if(S.mode==='high'){
+    modeNote=' 👑 하이롤러: 앤티 있음. 타이트하게. BTN 스틸 적극 활용.';
+  }else if(S.mode==='trn'&&mAdj2.ante){
+    modeNote=' 🏆 앤티: BB가 BB금액 추가 납부. BB 디펜스 넓히고 BTN 스틸 추가.';
+  }
+
+  // 칩리더 멘트
+  let chipNote='';
+  if(S.chipLeader){chipNote=' 👑 칩리더: 수티드 커넥터·셋 마이닝 추가. 블러프 기회 확대. 버블·단기 약자 스틸 적극.';}
+  return base+stackNote+limpNote+posNote+modeNote+chipNote;
 }
 
 /* ════════════════ 상태 ════════════════ */
@@ -741,6 +789,8 @@ let S={
   breakActive:false,breakTotal:900,breakLeft:900,breakInterval:null,
   flopCards:['','',''],
   freeLevel:0,
+  villain:false,
+  chipLeader:false,
   pickerTarget:-1,pickerRank:'',pickerSuit:''
 };
 
@@ -805,10 +855,89 @@ function applyMultiway(acts, sc, hand, n){
   }
 }
 
+
+/* ════════════════ 모드 정의 ════════════════ */
+// 모드별 레인지 조정 계수 [fi_fold_reduction, vr_3bet_mult, vr_call_mult]
+// fi_fold_reduction: 폴드 확률 감소 (넓은 레인지), 음수면 증가 (타이트)
+// vr_3bet_mult: 3벳 배율, vr_call_mult: 콜 배율
+const MODE_ADJ={
+  trn: {fi_fold:-5,  vr3:1.0, vrc:0.7,  ante:true,  label:'🏆대회',  desc:'GTO 기반 타이트'},
+  pub: {fi_fold:5,   vr3:0.9, vrc:1.1,  ante:false, label:'🍺펍',    desc:'표준 펍 스타일'},
+  mini:{fi_fold:15,  vr3:0.8, vrc:1.3,  ante:false, label:'🔥미니데일리', desc:'어그레시브 테이블'},
+  daily:{fi_fold:0,  vr3:1.0, vrc:1.0,  ante:false, label:'💎데일리3만', desc:'표준 데일리'},
+  high:{fi_fold:-8,  vr3:1.1, vrc:0.8,  ante:true,  label:'👑하이롤5만', desc:'하이롤러 타이트'},
+  free:{fi_fold:0,   vr3:1.0, vrc:1.0,  ante:false, label:'🎮무료토너', desc:'무료 토너먼트'},
+};
+// 빌런 모드: 초강타이트 (비프리미엄 폴드, 프리미엄 올인 위주)
+const VILLAIN_ADJ={fi_fold:-20, vr3:1.4, vrc:0.3};
+
+function getModeAdj(){
+  const base=MODE_ADJ[S.mode]||MODE_ADJ.trn;
+  if(!S.villain)return base;
+  // 빌런 모드 + 현재 모드 조합
+  return{
+    fi_fold: base.fi_fold + VILLAIN_ADJ.fi_fold,
+    vr3: base.vr3 * VILLAIN_ADJ.vr3,
+    vrc: base.vrc * VILLAIN_ADJ.vrc,
+    ante: base.ante,
+    label: base.label+'+빌런',
+    desc: '빌런 대응: 프리미엄만, 비프리미엄 폴드'
+  };
+}
+
+/* 앤티 보정: 대회/하이롤러에서 BB 포지션이 BB 한번 더 납부
+   → BB는 투자 금액이 크므로 디펜스 레인지 넓어짐
+   → 다른 포지션은 ante/BB 때문에 스틸 레인지 넓어짐 */
+function applyAnteAdj(acts, sc, pi, isAnteMode){
+  if(!isAnteMode)return acts;
+  if(sc==='fi'){
+    let[r,al,l,f]=acts;
+    if(pi===5){// BB: 앤티 납부 → 디펜스 넓어짐
+      const bonus=Math.min(f*.25,18);r=Math.round(r+bonus*.4);l=Math.round(l+bonus*.6);f=Math.max(0,100-r-al-l);
+    }else if(pi===3||pi===2){// BTN/CO: 스틸 레인지 넓어짐
+      const bonus=Math.min(f*.12,8);r=Math.round(r+bonus);f=Math.max(0,100-r-al-l);
+    }
+    return[r,al,l,f];
+  }
+  return acts;
+}
+
+/* ════ 올인 직면 전용 콜 테이블 ════
+   기준: 헤즈업(potPlayers=2) 에쿼티
+   멀티웨이 시 자동으로 축소됨           */
+const ALLIN_HU={
+  // 포켓 페어
+  'AA':100,'KK':100,'QQ':99,'JJ':97,'TT':93,
+  '99':87,'88':80,'77':73,'66':65,'55':57,'44':50,'33':44,'22':38,
+  // 수티드 에이스
+  'AKs':99,'AQs':94,'AJs':88,'ATs':82,'A9s':74,'A8s':68,'A7s':62,
+  'A6s':57,'A5s':60,'A4s':55,'A3s':52,'A2s':49,
+  // 오프수트 에이스
+  'AKo':97,'AQo':90,'AJo':83,'ATo':75,
+  // 수티드 킹
+  'KQs':82,'KJs':75,'KTs':68,'K9s':58,'K8s':50,'K7s':42,
+  // 오프수트 킹
+  'KQo':76,'KJo':68,'KTo':58,'K9o':47,
+  // QJ이하 수티드 커넥터
+  'QJs':70,'QTs':63,'Q9s':54,'JTs':66,'J9s':57,'T9s':62,
+  '98s':57,'87s':52,'76s':48,'65s':45,'54s':42,
+  // 오프수트 브로드웨이
+  'QJo':62,'JTo':57,'T9o':52,
+};
+
+function getAllinCall(hand, nPlayers){
+  const baseCall = ALLIN_HU[hand] || (HT[hand]<=2?85:HT[hand]<=3?70:HT[hand]<=4?55:HT[hand]<=5?40:25);
+  // 멀티웨이: 플레이어 1명 추가될수록 에쿼티 필요량 상승 → 콜 범위 축소
+  const multi = Math.max(0, nPlayers - 2);
+  const adj = multi * 9; // 3웨이: -9%, 4웨이: -18%
+  return Math.max(0, Math.min(100, baseCall - adj));
+}
+
 function getActs(hand,pi,sc,nPlayers){
   nPlayers=nPlayers||S.potPlayers;
   const limpers=S.limpers||0;
-  const isPub=S.mode==='pub';
+  const isPub=S.mode==='pub'||S.mode==='mini'||S.mode==='daily';
+  const mAdj=getModeAdj();
   const t=HT[hand]||7;
   const isBB=pi===5;
 
@@ -820,14 +949,30 @@ function getActs(hand,pi,sc,nPlayers){
     // ① 림프→폴드 전환 (BB 제외)
     if(!isBB){ f+=l; l=0; }
 
-    // ② 펍 모드: 약간 넓게
-    if(isPub){
+    // ② 모드별 레인지 조정
+    {
       const gap=t-mFI[pi];
-      if(gap===1&&isBB)l=Math.min(30,l+20); // BB만 림프 소량
-      else if(gap<=0&&f>0){
-        const bn=Math.min(f*.22,14);
-        r=Math.round(r+bn); f=Math.max(0,100-r-al-l);
+      const fd=mAdj.fi_fold; // 양수=폴드감소(넓어짐), 음수=폴드증가(타이트)
+      if(gap===1&&isBB&&isPub)l=Math.min(30,l+20);
+      else if(gap<=0&&f>0&&fd>0){
+        const bn=Math.min(f*(fd/100)*2.2,fd*.8);
+        r=Math.round(r+bn*.6); if(isPub)l=Math.round(l+bn*.4); f=Math.max(0,100-r-al-l);
+      }else if(fd<0&&f<95){// 타이트: 폴드 증가
+        const tight=Math.min(Math.abs(fd)*0.8,15);
+        f=Math.min(95,f+tight); r=Math.max(0,r-tight*.7); al=Math.max(0,al-tight*.3);
       }
+      // 앤티 보정
+      let a=[r,al,l,f]; a=applyAnteAdj(a,sc,pi,mAdj.ante); [r,al,l,f]=a;
+      // 칩리더 보정: 레인지 확장 (깊은 스택 → 더 투기적)
+      if(S.chipLeader&&f>0&&t<=6){
+        const bonus=Math.min(f*.20,14);
+        r=Math.round(r+bonus*.7);if(isBB)l=Math.round(l+bonus*.3);
+        f=Math.max(0,100-r-al-l);
+      }
+    }
+    // 미니데일리: 어그레시브 테이블 → 3벳+리레이즈 늘리고 콜 줄이기 (fi는 오픈↑)
+    if(S.mode==='mini'&&!isBB&&f>0&&t<=4){
+      const bn=Math.min(f*.18,12);r=Math.round(r+bn);f=Math.max(0,100-r-al-l);
     }
 
     // ③ 사이 림퍼 보정: 아이소 레이즈 or 폴드
@@ -865,8 +1010,10 @@ function getActs(hand,pi,sc,nPlayers){
     fv=Math.max(0,100-tv-cv);
   }
 
-  // 펍 모드: 약간 콜 확대
-  if(isPub){const bn=Math.round(Math.min(fv*.15,10));cv=Math.min(cv+bn,55);fv=Math.max(0,100-tv-cv);}
+  // 모드별 조정: 3벳 배율, 콜 배율
+  tv=Math.min(88,Math.round(tv*mAdj.vr3));
+  cv=Math.min(60,Math.round(cv*mAdj.vrc));
+  fv=Math.max(0,100-tv-cv);
 
   // ★ 사이콜 스퀴즈 보정 (가장 중요) ★
   // 콜러가 많을수록 → 가치 핸드는 올인/스퀴즈, 나머지 폴드
@@ -893,7 +1040,10 @@ function getActs(hand,pi,sc,nPlayers){
   }
 
   let a=[tv,cv,fv];
-  if(sc==='allin')a=[cv,Math.max(0,100-cv)];
+  if(sc==='allin'){
+    const huCall=getAllinCall(hand,nPlayers);
+    return[huCall,Math.max(0,100-huCall)];
+  }
   a=applyMultiway(a,sc,hand,nPlayers);
   return a;
 }
@@ -907,9 +1057,11 @@ function cellCls(hand,pi,sc){
     if(l>=25)return'limp'; if(l>=8)return'limp-w';
     return'weak';
   }
-  if(sc==='allin'){const[c]=a;if(c<8)return'out';if(c<18)return'call-w';return'call';}
+  if(sc==='allin'){const[c]=a;if(c<20)return'out';if(c<40)return'call-w';if(c<70)return'call';return'allin';}
   const[t,c,f]=a;
-  if(f>=98)return'out'; if(f>=80)return'weak';
+  // 빌런 모드: 폴드 임계값 강화
+  const fThreshold=S.villain?70:80;
+  if(f>=98)return'out'; if(f>=fThreshold)return'weak';
   if(t>=25)return'tbet'; if(c>=25)return'call';
   if(t>=10)return'tbet-w'; if(c>=10)return'call-w';
   return'weak';
@@ -936,7 +1088,7 @@ function updateZoneBadge(){
 function updateBBDisplay(){
   const bb=S.bbNow||2000;
   const bi=S.buyIn,cc=S.curChip;
-  document.getElementById('bi-bb').textContent=bi>0?(Math.round(bi/bb)+'BB'):'—';
+  // bi-bb removed
   document.getElementById('cc-bb').textContent=cc>0?(Math.round(cc/bb)+'BB'):'—';
 }
 
@@ -1081,112 +1233,137 @@ function renderSheet(){
   const isP=hand.length===2&&hand[0]===hand[1];
   const type=isP?'포켓 페어':hand.endsWith('s')?'수티드':'오프수트';
   const scLabel=SC_LIST.find(s=>s.key===sc)?.l1||sc;
-  const _sh=document.getElementById('s-hand');if(_sh)_sh.textContent=hand;
-  document.getElementById('s-sub').textContent=`${type} · ${PFULL[pi]} · ${scLabel} · ${S.mode==='trn'?'🏆대회':'🍺펍'} · 팟${S.potPlayers}명`+(S.limpers>0?` · 사이콜${S.limpers}명`:'');
-  // 스택 정보
   const stk=getStackInfo();
   const bbNow=S.bbNow||2000;
-  let stkHtml='';
-  if(stk.bbCount>0){
-    const z=zoneBadge(stk);
-    stkHtml=`<span style="color:${z.col}">${z.txt}</span>`;
-    const mult=stk.bbCount<=30?2.5:3;
-    if(sc==='fi')stkHtml+=` · 오픈${mult}x=<b style="color:#fbbf24">${fmtC(bbNow*mult)}</b>`;
-    if(sc==='r3')stkHtml+=` · 3벳≈<b style="color:#fb923c">${fmtC(bbNow*9)}</b>`;
-    if(sc==='rr')stkHtml+=` · 4벳≈<b style="color:#E24B4A">${fmtC(bbNow*16)}</b>`;
-    if(S.curChip>0)stkHtml+=` · 현재<b style="color:#ddd">${fmtC(S.curChip)}</b>`;
-    if(S.potPlayers>2)stkHtml+=` · <span style="color:#fb923c">멀티웨이 ${S.potPlayers}명</span>`;
-  if(S.limpers>0){
-    const limpColor=S.limpers>=3?'#E24B4A':'#f97316';
-    stkHtml+=` · <span style="color:${limpColor}">사이콜 ${S.limpers}명 → ${S.limpers>=3?'스퀴즈 or 폴드':'타이트 스퀴즈'}</span>`;
-  }
-  }else{
-    stkHtml='<span style="color:#2a2a2a">현재칩 입력 시 베팅금액이 계산됩니다</span>';
-  }
-  document.getElementById('s-stack-info').innerHTML=stkHtml;
-  // 메인 액션 바
+
+  // 스택 정보 문자열
+  const fmt=n=>n>=1000?Math.round(n/100)/10+'K':n;
+  const bbCount=stk.bbCount;
+  let stkParts=[];
+  if(bbCount>0){const z=zoneBadge(stk);stkParts.push(z.txt);}
+  if(bbCount>0){const mult=bbCount<=30?2.5:3;stkParts.push('오픈'+mult+'x='+fmt(bbNow*mult));}
+  if(S.curChip>0)stkParts.push('현재'+fmt(S.curChip));
+  if(S.potPlayers>2)stkParts.push('멀티웨이 '+S.potPlayers+'명');
+  if(S.limpers>0)stkParts.push('사이콜 '+S.limpers+'명');
+
+  // 액션 바 데이터
   const bars=getDetailedBars(hand,pi,sc);
+  const topBar=bars.reduce((a,b)=>b.v>a.v?b:a,{v:0,l:'',c:'#888'});
+
+  // ── 팝업 내용 ──
+  const _sh=document.getElementById('s-hand');if(_sh)_sh.textContent=hand;
+  const _ssub=document.getElementById('s-sub');if(_ssub)_ssub.textContent=type+' · '+PFULL[pi]+' · '+scLabel+' · '+(S.mode==='trn'?'🏆대회':'🍺펍');
+  const _ssi=document.getElementById('s-stack-info');
+  if(_ssi)_ssi.innerHTML=stkParts.map((p,i)=>`<span style="color:${i===0?'#4ade80':'#bbb'}">${p}</span>`).join('<span style="color:#333;margin:0 4px;">·</span>');
+
+  // 팝업 최고 액션 배지
+  const actEl=document.getElementById('s-top-action');
+  if(actEl&&topBar.v>0){
+    actEl.textContent=topBar.l+' '+topBar.v+'%';
+    actEl.style.background=topBar.c+'22';actEl.style.color=topBar.c;actEl.style.border='1px solid '+topBar.c+'55';
+  }
+
+  // 팝업 액션 바
   document.getElementById('acts').innerHTML=bars.map(b=>`
     <div class="ar">
       <div class="albl" style="color:${b.c};">${b.l}${b.note?`<span class="anote">${b.note}</span>`:''}</div>
-      <div class="abg">
-        <div class="abar" style="width:${b.v}%;background:${b.c};"></div>
-        ${b.v>10?`<span class="a-pct-in" style="color:${b.c};">${b.eq>0?b.eq+'%eq':''}</span>`:''}
-      </div>
+      <div class="abg"><div class="abar" style="width:${b.v}%;background:${b.c};"></div></div>
       <div class="apct" style="color:${b.c};">${b.v}%</div>
     </div>`).join('');
-  // 상단 배너: 최고 액션 강조
-  const topAct=bars.reduce((a,b)=>b.v>a.v?b:{v:0,l:'',c:'#888'},{v:0,l:'',c:'#888'});
-  const actEl=document.getElementById('s-top-action');if(!actEl)return;
-  if(topAct.v>0){
-    actEl.textContent=topAct.l+' '+topAct.v+'%';
-    actEl.style.background=topAct.c+'22';
-    actEl.style.color=topAct.c;
-    actEl.style.border='1px solid '+topAct.c+'55';
-  }else{actEl.textContent='';}
 
-  // 🚀 올인 찬스 → 배너 테두리+진동 (팝업 제거)
-  const topBar=bars.reduce((a,b)=>b.v>a.v?b:a,{v:0});
+  // 팁 (팝업 안)
+  document.getElementById('s-tip').textContent=getTip(hand,pi,sc,stk);
+
+  // 레이즈 비교 (팝업 안)
+  const rcWrap=document.getElementById('raise-compare-wrap');
+  if(rcWrap&&sc!=='fi'&&sc!=='allin'){
+    rcWrap.style.display='';
+    const cd=getRaiseCompareData(hand,pi);
+    const rcHtml=(d,title)=>{
+      const rows=[{l:'올인',v:d.shove,c:'#E24B4A'},{l:'3벳',v:d.threebet,c:'#D85A30'},{l:'콜',v:d.call,c:'#378ADD'},{l:'폴드',v:d.fold,c:'#555'}].filter(r=>r.v>0);
+      return`<div class="rc-panel"><div class="rc-title">${title}</div>${rows.map(r=>`<div class="rc-row"><div class="rc-lbl" style="color:${r.c};">${r.l}</div><div class="rc-bar-wrap"><div class="rc-bar" style="width:${r.v}%;background:${r.c};"></div></div><div class="rc-num" style="color:${r.c};">${r.v}</div></div>`).join('')}</div>`;
+    };
+    document.getElementById('raise-compare').innerHTML=rcHtml(cd.small,'3BB 레이즈')+rcHtml(cd.big,'5BB 레이즈');
+  }else if(rcWrap){rcWrap.style.display='none';}
+
+  // 올인 찬스 → 테두리 색 변경
   const isAllin=(topBar.l&&(topBar.l.includes('올인')||topBar.l.includes('push')))&&topBar.v>=55;
   const sheetEl=document.getElementById('sheet');
-  if(isAllin){
-    sheetEl.style.borderTopColor='#ef4444';
-    sheetEl.style.boxShadow='0 -4px 24px rgba(239,68,68,.45)';
-    if(navigator.vibrate)navigator.vibrate([80,40,80]);
-  }else{
-    sheetEl.style.borderTopColor='#14532d';
-    sheetEl.style.boxShadow='0 -4px 24px rgba(0,0,0,.8)';
+  if(sheetEl){sheetEl.style.borderColor=isAllin?'#ef4444':'#14532d';}
+  if(isAllin&&navigator.vibrate)navigator.vibrate([80,40,80]);
+
+  // 팝업 열기
+  const ovl=document.getElementById('sheet-overlay');if(ovl)ovl.classList.add('open');
+
+  // ── 하단 패널 업데이트 (팝업 닫혀도 유지) ──
+  updateHandInfoPanel(hand,pi,sc,bars,stk);
+}
+
+function updateHandInfoPanel(hand,pi,sc,bars,stk){
+  const panel=document.getElementById('hand-info-panel');
+  if(!panel)return;
+  panel.style.display='';
+
+  // 핸드명 + 최고액션
+  const fmt=n=>n>=1000?Math.round(n/100)/10+'K':n;
+  const topBar=bars?bars.reduce((a,b)=>b.v>a.v?b:a,{v:0,l:'',c:'#888'}):{v:0,l:'',c:'#888'};
+  const scLabel=SC_LIST.find(s=>s.key===sc)?.l1||sc;
+  const el_hand=document.getElementById('hip-hand');if(el_hand)el_hand.textContent=hand;
+  const el_act=document.getElementById('hip-top-act');
+  if(el_act&&topBar.v>0){el_act.textContent=topBar.l+' '+topBar.v+'%';el_act.style.background=topBar.c+'22';el_act.style.color=topBar.c;el_act.style.border='1px solid '+topBar.c+'55';}
+  const el_sub=document.getElementById('hip-sub');if(el_sub)el_sub.textContent=PFULL[pi]+' · '+scLabel;
+
+  // 액션 바 (컴팩트)
+  const el_acts=document.getElementById('hip-acts');
+  if(el_acts&&bars){
+    el_acts.innerHTML=bars.map(b=>`<div style="display:flex;align-items:center;gap:6px;margin:3px 0;">
+      <div style="font-size:10px;font-weight:700;color:${b.c};width:80px;flex-shrink:0;">${b.l}${b.note?'<span style="font-size:8px;color:#555;display:block;">'+b.note+'</span>':''}</div>
+      <div style="flex:1;height:16px;background:#141414;border-radius:3px;overflow:hidden;position:relative;">
+        <div style="width:${b.v}%;height:100%;background:${b.c};border-radius:3px;"></div>
+        ${b.v>15?`<span style="position:absolute;left:5px;top:50%;transform:translateY(-50%);font-size:9px;font-weight:700;color:rgba(0,0,0,.6);">${b.v}%</span>`:''}
+      </div>
+      <div style="font-size:11px;font-weight:700;color:${b.c};width:30px;text-align:right;">${b.v}%</div>
+    </div>`).join('');
   }
 
-  // 레이즈 비교 패널 (fi 제외)
-  const rcWrap=document.getElementById('raise-compare-wrap');
-  if(sc!=='fi'&&sc!=='allin'){
-    const cd=getRaiseCompareData(hand,pi);
-    rcWrap.style.display='';
-    const rcHtml=(d,title)=>{
-      const rows=[
-        {l:'올인',v:d.shove,c:'#E24B4A'},
-        {l:'3벳',v:d.threebet,c:'#D85A30'},
-        {l:'콜',v:d.call,c:'#378ADD'},
-        {l:'폴드',v:d.fold,c:'#555'},
-      ].filter(r=>r.v>0);
-      return`<div class="rc-panel">
-        <div class="rc-title">${title}</div>
-        ${rows.map(r=>`<div class="rc-row"><div class="rc-lbl" style="color:${r.c};">${r.l}</div><div class="rc-bar-wrap"><div class="rc-bar" style="width:${r.v}%;background:${r.c};"></div></div><div class="rc-num" style="color:${r.c};">${r.v}</div></div>`).join('')}
-      </div>`;
-    };
-    document.getElementById('raise-compare').innerHTML=rcHtml(cd.small,'레이즈 작을 때 (3BB)')+rcHtml(cd.big,'레이즈 클 때 (5BB)');
-  }else{
-    rcWrap.style.display='none';
-  }
-
-  // 포지션별 비교 테이블
+  // 포지션별 테이블 (컴팩트)
   const ptData=getPosTableData(hand,sc);
   const poNames=['UTG','HJ','CO','BTN','SB','BB'];
   const rLabel=sc==='fi'?'레이즈':sc==='allin'?'콜':'3벳';
-  const cLabel=sc==='fi'?'림프':sc==='allin'?'폴드':'콜';
-  document.getElementById('pos-table').innerHTML=`<table class="pt-table">
-    <thead><tr><th>포지션</th><th>${rLabel}</th><th>${cLabel}</th><th>폴드</th><th style="width:70px;">분포</th></tr></thead>
-    <tbody>${ptData.map((d,i)=>`<tr${i===pi?' class="cur-row"':''}>
-      <td>${poNames[i]}${i===pi?'◀':''}</td>
-      <td style="color:#ba7517;">${d.raise}%</td>
-      <td style="color:#378ADD;">${d.call_limp}%</td>
-      <td style="color:#555;">${d.fold}%</td>
-      <td><div class="mini-bar-wrap"><div class="mini-bar-r" style="width:${d.raise}%;"></div><div class="mini-bar-c" style="width:${d.call_limp}%;"></div><div class="mini-bar-f" style="width:${d.fold}%;"></div></div></td>
-    </tr>`).join('')}</tbody>
-  </table>`;
-  document.getElementById('s-tip').textContent=getTip(hand,pi,sc,getStackInfo());
-  document.getElementById('sheet').classList.add('open');
-  // 플랍 분석 업데이트
-  if(S.flopCards.filter(c=>c).length===3)runFlopAnalysis();
+  const el_pt=document.getElementById('hip-pos-table');
+  if(el_pt){
+    el_pt.innerHTML=`<table style="width:100%;border-collapse:collapse;font-size:9px;">
+      <thead><tr>
+        <th style="padding:3px 4px;color:#888;text-align:left;border-bottom:0.5px solid #1a1a1a;">포지션</th>
+        <th style="padding:3px 4px;color:#888;text-align:center;border-bottom:0.5px solid #1a1a1a;">${rLabel}</th>
+        <th style="padding:3px 4px;color:#888;text-align:center;border-bottom:0.5px solid #1a1a1a;">${sc==='fi'?'림프':'콜'}</th>
+        <th style="padding:3px 4px;color:#888;text-align:center;border-bottom:0.5px solid #1a1a1a;">폴드</th>
+        <th style="padding:3px 4px;color:#888;border-bottom:0.5px solid #1a1a1a;">분포</th>
+      </tr></thead>
+      <tbody>${ptData.map((d,i)=>`<tr style="background:${i===pi?'#0a1a0e':'transparent'}">
+        <td style="padding:3px 4px;font-family:monospace;font-weight:700;color:${i===pi?'#86efac':'#bbb'};">${poNames[i]}${i===pi?'◀':''}</td>
+        <td style="padding:3px 4px;text-align:center;color:#ba7517;">${d.raise}%</td>
+        <td style="padding:3px 4px;text-align:center;color:#378ADD;">${d.call_limp}%</td>
+        <td style="padding:3px 4px;text-align:center;color:#555;">${d.fold}%</td>
+        <td style="padding:3px 4px;"><div style="height:7px;background:#141414;border-radius:2px;overflow:hidden;display:flex;"><div style="width:${d.raise}%;background:#ba7517;"></div><div style="width:${d.call_limp}%;background:#378ADD;"></div><div style="width:${d.fold}%;background:#1e1e1e;"></div></div></td>
+      </tr>`).join('')}</tbody>
+    </table>`;
+  }
 }
 function closeSheet(){
-  document.getElementById('sheet').classList.remove('open');
+  const ovl=document.getElementById('sheet-overlay');if(ovl)ovl.classList.remove('open');
+  // hand-info-panel은 유지 (마지막 선택 핸드 표시)
   S.hand=null;
   document.querySelectorAll('.mc.sel').forEach(el=>el.classList.remove('sel'));
 }
 function selectHand(hand){
-  if(S.hand===hand){closeSheet();return;}
+  if(S.hand===hand){
+    // 같은 핸드 클릭: 팝업 열기 (이미 열려있으면 닫기)
+    const ovl=document.getElementById('sheet-overlay');
+    if(ovl&&ovl.classList.contains('open')){ovl.classList.remove('open');}
+    else{renderSheet();}
+    return;
+  }
   S.hand=hand;
   document.querySelectorAll('.mc').forEach(el=>el.classList.toggle('sel',el.dataset.hand===hand));
   renderSheet();
@@ -1197,23 +1374,55 @@ function selectByIdx(idx){
   const seat=SEATS[S.players][idx];
   S.rotIdx=idx;S.posLabel=seat.l;S.posKey=seat.k;S.posIdx=PK[seat.k];S.hand=null;
   renderPositions();renderMatrix();
-  document.getElementById('sheet').classList.remove('open');
+  const _sovl=document.getElementById('sheet-overlay');if(_sovl)_sovl.classList.remove('open');
   updateSummaryBar();
 }
 function setSc(sc){
   S.sc=sc;S.hand=null;renderScBar();renderMatrix();
-  document.getElementById('sheet').classList.remove('open');
+  const _sovl=document.getElementById('sheet-overlay');if(_sovl)_sovl.classList.remove('open');
 }
+
+/* ════════════════ 빌런 모드 ════════════════ */
+/* ════ 칩리더 모드 ════ */
+function toggleChipLeader(){
+  S.chipLeader=!S.chipLeader;
+  const btn=document.getElementById('chip-leader-btn');
+  if(btn){
+    btn.style.background=S.chipLeader?'#18140a':'#111';
+    btn.style.color=S.chipLeader?'#f0c040':'#666';
+    btn.style.border=S.chipLeader?'0.5px solid #3a2800':'0.5px solid #222';
+    btn.textContent=S.chipLeader?'👑칩리더 ON':'👑칩리더';
+  }
+  if(S.chipLeader&&navigator.vibrate)navigator.vibrate(20);
+  renderMatrix();
+  if(S.hand)renderSheet();
+  updateSummaryBar();
+}
+
+function toggleVillain(){
+  S.villain=!S.villain;
+  const btn=document.getElementById('villain-btn');
+  const badge=document.getElementById('villain-badge');
+  if(btn)btn.classList.toggle('on',S.villain);
+  if(badge)badge.classList.toggle('on',S.villain);
+  if(S.villain&&navigator.vibrate)navigator.vibrate([50,30,50]);
+  renderMatrix();
+  if(S.hand)renderSheet();
+  updateSummaryBar();
+}
+
 function setMode(m){
   S.mode=m;S.hand=null;
   document.getElementById('m-trn').className='mtb'+(m==='trn'?' on':'');
   document.getElementById('m-pub').className='mtb'+(m==='pub'?' onp':'');
-  const freeBtn=document.getElementById('m-free');
-  if(freeBtn)freeBtn.className='mtb'+(m==='free'?' onfree':'');
+  const freeBtn=document.getElementById('m-free');if(freeBtn)freeBtn.className='mtb'+(m==='free'?' onfree':'');
+  const miniBtn=document.getElementById('m-mini');if(miniBtn)miniBtn.className='mtb'+(m==='mini'?' onmini':'');
+  const dailyBtn=document.getElementById('m-daily');if(dailyBtn)dailyBtn.className='mtb'+(m==='daily'?' ondaily':'');
+  const highBtn=document.getElementById('m-high');if(highBtn)highBtn.className='mtb'+(m==='high'?' onhigh':'');
   if(m==='free'){
     initFreeLevelAtCurrentTime();
     // 20k 칩 세팅
-    document.getElementById('buy-in').value=20000;
+    // buy-in removed
     document.getElementById('cur-chip').value=20000;
     S.buyIn=20000; S.curChip=20000;
     updateBBDisplay(); updateZoneBadge();
@@ -1261,7 +1470,7 @@ function setLimpers(n){
 
 /* ════════════════ 칩 / 블라인드 ════════════════ */
 function onChipChg(){
-  S.buyIn=+document.getElementById('buy-in').value||0;
+  S.buyIn=0;
   S.curChip=+document.getElementById('cur-chip').value||0;
   updateZoneBadge();updateBBDisplay();updateSummaryBar();
   if(S.hand)renderSheet();
@@ -1300,6 +1509,9 @@ function updateTimerUI(){
   // 요약바 타이머 동기화
   const sumT=document.getElementById('sum-timer');
   if(sumT)sumT.textContent=fmtSec(left);
+  const sumLvl=document.getElementById('sum-lvl-info');
+  const fmtQ=n=>n>=1000?Math.round(n/100)/10+'K':n;
+  if(sumLvl)sumLvl.textContent='Lv.'+S.blindLevel+' '+fmtQ(S.sbNow)+'/'+fmtQ(S.bbNow);
 }
 function resetTimer(){
   clearInterval(S.timerInterval);S.timerRunning=false;
@@ -1757,11 +1969,19 @@ function updateSummaryBar(){
     const modeBg=S.mode==='free'?'#1a0a3b':S.mode==='pub'?'#3b1c00':'#14532d';
     const modeCol=S.mode==='free'?'#c084fc':S.mode==='pub'?'#fb923c':'#86efac';
     function set(id,txt,sty){const el=document.getElementById(id);if(!el)return;el.textContent=txt;if(sty)Object.assign(el.style,sty);}
-    set('sum-mode',modeLabel,{background:modeBg,color:modeCol});
+    const villainSuffix=S.villain?' 🦹':'';
+    const chipSuffix=S.chipLeader?' 👑':'';
+    set('sum-mode',modeLabel+villainSuffix+chipSuffix,{background:modeBg,color:modeCol});
     set('sum-pos',seat.l);
+    set('sum-players',S.players+'인');
+    set('sum-lvl-info','Lv.'+S.blindLevel+' '+fmt(S.sbNow)+'/'+fmt(S.bbNow));
     set('sum-blind',fmt(S.sbNow)+'/'+fmt(S.bbNow));
     if(bbCount>0){const stk=getStackInfo();const z=zoneBadge(stk);set('sum-zone',z.txt,{color:z.col,background:z.bg,border:'0.5px solid '+z.col+'33'});}
     else{set('sum-zone','칩미입력',{color:'#555',background:'#111',border:'0.5px solid #1a1a1a'});}
+    // mode-desc 업데이트
+    const descEl=document.getElementById('mode-desc');
+    const descMap={trn:'GTO·앤티BB',pub:'표준 펍',mini:'🔥어그레시브·3만',daily:'💎데일리·5만',high:'👑하이롤·앤티',free:'🎮무료토너·20K'};
+    if(descEl)descEl.textContent=S.villain?'🦹빌런모드 ON':(descMap[S.mode]||'');
     // btn-start 동기화
     const startBtn=document.getElementById('btn-start');
     if(startBtn){
