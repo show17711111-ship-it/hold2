@@ -18,9 +18,9 @@ input[type=number]{-moz-appearance:textfield;}
 input::-webkit-inner-spin-button,input::-webkit-outer-spin-button{-webkit-appearance:none;}
 #app{display:flex;flex-direction:column;height:100vh;height:100dvh;}
 #hdr{background:#080808;border-bottom:0.5px solid #1a1a1a;flex-shrink:0;padding-top:env(safe-area-inset-top,0);}
-#content{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding-bottom:0;}
+#content{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding-bottom:56px;}
 /* ── 핸드 배너: 하단 슬라이드업 ── */
-#sheet{position:fixed;bottom:0;left:0;right:0;z-index:6000;background:#0a0a0a;border-top:2px solid #14532d;border-radius:16px 16px 0 0;padding-bottom:env(safe-area-inset-bottom,0);transform:translateY(100%);transition:transform .28s cubic-bezier(.4,0,.2,1);box-shadow:0 -4px 24px rgba(0,0,0,.8);}
+#sheet{position:fixed;bottom:54px;left:0;right:0;z-index:6000;background:#0a0a0a;border-top:2px solid #14532d;border-radius:16px 16px 0 0;padding-bottom:env(safe-area-inset-bottom,0);transform:translateY(100%);transition:transform .28s cubic-bezier(.4,0,.2,1);box-shadow:0 -4px 24px rgba(0,0,0,.8);}
 #sheet.open{transform:translateY(0);}
 
 /* ══ 헤더 전체 ══ */
@@ -145,7 +145,8 @@ input::-webkit-inner-spin-button,input::-webkit-outer-spin-button{-webkit-appear
 #next-lbl{font-size:9px;color:#4ade80;font-family:monospace;}
 
 /* ─ 게임 컨트롤 행 ─ */
-#game-row-a{display:flex;align-items:center;gap:4px;padding:5px 9px;border-top:0.5px solid #1a1a1a;background:#060606;}
+#game-row-a{display:flex;align-items:center;gap:4px;padding:5px 9px;border-bottom:0.5px solid #1a1a1a;background:#060606;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;}
+#game-row-a::-webkit-scrollbar{display:none;}
 
 /* ─ 시나리오 바 ─ */
 #sc-bar{display:flex;gap:3px;padding:6px 11px;overflow-x:auto;scrollbar-width:none;border-bottom:0.5px solid #141414;background:#040404;}
@@ -243,7 +244,7 @@ input::-webkit-inner-spin-button,input::-webkit-outer-spin-button{-webkit-appear
 #s-stack-info{margin-bottom:8px;padding:5px 8px;background:#0c1a10;border-radius:5px;border:0.5px solid #1a3a20;font-size:9px;color:#4ade80;line-height:1.6;}
 #close-btn{width:28px;height:28px;border-radius:50%;background:#1a1a1a;color:#888;font-size:18px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
 #s-top-action{font-size:13px;font-weight:700;padding:2px 10px;border-radius:5px;display:inline-block;}
-#s-hand{color:#86efac;}
+#s-hand{font-size:28px;font-weight:700;font-family:monospace;color:#86efac;line-height:1;}
 #sh{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;}
 
 /* 메인 액션 바 */
@@ -308,6 +309,11 @@ input::-webkit-inner-spin-button,input::-webkit-outer-spin-button{-webkit-appear
 #brk-end-btn{margin-top:16px;padding:8px 22px;background:#222;border-radius:8px;color:#888;font-size:12px;font-weight:700;}
 
 @keyframes pop{from{transform:translate(-50%,-50%) scale(.8);opacity:0}to{transform:translate(-50%,-50%) scale(1);opacity:1}}
+
+/* ─ 하단 눈팅방지 버튼 ─ */
+#shield-fixed-btn{position:fixed;bottom:env(safe-area-inset-bottom,0);left:0;right:0;z-index:5500;background:#0a0a0a;border-top:0.5px solid #1a1a1a;padding:8px 0 calc(8px + env(safe-area-inset-bottom,0));display:flex;justify-content:center;}
+#shield-fixed-btn button{width:100%;max-width:100%;margin:0 11px;height:36px;background:#111;border:0.5px solid #2a2a2a;border-radius:8px;color:#666;font-size:12px;font-weight:700;letter-spacing:.3px;}
+#shield-fixed-btn button:active{background:#1a1a1a;}
 </style>
 </head>
 <body>
@@ -332,6 +338,9 @@ input::-webkit-inner-spin-button,input::-webkit-outer-spin-button{-webkit-appear
   <button id="brk-end-btn" onclick="endBreak()">브레이크 종료</button>
 </div>
 
+<!-- 하단 눈팅방지 버튼 -->
+<div id="shield-fixed-btn"><button onclick="activateShield()">👁 눈팅방지 (탭하면 화면 차단)</button></div>
+
 <div id="app">
 <div id="hdr">
 
@@ -350,7 +359,6 @@ input::-webkit-inner-spin-button,input::-webkit-outer-spin-button{-webkit-appear
         <button class="mtb" id="m-pub" onclick="event.stopPropagation();setMode('pub')">펍</button>
         <button class="mtb" id="m-free" onclick="event.stopPropagation();setMode('free')">무료</button>
       </div>
-      <button class="ibt" onclick="event.stopPropagation();activateShield()">👁</button>
       <span id="tog-arrow">▼</span>
     </div>
   </div>
@@ -386,10 +394,10 @@ input::-webkit-inner-spin-button,input::-webkit-outer-spin-button{-webkit-appear
     <!-- 줄3: 바인칩 / 현재칩 / 브레이크 -->
     <div class="cfg-row">
       <span class="cl">바인</span>
-      <input type="number" class="ci" id="buy-in" placeholder="0" inputmode="numeric" onchange="onChipChg()" style="width:72px;">
+      <input type="number" class="ci" id="buy-in" placeholder="0" inputmode="numeric" onchange="onChipChg()" style="width:52px;">
       <span class="cg-bb" id="bi-bb">—</span>
       <span class="cl" style="margin-left:6px;">현재칩</span>
-      <input type="number" class="ci" id="cur-chip" placeholder="0" inputmode="numeric" onchange="onChipChg()" style="width:72px;">
+      <input type="number" class="ci" id="cur-chip" placeholder="0" inputmode="numeric" onchange="onChipChg()" style="width:52px;">
       <span class="cg-bb" id="cc-bb">—</span>
       <div id="brk-wrap" style="margin-left:auto;">
         <input type="text" class="ti" id="brk-t-in" value="15:00" maxlength="5" style="width:36px;height:26px;font-size:9px;">
@@ -920,9 +928,10 @@ function zoneBadge(stk){
   return z[stk.zone]||{txt:'?',col:'#aaa',bg:'#111'};
 }
 function updateZoneBadge(){
-  const stk=getStackInfo(),z=stk.bbCount>0?zoneBadge(stk):{txt:'칩 미입력',col:'#2a2a2a',bg:'#0f0f0f'};
+  const stk=getStackInfo();
+  const z=stk.bbCount>0?zoneBadge(stk):{txt:'칩 미입력',col:'#555',bg:'#111'};
   const el=document.getElementById('zone-badge');
-  el.textContent=z.txt;el.style.color=z.col;el.style.background=z.bg;el.style.borderColor=z.col+'33';
+  if(el){el.textContent=z.txt;el.style.color=z.col;el.style.background=z.bg;el.style.borderColor=z.col+'33';}
 }
 function updateBBDisplay(){
   const bb=S.bbNow||2000;
@@ -1022,7 +1031,7 @@ function getPosTableData(hand,sc){
 
 /* ════════════════ 렌더 ════════════════ */
 function renderScBar(){
-  document.getElementById('sc-bar').innerHTML=SC_LIST.map(s=>
+  const scb=document.getElementById('sc-bar');if(!scb)return;scb.innerHTML=SC_LIST.map(s=>
     `<div class="scpill${S.sc===s.key?' on':''}" onclick="setSc('${s.key}')"><div class="sp1">${s.l1}</div><div class="sp2">${s.l2}</div></div>`).join('');
 }
 function renderPositions(){
@@ -1033,9 +1042,9 @@ function renderPositions(){
     const on=i===S.rotIdx,nxt=i===nextIdx&&!on,isBtn=s.k==='BTN';
     h+=`<div class="pp${on?' on':''}${nxt?' nxt':''}${isBtn?' is-btn':''}" onclick="selectByIdx(${i})"><div class="pn">${s.l}</div><div class="pr">${on?'◀현재':nxt?'▷다음':PRANGE[PK[s.k]]}</div></div>`;
   });
-  document.getElementById('pos-bar').innerHTML=h;
-  document.getElementById('pos-badge').textContent=seats[S.rotIdx].l;
-  document.getElementById('next-lbl').textContent='→'+seats[nextIdx].l;
+  const posb=document.getElementById('pos-bar');if(posb)posb.innerHTML=h;
+  const pb2=document.getElementById('pos-badge');if(pb2)pb2.textContent=seats[S.rotIdx].l;
+  const nlbl=document.getElementById('next-lbl');if(nlbl)nlbl.textContent='→'+seats[nextIdx].l;
 }
 function renderMatrix(){
   const pi=S.posIdx,sc=S.sc;
@@ -1052,8 +1061,9 @@ function renderMatrix(){
     }
   }
   h+=`</div>`;
-  document.getElementById('mtx').innerHTML=h;
-  renderLegend();
+  const mtxEl=document.getElementById('mtx');if(!mtxEl)return;
+  try{mtxEl.innerHTML=h;}catch(e){}
+  try{renderLegend();}catch(e){}
 }
 function renderLegend(){
   const fi=S.sc==='fi',al=S.sc==='allin';
@@ -1061,7 +1071,7 @@ function renderLegend(){
   if(fi)it=[['#fca5a5','올인'],['#fbbf24','레이즈'],['#4ade80','BB체크'],['#181818','폴드']];
   else if(al)it=[['#60a5fa','콜'],['#181818','폴드']];
   else it=[['#fb923c','3벳/4벳'],['#60a5fa','콜'],['#7c3d0e','3벳믹스'],['#3b6ca8','콜믹스'],['#181818','폴드']];
-  document.getElementById('legend').innerHTML=it.map(([c,l])=>`<div class="li"><div class="ld" style="background:${c};"></div>${l}</div>`).join('');
+  try{const legEl=document.getElementById('legend');if(legEl)legEl.innerHTML=it.map(([c,l])=>`<div class="li"><div class="ld" style="background:${c};"></div>${l}</div>`).join('');}catch(e){}
 }
 
 /* ─ 시트 렌더 ─ */
@@ -1071,7 +1081,7 @@ function renderSheet(){
   const isP=hand.length===2&&hand[0]===hand[1];
   const type=isP?'포켓 페어':hand.endsWith('s')?'수티드':'오프수트';
   const scLabel=SC_LIST.find(s=>s.key===sc)?.l1||sc;
-  document.getElementById('s-hand').textContent=hand;
+  const _sh=document.getElementById('s-hand');if(_sh)_sh.textContent=hand;
   document.getElementById('s-sub').textContent=`${type} · ${PFULL[pi]} · ${scLabel} · ${S.mode==='trn'?'🏆대회':'🍺펍'} · 팟${S.potPlayers}명`+(S.limpers>0?` · 사이콜${S.limpers}명`:'');
   // 스택 정보
   const stk=getStackInfo();
@@ -1107,7 +1117,7 @@ function renderSheet(){
     </div>`).join('');
   // 상단 배너: 최고 액션 강조
   const topAct=bars.reduce((a,b)=>b.v>a.v?b:{v:0,l:'',c:'#888'},{v:0,l:'',c:'#888'});
-  const actEl=document.getElementById('s-top-action');
+  const actEl=document.getElementById('s-top-action');if(!actEl)return;
   if(topAct.v>0){
     actEl.textContent=topAct.l+' '+topAct.v+'%';
     actEl.style.background=topAct.c+'22';
@@ -1737,35 +1747,28 @@ function onEnd(){
 
 /* ════════════════ 요약바 업데이트 ════════════════ */
 function updateSummaryBar(){
-  const seats=SEATS[S.players];
-  const seat=seats[S.rotIdx]||{l:'?'};
-  const fmt=n=>n>=1000?Math.round(n/100)/10+'K':n;
-  const bb=S.bbNow||2000,chips=S.curChip||0;
-  const bbCount=chips>0?Math.round(chips/bb):0;
-
-  document.getElementById('sum-mode').textContent=
-    S.mode==='free'?'무료':S.mode==='pub'?'펍':'대회';
-  document.getElementById('sum-mode').style.background=
-    S.mode==='free'?'#1a0a3b':S.mode==='pub'?'#3b1c00':'#14532d';
-  document.getElementById('sum-mode').style.color=
-    S.mode==='free'?'#c084fc':S.mode==='pub'?'#fb923c':'#86efac';
-  document.getElementById('sum-pos').textContent=seat.l;
-  document.getElementById('sum-blind').textContent=fmt(S.sbNow)+'/'+fmt(S.bbNow);
-  // 타이머 동기화는 updateTimerUI에서 처리
-  const zEl=document.getElementById('sum-zone');
-  if(bbCount>0){
-    const stk=getStackInfo();
-    const z=zoneBadge(stk);
-    zEl.textContent=z.txt;zEl.style.color=z.col;zEl.style.background=z.bg;zEl.style.border='0.5px solid '+z.col+'33';
-  }else{
-    zEl.textContent='칩미입력';zEl.style.color='#555';zEl.style.background='#111';zEl.style.border='0.5px solid #1a1a1a';
-  }
-  // t-play 버튼 상태 btn-start 동기화
-  const startBtn=document.getElementById('btn-start');
-  if(startBtn){
-    if(S.timerRunning){startBtn.textContent='⏸ 정지';startBtn.style.background='#3d1400';startBtn.style.color='#fdba74';startBtn.style.borderColor='#7c2d12';}
-    else{startBtn.textContent='▶ 스타트';startBtn.style.background='#14532d';startBtn.style.color='#86efac';startBtn.style.borderColor='#166534';}
-  }
+  try{
+    const seats=SEATS[S.players];
+    const seat=seats[S.rotIdx]||{l:'?'};
+    const fmt=n=>n>=1000?Math.round(n/100)/10+'K':n;
+    const bb=S.bbNow||2000,chips=S.curChip||0;
+    const bbCount=chips>0?Math.round(chips/bb):0;
+    const modeLabel=S.mode==='free'?'무료':S.mode==='pub'?'펍':'대회';
+    const modeBg=S.mode==='free'?'#1a0a3b':S.mode==='pub'?'#3b1c00':'#14532d';
+    const modeCol=S.mode==='free'?'#c084fc':S.mode==='pub'?'#fb923c':'#86efac';
+    function set(id,txt,sty){const el=document.getElementById(id);if(!el)return;el.textContent=txt;if(sty)Object.assign(el.style,sty);}
+    set('sum-mode',modeLabel,{background:modeBg,color:modeCol});
+    set('sum-pos',seat.l);
+    set('sum-blind',fmt(S.sbNow)+'/'+fmt(S.bbNow));
+    if(bbCount>0){const stk=getStackInfo();const z=zoneBadge(stk);set('sum-zone',z.txt,{color:z.col,background:z.bg,border:'0.5px solid '+z.col+'33'});}
+    else{set('sum-zone','칩미입력',{color:'#555',background:'#111',border:'0.5px solid #1a1a1a'});}
+    // btn-start 동기화
+    const startBtn=document.getElementById('btn-start');
+    if(startBtn){
+      if(S.timerRunning){startBtn.textContent='⏸ 정지';startBtn.style.cssText='background:#3d1400;color:#fdba74;border-color:#7c2d12;';}
+      else{startBtn.textContent='▶ 스타트';startBtn.style.cssText='background:#14532d;color:#86efac;border-color:#166534;';}
+    }
+  }catch(e){}
 }
 
 /* ════════════════ 초기화 ════════════════ */
@@ -1810,9 +1813,32 @@ document.getElementById('content').addEventListener('click',function(e){
 });
 
 // 카드 피커 초기화
-renderSeatBtns();renderScBar();selectByIdx(3);resetTimer();updateSummaryBar();
-updateZoneBadge();updateBBDisplay();updateSummaryBar();
+try{renderSeatBtns();}catch(e){}
+try{renderScBar();}catch(e){}
+try{selectByIdx(3);}catch(e){console.error('selectByIdx:',e);}
+try{resetTimer();}catch(e){}
+try{updateSummaryBar();}catch(e){}
+try{updateZoneBadge();updateBBDisplay();}catch(e){}
 if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
+// 초기 렌더링 강제 실행
+setTimeout(()=>{
+  try{
+    calcMatrixSize();
+    renderScBar();
+    renderPositions();
+    renderMatrix();
+    updateSummaryBar();
+    // 팟참여/사이콜 버튼 재확인
+    if(!document.querySelector('#pot-btns .potb')){
+      const pw=document.getElementById('pot-btns');
+      if(pw){pw.innerHTML='';for(let i=2;i<=8;i++){const b=document.createElement('button');b.className='potb'+(i===2?' on':'');b.dataset.n=i;b.textContent=i;b.onclick=()=>setPotPlayers(i);pw.appendChild(b);}}
+    }
+    if(!document.querySelector('#limp-btns .potb')){
+      const lw=document.getElementById('limp-btns');
+      if(lw){lw.innerHTML='';for(let i=0;i<=6;i++){const b=document.createElement('button');b.className='potb'+(i===0?' on':'');b.dataset.n=i;b.textContent=i;b.onclick=()=>setLimpers(i);lw.appendChild(b);}}
+    }
+  }catch(e){console.warn('render err:',e.message,e.stack);}
+},200);
 </script>
 </body>
 </html>
