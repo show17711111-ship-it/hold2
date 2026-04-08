@@ -18,9 +18,10 @@ input[type=number]{-moz-appearance:textfield;}
 input::-webkit-inner-spin-button,input::-webkit-outer-spin-button{-webkit-appearance:none;}
 #app{display:flex;flex-direction:column;height:100vh;height:100dvh;}
 #hdr{background:#080808;border-bottom:0.5px solid #1a1a1a;flex-shrink:0;padding-top:env(safe-area-inset-top,0);}
-#content{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;}
-#sheet{background:#090909;border-top:1.5px solid #14532d;overflow:hidden;transition:max-height .3s cubic-bezier(.4,0,.2,1);max-height:0;flex-shrink:0;padding-bottom:env(safe-area-inset-bottom,0);}
-#sheet.open{max-height:520px;}
+#content{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding-bottom:0;}
+/* ── 핸드 배너: 하단 슬라이드업 ── */
+#sheet{position:fixed;bottom:0;left:0;right:0;z-index:6000;background:#0a0a0a;border-top:2px solid #14532d;border-radius:16px 16px 0 0;padding-bottom:env(safe-area-inset-bottom,0);transform:translateY(100%);transition:transform .28s cubic-bezier(.4,0,.2,1);box-shadow:0 -4px 24px rgba(0,0,0,.8);}
+#sheet.open{transform:translateY(0);}
 
 /* ─ 헤더 rows ─ */
 #r1{display:flex;align-items:center;justify-content:space-between;padding:8px 11px 5px;}
@@ -115,8 +116,8 @@ h1{font-size:14px;font-weight:700;color:#4ade80;}
 .pp.is-btn::after{content:'D';position:absolute;top:-4px;right:-3px;width:11px;height:11px;border-radius:50%;background:#f0c040;color:#000;font-size:6px;font-weight:800;line-height:11px;text-align:center;}
 
 /* ─ 매트릭스 ─ */
-#matrix-wrap{padding:7px 9px 3px;overflow-x:auto;-webkit-overflow-scrolling:touch;}
-.mgrid{display:inline-grid;grid-template-columns:16px repeat(13,24px);grid-template-rows:16px repeat(13,24px);gap:1px;}
+#matrix-wrap{padding:6px 6px 3px;overflow-x:auto;-webkit-overflow-scrolling:touch;width:100%;}
+.mgrid{display:grid;grid-template-columns:var(--cl) repeat(13,var(--cs));grid-template-rows:var(--cl) repeat(13,var(--cs));gap:1px;width:100%;}
 .ml{display:flex;align-items:center;justify-content:center;font-size:8px;color:#555;font-family:monospace;}
 .mc{display:flex;align-items:center;justify-content:center;border-radius:2px;font-size:7px;font-family:monospace;cursor:pointer;user-select:none;-webkit-user-select:none;transition:transform .08s;position:relative;}
 .mc:active{transform:scale(.85);}
@@ -180,12 +181,15 @@ h1{font-size:14px;font-weight:700;color:#4ade80;}
 #mhe-action{font-size:11px;color:#f0c040;margin-top:3px;font-weight:600;}
 
 /* ─ 시트 ─ */
-#si{padding:10px 13px 12px;overflow-y:auto;max-height:520px;}
+#si{padding:12px 14px 14px;overflow-y:auto;max-height:70dvh;}
 #sh{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;}
 #s-hand{font-size:24px;font-weight:700;font-family:monospace;color:#86efac;line-height:1;}
 #s-sub{font-size:9px;color:#2a2a2a;margin-top:2px;}
 #s-stack-info{margin-bottom:8px;padding:5px 8px;background:#0c1a10;border-radius:5px;border:0.5px solid #1a3a20;font-size:9px;color:#4ade80;line-height:1.6;}
-#close-btn{width:24px;height:24px;border-radius:50%;background:#161616;color:#444;font-size:16px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+#close-btn{width:28px;height:28px;border-radius:50%;background:#1a1a1a;color:#888;font-size:18px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+#s-top-action{font-size:13px;font-weight:700;padding:2px 10px;border-radius:5px;display:inline-block;}
+#s-hand{color:#86efac;}
+#sh{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;}
 
 /* 메인 액션 바 */
 .sheet-section-title{font-size:9px;color:#2a2a2a;margin-bottom:4px;margin-top:8px;letter-spacing:.3px;}
@@ -200,7 +204,7 @@ h1{font-size:14px;font-weight:700;color:#4ade80;}
 /* 레이즈 크기 비교 패널 (이미지 스타일) */
 #raise-compare{display:flex;gap:6px;margin-top:8px;}
 .rc-panel{flex:1;background:#0c0c0c;border-radius:6px;border:0.5px solid #1a1a1a;padding:7px;min-width:0;}
-.rc-title{font-size:9px;color:#2a2a2a;margin-bottom:5px;text-align:center;}
+.rc-title{font-size:9px;color:#888;margin-bottom:5px;text-align:center;}
 .rc-row{display:flex;align-items:center;gap:4px;margin:3px 0;}
 .rc-lbl{font-size:9px;font-weight:700;width:46px;flex-shrink:0;}
 .rc-bar-wrap{flex:1;height:14px;background:#141414;border-radius:2px;overflow:hidden;}
@@ -210,7 +214,7 @@ h1{font-size:14px;font-weight:700;color:#4ade80;}
 /* 포지션별 비교 테이블 */
 #pos-table{margin-top:8px;overflow-x:auto;}
 .pt-table{width:100%;border-collapse:collapse;}
-.pt-table th{font-size:8px;color:#2a2a2a;padding:3px 4px;text-align:center;font-weight:700;border-bottom:0.5px solid #141414;}
+.pt-table th{font-size:8px;color:#888;padding:3px 4px;text-align:center;font-weight:700;border-bottom:0.5px solid #1a1a1a;}
 .pt-table td{font-size:9px;padding:3px 4px;text-align:center;border-bottom:0.5px solid #0d0d0d;}
 .pt-table tr.cur-row td{background:#0a1a0e;}
 .pt-table td:first-child{font-family:monospace;font-weight:700;color:#4ade80;text-align:left;}
@@ -220,7 +224,7 @@ h1{font-size:14px;font-weight:700;color:#4ade80;}
 .mini-bar-c{height:100%;background:#378aDD;}
 .mini-bar-f{height:100%;background:#1e1e1e;}
 
-#s-tip{padding:6px 8px;background:#0c0c0c;border-radius:5px;font-size:9px;color:#4ade80;line-height:1.6;border-left:2px solid #14532d;margin-top:8px;}
+#s-tip{padding:9px 11px;background:#0a1a0e;border-radius:8px;font-size:11px;color:#86efac;line-height:1.65;border-left:3px solid #4ade80;margin-top:8px;}
 
 /* ─ 오버레이 / 모달 ─ */
 #shield{display:none;position:fixed;inset:0;background:#000;z-index:9999;flex-direction:column;align-items:center;justify-content:center;}
@@ -380,14 +384,26 @@ h1{font-size:14px;font-weight:700;color:#4ade80;}
 </div>
 
 <div id="sheet">
+  <!-- 드래그바 -->
+  <div style="display:flex;justify-content:center;padding:8px 0 4px;" onclick="closeSheet()">
+    <div style="width:36px;height:4px;border-radius:2px;background:#2a2a2a;"></div>
+  </div>
   <div id="si">
+    <!-- 핸드명 + 닫기 -->
     <div id="sh">
-      <div><div id="s-hand">AA</div><div id="s-sub">—</div></div>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <div id="s-hand" style="font-size:32px;font-weight:700;font-family:monospace;"></div>
+        <div>
+          <div id="s-top-action"></div>
+          <div id="s-sub" style="font-size:9px;color:#555;margin-top:2px;"></div>
+        </div>
+      </div>
       <button id="close-btn" onclick="closeSheet()">×</button>
     </div>
+    <!-- 스택 정보 -->
     <div id="s-stack-info"></div>
     <!-- 메인 액션 -->
-    <div class="sheet-section-title">▶ 현재 시나리오 액션 추천</div>
+    <div class="sheet-section-title">▶ 액션 확률</div>
     <div id="acts"></div>
     <!-- 레이즈 크기 비교 -->
     <div id="raise-compare-wrap">
@@ -996,16 +1012,27 @@ function renderSheet(){
       </div>
       <div class="apct" style="color:${b.c};">${b.v}%</div>
     </div>`).join('');
+  // 상단 배너: 최고 액션 강조
+  const topAct=bars.reduce((a,b)=>b.v>a.v?b:{v:0,l:'',c:'#888'},{v:0,l:'',c:'#888'});
+  const actEl=document.getElementById('s-top-action');
+  if(topAct.v>0){
+    actEl.textContent=topAct.l+' '+topAct.v+'%';
+    actEl.style.background=topAct.c+'22';
+    actEl.style.color=topAct.c;
+    actEl.style.border='1px solid '+topAct.c+'55';
+  }else{actEl.textContent='';}
 
-  // 🚀 올인 찬스 팝업
+  // 🚀 올인 찬스 → 배너 테두리+진동 (팝업 제거)
   const topBar=bars.reduce((a,b)=>b.v>a.v?b:a,{v:0});
-  if((topBar.l.includes('올인')||topBar.l.includes('push'))&&topBar.v>=55){
-    setTimeout(()=>{
-      document.getElementById('ap-pct').textContent=topBar.v+'%';
-      document.getElementById('ap-sub').textContent=`${hand} · ${PFULL[pi]} · ${fmtC(S.curChip)||'올인'}`;
-      document.getElementById('allin-popup').classList.add('show');
-      if(navigator.vibrate)navigator.vibrate([150,80,150]);
-    },400);
+  const isAllin=(topBar.l&&(topBar.l.includes('올인')||topBar.l.includes('push')))&&topBar.v>=55;
+  const sheetEl=document.getElementById('sheet');
+  if(isAllin){
+    sheetEl.style.borderTopColor='#ef4444';
+    sheetEl.style.boxShadow='0 -4px 24px rgba(239,68,68,.45)';
+    if(navigator.vibrate)navigator.vibrate([80,40,80]);
+  }else{
+    sheetEl.style.borderTopColor='#14532d';
+    sheetEl.style.boxShadow='0 -4px 24px rgba(0,0,0,.8)';
   }
 
   // 레이즈 비교 패널 (fi 제외)
@@ -1471,6 +1498,24 @@ for(let i=0;i<=6;i++){
   b.className='potb'+(i===0?' on':'');b.dataset.n=i;b.textContent=i;
   b.onclick=()=>setLimpers(i);limpWrap.appendChild(b);
 }
+// 매트릭스 동적 셀 크기 계산
+function calcMatrixSize(){
+  const w=window.innerWidth-12; // 좌우 패딩 6px씩
+  const cs=Math.floor((w-20)/14); // 14칸(레이블1+13열), 여백20px
+  const cl=Math.max(14,Math.round(cs*.65));
+  document.documentElement.style.setProperty('--cs',Math.min(Math.max(cs,24),34)+'px');
+  document.documentElement.style.setProperty('--cl',Math.min(Math.max(cl,14),22)+'px');
+}
+calcMatrixSize();
+window.addEventListener('resize',calcMatrixSize);
+
+// 배경 탭으로 배너 닫기
+document.getElementById('content').addEventListener('click',function(e){
+  if(S.hand&&!e.target.closest('.mc')&&!e.target.closest('#sheet')){
+    closeSheet();
+  }
+});
+
 // 카드 피커 초기화
 renderSeatBtns();renderScBar();selectByIdx(3);resetTimer();
 updateZoneBadge();updateBBDisplay();
