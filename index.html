@@ -67,9 +67,7 @@ input::-webkit-inner-spin-button,input::-webkit-outer-spin-button{-webkit-appear
 #t-time{font-size:13px;font-weight:700;font-family:monospace;color:#f0c040;flex-shrink:0;}
 #t-lvl{font-size:8px;color:#aaa;flex-shrink:0;}
 #t-blind{font-size:8px;color:#4ade80;flex:1;text-align:right;font-family:monospace;white-space:nowrap;overflow:hidden;}
-#t-play{width:26px;height:26px;border-radius:5px;background:#14532d;border:0.5px solid #166534;color:#86efac;font-size:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
-#t-play.pause{background:#3d1400;border-color:#7c2d12;color:#fdba74;}
-#t-rst{width:22px;height:26px;border-radius:5px;background:#141414;border:0.5px solid #222;color:#999;font-size:11px;display:flex;align-items:center;justify-content:center;}
+/* t-play/t-rst는 줄4로 이동, 줄2에서 제거됨 */
 
 /* 칩 입력 */
 .ci{height:26px;background:#141414;border:0.5px solid #222;border-radius:5px;color:#fff;font-size:11px;font-weight:600;text-align:center;font-family:monospace;}
@@ -80,6 +78,7 @@ input::-webkit-inner-spin-button,input::-webkit-outer-spin-button{-webkit-appear
 /* 스타트/끝내기 버튼 */
 #btn-start{flex:1;height:28px;border-radius:6px;background:#14532d;border:0.5px solid #166534;color:#86efac;font-size:11px;font-weight:700;}
 #btn-end{flex:1;height:28px;border-radius:6px;background:#2d0808;border:0.5px solid #7c2020;color:#fca5a5;font-size:11px;font-weight:700;}
+#btn-rst{height:28px;padding:0 10px;border-radius:6px;background:#141414;border:0.5px solid #2a2a2a;color:#888;font-size:13px;font-weight:700;flex-shrink:0;}
 
 /* 내자리 */
 #seat-btns{display:flex;gap:2px;overflow-x:auto;scrollbar-width:none;flex:1;}
@@ -87,9 +86,10 @@ input::-webkit-inner-spin-button,input::-webkit-outer-spin-button{-webkit-appear
 .sb2{min-width:24px;height:26px;border-radius:4px;border:0.5px solid #222;background:#141414;color:#ddd;font-size:10px;font-weight:700;flex-shrink:0;}
 .sb2.on{background:#1c1500;color:#f0c040;border-color:#3a2800;}
 
-/* 모드 토글 */
-#mode-tog{display:flex;background:#111;border-radius:5px;border:0.5px solid #222;overflow:hidden;}
-.mtb{padding:4px 7px;font-size:10px;font-weight:700;color:#777;}
+/* 모드 토글 - 한 줄 스크롤 */
+#mode-tog{display:flex;background:#111;border-radius:5px;border:0.5px solid #222;overflow-x:auto;scrollbar-width:none;}
+#mode-tog::-webkit-scrollbar{display:none;}
+.mtb{padding:4px 7px;font-size:10px;font-weight:700;color:#777;white-space:nowrap;flex-shrink:0;}
 .mtb.on{background:#1e3a5f;color:#7dd3fc;}
 .mtb.onp{background:#3b1c00;color:#fb923c;}
 .mtb.onfree{background:#1a0a3b;color:#c084fc;}
@@ -97,11 +97,16 @@ input::-webkit-inner-spin-button,input::-webkit-outer-spin-button{-webkit-appear
 .mtb.ondaily{background:#0a2020;color:#34d399;}
 .mtb.onhigh{background:#2a1500;color:#fbbf24;}
 /* 빌런 버튼 */
-#villain-btn{padding:4px 8px;border-radius:5px;background:#1a0808;border:0.5px solid #7c2020;color:#f87171;font-size:10px;font-weight:700;flex-shrink:0;}
+#villain-btn{padding:2px 8px;height:26px;border-radius:5px;background:#1a0808;border:0.5px solid #7c2020;color:#f87171;font-size:10px;font-weight:700;flex-shrink:0;white-space:nowrap;}
 #villain-btn.on{background:#3d0e0e;border-color:#ef4444;color:#fca5a5;animation:pulse .8s ease-in-out infinite;}
 @keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(239,68,68,.4);}50%{box-shadow:0 0 0 4px rgba(239,68,68,0);}}
 #villain-badge{display:none;font-size:9px;color:#f87171;background:#1a0808;border:0.5px solid #7c2020;padding:1px 6px;border-radius:4px;flex-shrink:0;}
 #villain-badge.on{display:inline-block;}
+
+/* 숏칩 뱃지 */
+#short-chip-badge{display:none;font-size:9px;font-weight:700;color:#fbbf24;background:#2d1800;border:0.5px solid #7c4a00;padding:2px 6px;border-radius:4px;flex-shrink:0;animation:shortPulse 1s ease-in-out infinite;}
+#short-chip-badge.on{display:inline-block;}
+@keyframes shortPulse{0%,100%{opacity:1;}50%{opacity:.6;}}
 
 /* 브레이크 */
 #brk-wrap{display:flex;gap:3px;align-items:center;flex-shrink:0;}
@@ -364,25 +369,23 @@ input::-webkit-inner-spin-button,input::-webkit-outer-spin-button{-webkit-appear
       <span id="sum-mode">대회</span>
       <span id="sum-players" style="font-size:10px;color:#ddd;background:#1a1a1a;padding:2px 6px;border-radius:4px;flex-shrink:0;">6인</span>
       <span id="sum-pos">BTN</span>
-      <span id="sum-blind">1K/2K</span>
+      <span id="sum-blind">100/200</span>
       <span id="sum-lvl-info" style="font-size:10px;color:#f0c040;font-family:monospace;flex-shrink:0;">Lv.1</span>
-      <span id="sum-timer">04:30</span>
+      <span id="sum-timer">06:00</span>
       <span id="sum-zone">칩미입력</span>
+      <!-- 숏칩 뱃지 -->
+      <span id="short-chip-badge">⚡숏칩ON</span>
     </div>
     <div id="sum-right" style="display:flex;align-items:center;gap:4px;">
       <span id="villain-badge">🦹빌런</span>
-      <div style="display:flex;flex-direction:column;gap:2px;align-items:flex-end;">
-        <div id="mode-tog">
-          <button class="mtb on" id="m-trn" onclick="event.stopPropagation();setMode('trn')">🏆대회</button>
-          <button class="mtb" id="m-pub" onclick="event.stopPropagation();setMode('pub')">🍺펍</button>
-          <button class="mtb" id="m-free" onclick="event.stopPropagation();setMode('free')">🎮무료</button>
-        </div>
-        <div style="display:flex;gap:2px;">
-          <button class="mtb" id="m-mini" onclick="event.stopPropagation();setMode('mini')">🔥미니</button>
-          <button class="mtb" id="m-daily" onclick="event.stopPropagation();setMode('daily')">💎데일리</button>
-          <button class="mtb" id="m-high" onclick="event.stopPropagation();setMode('high')">👑하이롤</button>
-          <button id="villain-btn" onclick="event.stopPropagation();toggleVillain()">🦹빌런</button>
-        </div>
+      <!-- ▼ 모드 버튼: 한 줄, 순서: 대회→펍→미니→데일리→하이롤→무료 -->
+      <div id="mode-tog">
+        <button class="mtb on" id="m-trn" onclick="event.stopPropagation();setMode('trn')">🏆대회</button>
+        <button class="mtb" id="m-pub" onclick="event.stopPropagation();setMode('pub')">🍺펍</button>
+        <button class="mtb" id="m-mini" onclick="event.stopPropagation();setMode('mini')">🔥미니</button>
+        <button class="mtb" id="m-daily" onclick="event.stopPropagation();setMode('daily')">💎데일리</button>
+        <button class="mtb" id="m-high" onclick="event.stopPropagation();setMode('high')">👑하이롤</button>
+        <button class="mtb" id="m-free" onclick="event.stopPropagation();setMode('free')">🎮무료</button>
       </div>
       <span id="tog-arrow">▼</span>
     </div>
@@ -397,41 +400,42 @@ input::-webkit-inner-spin-button,input::-webkit-outer-spin-button{-webkit-appear
       <div class="p-btns" id="pbtn"></div>
     </div>
 
-    <!-- 줄2: SB BB 1레벨 이후 타이머디스플레이 시작/리셋 -->
+    <!-- 줄2: SB BB 1레벨 이후 타이머디스플레이 (▶/↺ 버튼 제거 → 줄4로 이동) -->
     <div class="cfg-row">
       <span class="bl">SB</span>
-      <input type="number" class="bi" id="sb" value="1000" inputmode="numeric" onchange="onBlindChg()" style="width:58px;">
+      <input type="number" class="bi" id="sb" value="100" inputmode="numeric" onchange="onBlindChg()" style="width:58px;">
       <span class="bl">BB</span>
-      <input type="number" class="bi" id="bb" value="2000" inputmode="numeric" onchange="onBlindChg()" style="width:58px;">
+      <input type="number" class="bi" id="bb" value="200" inputmode="numeric" onchange="onBlindChg()" style="width:58px;">
       <span class="ti-l">1레벨</span>
-      <input type="text" class="ti" id="t1" value="04:30" maxlength="5" oninput="fmtTime(this)" style="width:38px;">
+      <input type="text" class="ti" id="t1" value="06:00" maxlength="5" oninput="fmtTime(this)" style="width:38px;">
       <span class="ti-l">이후</span>
       <input type="text" class="ti" id="tn" value="06:00" maxlength="5" oninput="fmtTime(this)" style="width:38px;">
       <div id="tdsp">
-        <span id="t-time">04:30</span>
+        <span id="t-time">06:00</span>
         <span id="t-lvl">Lv.1</span>
-        <span id="t-blind">1K/2K</span>
+        <span id="t-blind">100/200</span>
       </div>
-      <button id="t-play" onclick="toggleTimer()">▶</button>
-      <button id="t-rst" onclick="resetTimer()">↺</button>
     </div>
 
-    <!-- 줄3: 바인칩 / 현재칩 / 브레이크 -->
+    <!-- 줄3: 현재칩 / 칩리더 / 빌런 / 브레이크 -->
     <div class="cfg-row">
       <span class="cl">현재칩</span>
       <input type="number" class="ci" id="cur-chip" placeholder="0" inputmode="numeric" onchange="onChipChg()" style="width:80px;">
       <span class="cg-bb" id="cc-bb">—</span>
       <button id="chip-leader-btn" onclick="toggleChipLeader()" style="padding:2px 9px;height:26px;border-radius:5px;background:#111;border:0.5px solid #222;color:#666;font-size:10px;font-weight:700;white-space:nowrap;margin-left:4px;">👑칩리더</button>
+      <!-- 빌런 버튼: 칩리더 오른쪽 -->
+      <button id="villain-btn" onclick="toggleVillain()">🦹빌런</button>
       <div id="brk-wrap" style="margin-left:auto;">
         <input type="text" class="ti" id="brk-t-in" value="15:00" maxlength="5" style="width:36px;height:26px;font-size:9px;">
         <button id="brk-btn" onclick="toggleBreak()">☕</button>
       </div>
     </div>
 
-    <!-- 줄4: 스타트 / 끝내기 / 모드 안내 -->
+    <!-- 줄4: 스타트 / 끝내기 / 새로고침 / 모드 안내 -->
     <div class="cfg-row" style="gap:6px;">
       <button id="btn-start" onclick="onStart()">▶ 스타트</button>
       <button id="btn-end" onclick="onEnd()">✕ 끝내기</button>
+      <button id="btn-rst" onclick="resetTimer()">↺</button>
       <span id="mode-desc" style="font-size:9px;color:#666;flex:1;text-align:right;white-space:nowrap;overflow:hidden;"></span>
     </div>
 
@@ -641,18 +645,13 @@ const HT={AA:1,KK:1,QQ:1,JJ:2,TT:2,'99':3,'88':3,'77':4,'66':4,'55':5,'44':5,'33
 AKs:1,AQs:2,AJs:2,ATs:3,A9s:4,A8s:4,A7s:4,A6s:5,A5s:4,A4s:5,A3s:5,A2s:5,
 KQs:2,KJs:3,KTs:4,K9s:5,QJs:3,QTs:4,JTs:3,J9s:4,T9s:4,'98s':4,'87s':5,'76s':5,'65s':6,'54s':6,
 AKo:1,AQo:2,AJo:3,ATo:4,KQo:3,KJo:4,KTo:5,QJo:4,JTo:4,T9o:5};
-/* ──────────────────────────────────────────
-   종합 팁 데이터: fi / vr / allin / rr 상황별
-   ────────────────────────────────────────── */
+
 const TIPS={
-/* 프리미엄 페어 */
 'AA':{fi:'절대 림프 금지. 무조건 3BB+ 레이즈. 3벳에 4벳 올인. EP 트랩 가능하지만 기본은 올인.',vr:'레이즈 크기 무관 4벳 올인. 단 100BB+ 딥스택에서는 4벳 후 반응 확인.',allin:'에쿼티 85%+. 무조건 콜.',rr:'5벳 올인. 예외 없음.'},
 'KK':{fi:'무조건 레이즈. A 플랍 두려워 말고 프리플랍 밸류 극대화.',vr:'4벳 올인 기본. A 오버카드 없는 플랍에서 풀 밸류.',allin:'에쿼티 80%+. AA 아니면 콜.',rr:'5벳 올인. 딥스택 4벳 후 올인도 OK.'},
 'QQ':{fi:'모든 포지션 레이즈. EP에서 3벳 직면 시 4벳 or 콜 선택.',vr:'3벳 기본. A·K 오버카드 보드에서 팟 컨트롤.',allin:'에쿼티 72%+. 콜 기본.',rr:'4벳 올인. A·K 없으면 강하게.'},
-/* 강한 페어 */
 'JJ':{fi:'레이즈. Q/K/A 보드에서 수동적으로. IP에서 수익성 극대화.',vr:'3벳 or 폴드. Q↑ 오버페어 보드에서 콜 지양.',allin:'에쿼티 60%+. IP에서 콜, OOP 타이트.',rr:'4벳 또는 폴드. QQ↑에 약함을 인지.'},
 'TT':{fi:'레이즈. J↑ 보드에서 팟 컨트롤 필수. 셋 없으면 원팟 마인드.',vr:'IP 3벳, OOP 콜 or 폴드. 보드에 오버카드 많으면 빠르게 폴드.',allin:'BB+수 고려. 단기전(≤25BB) 콜, 딥스택 신중.',rr:'폴드 고려. QQ+ 대부분.'},
-/* 미드 페어 */
 '99':{fi:'EP에서도 레이즈. 셋 없는 J↑ 보드에서 원팟 마인드.',vr:'IP 3벳 믹스, OOP 콜 후 셋 노리기.',allin:'≤20BB 콜. 딥스택 신중.',rr:'폴드 기본. QQ+ 상대가 많음.'},
 '88':{fi:'EP 폴드. MP+ 레이즈. 셋 없으면 빠른 포기.',vr:'CO/BTN에서만 3벳. OOP 폴드 경향.',allin:'≤15BB 콜.',rr:'폴드.'},
 '77':{fi:'CO+ 레이즈. EP/MP 폴드.',vr:'BTN에서만 콜 or 폴드. 셋 없으면 포기.',allin:'≤12BB 콜.',rr:'폴드.'},
@@ -661,7 +660,6 @@ const TIPS={
 '44':{fi:'BTN에서만 선택적. 셋 마이닝 목적.',vr:'딥스택 BTN 콜 정도.',allin:'≤8BB 콜.',rr:'폴드.'},
 '33':{fi:'BTN에서만 선택적.',vr:'딥스택에서만 콜.',allin:'≤7BB 콜.',rr:'폴드.'},
 '22':{fi:'BTN에서만.',vr:'딥스택에서만 콜.',allin:'≤6BB 콜.',rr:'폴드.'},
-/* AK/AQ */
 'AKs':{fi:'모든 포지션 레이즈. 수티드 특성으로 넛 플러시+스트레이트 드로 포텐셜.',vr:'3벳 or 4벳. 강력한 세미블러프. 페어 미스해도 드로 존재.',allin:'에쿼티 55%+. 콜.',rr:'4벳 올인 또는 3벳 후 올인.'},
 'AKo':{fi:'모든 포지션 레이즈. 프리플랍 최강. 포스트플랍 페어 미스 시 밸류 감소 인지.',vr:'3벳 or 4벳. 페어 미스해도 에쿼티 강함.',allin:'에쿼티 55%+. 콜.',rr:'4벳 올인.'},
 'AQs':{fi:'모든 포지션 레이즈. AK에 도미네이트 주의.',vr:'3벳. EP 오퍼 상대 시 4벳 신중.',allin:'50%+ 에쿼티. 콜.',rr:'3벳 or 폴드. AK/KK 상대 어려움.'},
@@ -670,7 +668,6 @@ const TIPS={
 'AJo':{fi:'CO+ 레이즈. EP/MP 폴드.',vr:'BTN/CO에서만 3벳.',allin:'신중. AK/AQ/AA/KK에 약함.',rr:'폴드.'},
 'ATs':{fi:'MP+ 레이즈.',vr:'CO+ 3벳 믹스. OOP 콜.',allin:'40%+.',rr:'폴드.'},
 'ATo':{fi:'CO+ 레이즈.',vr:'BTN에서만 3벳.',allin:'신중.',rr:'폴드.'},
-/* 수티드 에이스 */
 'A9s':{fi:'CO+ 레이즈.',vr:'BTN/SB 3벳 믹스. 넛 플러시 포텐셜.',allin:'신중.',rr:'폴드.'},
 'A8s':{fi:'BTN/SB 레이즈.',vr:'BTN 3벳 블러프 소재.',allin:'신중.',rr:'폴드.'},
 'A7s':{fi:'BTN/SB 레이즈.',vr:'블러프 3벳 소재.',allin:'신중.',rr:'폴드.'},
@@ -679,11 +676,9 @@ const TIPS={
 'A4s':{fi:'BTN/SB 레이즈.',vr:'3벳 블러프 소재.',allin:'폴드.',rr:'폴드.'},
 'A3s':{fi:'BTN/SB 선택적.',vr:'블러프 3벳.',allin:'폴드.',rr:'폴드.'},
 'A2s':{fi:'BTN에서 선택적.',vr:'블러프 3벳 소재.',allin:'폴드.',rr:'폴드.'},
-/* 오프수트 에이스 하위 */
 'A9o':{fi:'BTN/SB 선택적. 대부분 폴드.',vr:'폴드.',allin:'폴드.',rr:'폴드.'},
 'A8o':{fi:'BTN에서만 선택적.',vr:'폴드.',allin:'폴드.',rr:'폴드.'},
 'A7o':{fi:'폴드.',vr:'폴드.',allin:'폴드.',rr:'폴드.'},
-/* KQ */
 'KQs':{fi:'MP+ 레이즈. 브로드웨이+수티드. 블러프 캐처로 우수.',vr:'CO+ 3벳. OOP 콜.',allin:'45%+ 에쿼티.',rr:'폴드 or 3벳 믹스.'},
 'KQo':{fi:'MP+ 레이즈.',vr:'CO+ 3벳. OOP 폴드 경향.',allin:'신중.',rr:'폴드.'},
 'KJs':{fi:'CO+ 레이즈.',vr:'BTN 3벳 믹스.',allin:'신중.',rr:'폴드.'},
@@ -693,7 +688,6 @@ const TIPS={
 'K9s':{fi:'BTN/SB 선택적.',vr:'BTN 콜 or 폴드.',allin:'폴드.',rr:'폴드.'},
 'K8s':{fi:'BTN에서만.',vr:'폴드.',allin:'폴드.',rr:'폴드.'},
 'K7s':{fi:'BTN에서만.',vr:'폴드.',allin:'폴드.',rr:'폴드.'},
-/* QJ/JT */
 'QJs':{fi:'MP+ 레이즈. 포스트플랍 드로 최강.',vr:'CO+ 3벳 믹스. BTN 콜.',allin:'신중.',rr:'폴드.'},
 'QJo':{fi:'CO+ 레이즈.',vr:'BTN 콜 or 폴드.',allin:'폴드.',rr:'폴드.'},
 'QTs':{fi:'CO+ 레이즈.',vr:'BTN 콜.',allin:'신중.',rr:'폴드.'},
@@ -701,7 +695,6 @@ const TIPS={
 'JTs':{fi:'MP+ 레이즈. 수티드 커넥터 최강급. 드로 포텐셜 막강.',vr:'CO+ 3벳 믹스. BTN 콜.',allin:'신중.',rr:'폴드.'},
 'JTo':{fi:'BTN/SB 선택적.',vr:'폴드.',allin:'폴드.',rr:'폴드.'},
 'J9s':{fi:'BTN/SB 선택적.',vr:'폴드.',allin:'폴드.',rr:'폴드.'},
-/* 수티드 커넥터 */
 'T9s':{fi:'CO+ 레이즈. 멀티웨이 드로 파워.',vr:'BTN 콜.',allin:'폴드.',rr:'폴드.'},
 'T9o':{fi:'BTN/SB 선택적.',vr:'폴드.',allin:'폴드.',rr:'폴드.'},
 '98s':{fi:'BTN/SB 레이즈.',vr:'BTN 콜.',allin:'폴드.',rr:'폴드.'},
@@ -711,9 +704,6 @@ const TIPS={
 '54s':{fi:'SB/BB 선택적.',vr:'폴드.',allin:'폴드.',rr:'폴드.'},
 };
 
-/* ──────────────────────────────────────────
-   동적 팁 생성기: 상황별 맥락을 추가한 최종 팁
-   ────────────────────────────────────────── */
 function getTip(hand,pi,sc,stk){
   const t=HT[hand]||7;
   const bbCount=(stk&&stk.bbCount)||0;
@@ -723,8 +713,6 @@ function getTip(hand,pi,sc,stk){
   const isDeep=bbCount>60;
   const posN=['EP','MP','CO','BTN','SB','BB'][pi];
   const isBB=pi===5;
-
-  // 기본 팁 선택
   const tipObj=TIPS[hand];
   const scKey=sc==='fi'?'fi':sc==='allin'?'allin':sc==='rr'?'rr':'vr';
   let base=tipObj?(tipObj[scKey]||tipObj.fi||''):
@@ -733,13 +721,9 @@ function getTip(hand,pi,sc,stk){
     t<=5?'중간 핸드. 레이즈 or 폴드 이분법.':
     t<=6?'투기적 핸드. LP에서만 레이즈.':
     '약한 핸드. 대부분 폴드.';
-
-  // 스택 깊이 추가
   const stackNote=isCritical?` ⚡ ${bbCount}BB 단기전: 올인 or 폴드만.`:
     isShort?` 🟡 ${bbCount}BB 단기: 2.5BB 오픈권.`:
     isDeep?' 💙 딥스택: 수티드 커넥터·셋 마이닝 가치 상승.':'';
-
-  // 사이콜 컨텍스트
   let limpNote='';
   if(limpers>0){
     if(sc==='fi'){
@@ -752,11 +736,7 @@ function getTip(hand,pi,sc,stk){
                ` ✂️ ${limpers}명 콜 확인: 폴드. 스퀴즈 에쿼티 없음.`;
     }
   }
-
-  // 포지션별 추가 멘트
   const posNote=sc==='fi'&&!isBB&&t>=5&&pi<=1?' EP에서는 이 핸드 기본 폴드.':'';
-
-  // 모드별 멘트
   let modeNote='';
   const mAdj2=getModeAdj();
   if(S.villain){
@@ -768,8 +748,6 @@ function getTip(hand,pi,sc,stk){
   }else if(S.mode==='trn'&&mAdj2.ante){
     modeNote=' 🏆 앤티: BB가 BB금액 추가 납부. BB 디펜스 넓히고 BTN 스틸 추가.';
   }
-
-  // 칩리더 멘트
   let chipNote='';
   if(S.chipLeader){chipNote=' 👑 칩리더: 수티드 커넥터·셋 마이닝 추가. 블러프 기회 확대. 버블·단기 약자 스틸 적극.';}
   return base+stackNote+limpNote+posNote+modeNote+chipNote;
@@ -780,9 +758,9 @@ let S={
   players:6,mode:'trn',sc:'fi',
   rotIdx:0,posLabel:'BTN',posKey:'BTN',posIdx:3,
   seatNum:1,hand:null,
-  sbBase:1000,bbBase:2000,sbNow:1000,bbNow:2000,
+  sbBase:100,bbBase:200,sbNow:100,bbNow:200,
   blindLevel:1,
-  timerRunning:false,timerTotal:270,timerLeft:270,timerInterval:null,
+  timerRunning:false,timerTotal:360,timerLeft:360,timerInterval:null,
   buyIn:0,curChip:0,
   potPlayers:2,
   limpers:0,
@@ -819,8 +797,7 @@ function baseVr(hand,pi){
   return[tb,ca,Math.max(0,100-tb-ca)];
 }
 
-/* 팟 멀티웨이 보정: 멀티웨이일수록 한계핸드 폴드↑, 프리미엄 드로↑ */
-function applyMultiway(acts, sc, hand, n){
+function applyMultiway(acts,sc,hand,n){
   if(n<=2)return acts;
   const extra=n-2;
   const t=HT[hand]||7;
@@ -828,16 +805,14 @@ function applyMultiway(acts, sc, hand, n){
   const isMarginal=t>=5;
   if(sc==='fi'){
     let[r,al,l,f]=acts;
-    if(isStrong)return acts; // 프리미엄: 변화 없음
+    if(isStrong)return acts;
     if(isMarginal){
-      // 한계 핸드: 폴드↑ (멀티웨이에서 셋/드로 없이 어려움)
       const fBonus=Math.min(f+extra*7,95);
       const diff=fBonus-f;
       l=Math.max(0,l-Math.round(diff*.6));
       r=Math.max(0,r-Math.round(diff*.4));
       f=Math.max(0,100-r-al-l);
     }else{
-      // 중간 핸드: 약간 조정
       const bonus=extra*4;
       f=Math.min(f+Math.round(bonus*.5),95);
       r=Math.max(0,100-f-al-l);
@@ -846,7 +821,6 @@ function applyMultiway(acts, sc, hand, n){
   }else{
     let[t2,c,f]=acts;
     if(isStrong)return acts;
-    // 멀티웨이 레이즈 직면: 콜 범위 줄이고 폴드↑
     const fBonus=extra*5;
     c=Math.max(0,c-Math.round(fBonus*.4));
     t2=Math.max(0,t2-Math.round(fBonus*.3));
@@ -855,11 +829,6 @@ function applyMultiway(acts, sc, hand, n){
   }
 }
 
-
-/* ════════════════ 모드 정의 ════════════════ */
-// 모드별 레인지 조정 계수 [fi_fold_reduction, vr_3bet_mult, vr_call_mult]
-// fi_fold_reduction: 폴드 확률 감소 (넓은 레인지), 음수면 증가 (타이트)
-// vr_3bet_mult: 3벳 배율, vr_call_mult: 콜 배율
 const MODE_ADJ={
   trn: {fi_fold:-5,  vr3:1.0, vrc:0.7,  ante:true,  label:'🏆대회',  desc:'GTO 기반 타이트'},
   pub: {fi_fold:5,   vr3:0.9, vrc:1.1,  ante:false, label:'🍺펍',    desc:'표준 펍 스타일'},
@@ -868,13 +837,11 @@ const MODE_ADJ={
   high:{fi_fold:-8,  vr3:1.1, vrc:0.8,  ante:true,  label:'👑하이롤5만', desc:'하이롤러 타이트'},
   free:{fi_fold:0,   vr3:1.0, vrc:1.0,  ante:false, label:'🎮무료토너', desc:'무료 토너먼트'},
 };
-// 빌런 모드: 초강타이트 (비프리미엄 폴드, 프리미엄 올인 위주)
 const VILLAIN_ADJ={fi_fold:-20, vr3:1.4, vrc:0.3};
 
 function getModeAdj(){
   const base=MODE_ADJ[S.mode]||MODE_ADJ.trn;
   if(!S.villain)return base;
-  // 빌런 모드 + 현재 모드 조합
   return{
     fi_fold: base.fi_fold + VILLAIN_ADJ.fi_fold,
     vr3: base.vr3 * VILLAIN_ADJ.vr3,
@@ -885,16 +852,13 @@ function getModeAdj(){
   };
 }
 
-/* 앤티 보정: 대회/하이롤러에서 BB 포지션이 BB 한번 더 납부
-   → BB는 투자 금액이 크므로 디펜스 레인지 넓어짐
-   → 다른 포지션은 ante/BB 때문에 스틸 레인지 넓어짐 */
-function applyAnteAdj(acts, sc, pi, isAnteMode){
+function applyAnteAdj(acts,sc,pi,isAnteMode){
   if(!isAnteMode)return acts;
   if(sc==='fi'){
     let[r,al,l,f]=acts;
-    if(pi===5){// BB: 앤티 납부 → 디펜스 넓어짐
+    if(pi===5){
       const bonus=Math.min(f*.25,18);r=Math.round(r+bonus*.4);l=Math.round(l+bonus*.6);f=Math.max(0,100-r-al-l);
-    }else if(pi===3||pi===2){// BTN/CO: 스틸 레인지 넓어짐
+    }else if(pi===3||pi===2){
       const bonus=Math.min(f*.12,8);r=Math.round(r+bonus);f=Math.max(0,100-r-al-l);
     }
     return[r,al,l,f];
@@ -902,35 +866,24 @@ function applyAnteAdj(acts, sc, pi, isAnteMode){
   return acts;
 }
 
-/* ════ 올인 직면 전용 콜 테이블 ════
-   기준: 헤즈업(potPlayers=2) 에쿼티
-   멀티웨이 시 자동으로 축소됨           */
 const ALLIN_HU={
-  // 포켓 페어
   'AA':100,'KK':100,'QQ':99,'JJ':97,'TT':93,
   '99':87,'88':80,'77':73,'66':65,'55':57,'44':50,'33':44,'22':38,
-  // 수티드 에이스
   'AKs':99,'AQs':94,'AJs':88,'ATs':82,'A9s':74,'A8s':68,'A7s':62,
   'A6s':57,'A5s':60,'A4s':55,'A3s':52,'A2s':49,
-  // 오프수트 에이스
   'AKo':97,'AQo':90,'AJo':83,'ATo':75,
-  // 수티드 킹
   'KQs':82,'KJs':75,'KTs':68,'K9s':58,'K8s':50,'K7s':42,
-  // 오프수트 킹
   'KQo':76,'KJo':68,'KTo':58,'K9o':47,
-  // QJ이하 수티드 커넥터
   'QJs':70,'QTs':63,'Q9s':54,'JTs':66,'J9s':57,'T9s':62,
   '98s':57,'87s':52,'76s':48,'65s':45,'54s':42,
-  // 오프수트 브로드웨이
   'QJo':62,'JTo':57,'T9o':52,
 };
 
-function getAllinCall(hand, nPlayers){
-  const baseCall = ALLIN_HU[hand] || (HT[hand]<=2?85:HT[hand]<=3?70:HT[hand]<=4?55:HT[hand]<=5?40:25);
-  // 멀티웨이: 플레이어 1명 추가될수록 에쿼티 필요량 상승 → 콜 범위 축소
-  const multi = Math.max(0, nPlayers - 2);
-  const adj = multi * 9; // 3웨이: -9%, 4웨이: -18%
-  return Math.max(0, Math.min(100, baseCall - adj));
+function getAllinCall(hand,nPlayers){
+  const baseCall=ALLIN_HU[hand]||(HT[hand]<=2?85:HT[hand]<=3?70:HT[hand]<=4?55:HT[hand]<=5?40:25);
+  const multi=Math.max(0,nPlayers-2);
+  const adj=multi*9;
+  return Math.max(0,Math.min(100,baseCall-adj));
 }
 
 function getActs(hand,pi,sc,nPlayers){
@@ -941,104 +894,59 @@ function getActs(hand,pi,sc,nPlayers){
   const t=HT[hand]||7;
   const isBB=pi===5;
 
-  /* ── 첫 액션: 레이즈 OR 폴드 (림프 없음, BB 체크만 예외) ── */
   if(sc==='fi'){
     const mFI=[3,3,5,6,5,6];
     let[r,al,l,f]=baseFi(hand,pi);
-
-    // ① 림프→폴드 전환 (BB 제외)
-    if(!isBB){ f+=l; l=0; }
-
-    // ② 모드별 레인지 조정
+    if(!isBB){f+=l;l=0;}
     {
       const gap=t-mFI[pi];
-      const fd=mAdj.fi_fold; // 양수=폴드감소(넓어짐), 음수=폴드증가(타이트)
+      const fd=mAdj.fi_fold;
       if(gap===1&&isBB&&isPub)l=Math.min(30,l+20);
       else if(gap<=0&&f>0&&fd>0){
         const bn=Math.min(f*(fd/100)*2.2,fd*.8);
-        r=Math.round(r+bn*.6); if(isPub)l=Math.round(l+bn*.4); f=Math.max(0,100-r-al-l);
-      }else if(fd<0&&f<95){// 타이트: 폴드 증가
+        r=Math.round(r+bn*.6);if(isPub)l=Math.round(l+bn*.4);f=Math.max(0,100-r-al-l);
+      }else if(fd<0&&f<95){
         const tight=Math.min(Math.abs(fd)*0.8,15);
-        f=Math.min(95,f+tight); r=Math.max(0,r-tight*.7); al=Math.max(0,al-tight*.3);
+        f=Math.min(95,f+tight);r=Math.max(0,r-tight*.7);al=Math.max(0,al-tight*.3);
       }
-      // 앤티 보정
-      let a=[r,al,l,f]; a=applyAnteAdj(a,sc,pi,mAdj.ante); [r,al,l,f]=a;
-      // 칩리더 보정: 레인지 확장 (깊은 스택 → 더 투기적)
+      {const _a=applyAnteAdj([r,al,l,f],sc,pi,mAdj.ante);r=_a[0];al=_a[1];l=_a[2];f=_a[3];}
       if(S.chipLeader&&f>0&&t<=6){
         const bonus=Math.min(f*.20,14);
         r=Math.round(r+bonus*.7);if(isBB)l=Math.round(l+bonus*.3);
         f=Math.max(0,100-r-al-l);
       }
     }
-    // 미니데일리: 어그레시브 테이블 → 3벳+리레이즈 늘리고 콜 줄이기 (fi는 오픈↑)
     if(S.mode==='mini'&&!isBB&&f>0&&t<=4){
       const bn=Math.min(f*.18,12);r=Math.round(r+bn);f=Math.max(0,100-r-al-l);
     }
-
-    // ③ 사이 림퍼 보정: 아이소 레이즈 or 폴드
     if(limpers>0){
       if(t<=3){r=Math.min(r+limpers*4,92);al=Math.min(al+limpers*2,30);}
       else if(t<=5){const tight=limpers*7;r=Math.max(0,r-tight*.4);f=Math.min(98,f+tight*.6);}
       else{f=Math.min(98,f+limpers*10);r=Math.max(0,100-f-al-l);}
       f=Math.max(0,100-r-al-l);
     }
-
-    // ④ 멀티웨이
     let a=[r,al,l,f];
     a=applyMultiway(a,sc,hand,nPlayers);
     return a;
   }
 
-  /* ── 레이즈 직면: 3벳/올인 OR 폴드, 콜은 최소화 ── */
   let[tv,cv,fv]=baseVr(hand,pi);
   const adj=RADJ[sc]||{t:1,c:1};
   tv=Math.min(90,Math.round(tv*adj.t));
-  // 콜 40% 감소 (과도한 콜 방지, 이전 25% → 40%로 강화)
   cv=Math.min(50,Math.round(cv*adj.c*.60));
   fv=Math.max(0,100-tv-cv);
-
-  // 프리미엄 핸드(QQ+/AKs) 기본 3벳 보정: 너무 콜하지 않도록
-  if(t<=1&&sc!=='allin'){
-    // QQ+ : 3벳 최소 55% 이상 보장
-    tv=Math.max(tv,55);
-    cv=Math.min(cv,35);
-    fv=Math.max(0,100-tv-cv);
-  }else if(t===2&&sc!=='allin'){
-    // JJ/AKs: 3벳 최소 40% 이상
-    tv=Math.max(tv,40);
-    cv=Math.min(cv,45);
-    fv=Math.max(0,100-tv-cv);
-  }
-
-  // 모드별 조정: 3벳 배율, 콜 배율
+  if(t<=1&&sc!=='allin'){tv=Math.max(tv,55);cv=Math.min(cv,35);fv=Math.max(0,100-tv-cv);}
+  else if(t===2&&sc!=='allin'){tv=Math.max(tv,40);cv=Math.min(cv,45);fv=Math.max(0,100-tv-cv);}
   tv=Math.min(88,Math.round(tv*mAdj.vr3));
   cv=Math.min(60,Math.round(cv*mAdj.vrc));
   fv=Math.max(0,100-tv-cv);
-
-  // ★ 사이콜 스퀴즈 보정 (가장 중요) ★
-  // 콜러가 많을수록 → 가치 핸드는 올인/스퀴즈, 나머지 폴드
   if(limpers>0&&sc!=='allin'){
-    if(t<=1){
-      // QQ+ : 콜러 1명당 3벳+12%, 콜−10%
-      // 콜러 4명 = 3벳 ~80%+, 콜 5% 이하
-      tv=Math.min(88, tv+limpers*12);
-      cv=Math.max(0, limpers>=3?0:cv-limpers*10);
-    }else if(t<=2){
-      // JJ/AKs: 콜러 1명당 3벳+8%, 콜−8%
-      tv=Math.min(82, tv+limpers*8);
-      cv=Math.max(0, cv-limpers*8);
-    }else if(t<=4){
-      // TT~AJs: 타이트 스퀴즈
-      tv=Math.max(0,tv-limpers*4);
-      cv=Math.max(0,cv-limpers*10);
-    }else{
-      // 나머지: 사이 콜이면 거의 폴드
-      cv=Math.max(0,cv-limpers*12);
-      tv=Math.max(0,tv-limpers*5);
-    }
+    if(t<=1){tv=Math.min(88,tv+limpers*12);cv=Math.max(0,limpers>=3?0:cv-limpers*10);}
+    else if(t<=2){tv=Math.min(82,tv+limpers*8);cv=Math.max(0,cv-limpers*8);}
+    else if(t<=4){tv=Math.max(0,tv-limpers*4);cv=Math.max(0,cv-limpers*10);}
+    else{cv=Math.max(0,cv-limpers*12);tv=Math.max(0,tv-limpers*5);}
     fv=Math.max(0,100-tv-cv);
   }
-
   let a=[tv,cv,fv];
   if(sc==='allin'){
     const huCall=getAllinCall(hand,nPlayers);
@@ -1052,25 +960,23 @@ function cellCls(hand,pi,sc){
   const a=getActs(hand,pi,sc);
   if(sc==='fi'){
     const[r,al,l,f]=a;
-    if(f>=99)return'out'; if(f>=72)return'weak';
-    if(al>=12)return'allin'; if(r+al>=55)return'raise';
-    if(l>=25)return'limp'; if(l>=8)return'limp-w';
+    if(f>=99)return'out';if(f>=72)return'weak';
+    if(al>=12)return'allin';if(r+al>=55)return'raise';
+    if(l>=25)return'limp';if(l>=8)return'limp-w';
     return'weak';
   }
   if(sc==='allin'){const[c]=a;if(c<20)return'out';if(c<40)return'call-w';if(c<70)return'call';return'allin';}
   const[t,c,f]=a;
-  // 빌런 모드: 폴드 임계값 강화
   const fThreshold=S.villain?70:80;
-  if(f>=98)return'out'; if(f>=fThreshold)return'weak';
-  if(t>=25)return'tbet'; if(c>=25)return'call';
-  if(t>=10)return'tbet-w'; if(c>=10)return'call-w';
+  if(f>=98)return'out';if(f>=fThreshold)return'weak';
+  if(t>=25)return'tbet';if(c>=25)return'call';
+  if(t>=10)return'tbet-w';if(c>=10)return'call-w';
   return'weak';
 }
 
-/* ─ 상세 액션 계산 ─ */
 function fmtC(n){if(n>=1000000)return(n/1000000).toFixed(1)+'M';if(n>=1000)return Math.round(n/100)/10+'K';return n;}
 function getStackInfo(){
-  const bb=S.bbNow||2000,chips=S.curChip||0;
+  const bb=S.bbNow||200,chips=S.curChip||0;
   if(chips<=0)return{bbCount:0,zone:'unknown'};
   const bbCount=Math.round(chips/bb);
   return{bbCount,zone:bbCount<=10?'critical':bbCount<=20?'short':bbCount<=40?'normal':'deep'};
@@ -1086,20 +992,24 @@ function updateZoneBadge(){
   if(el){el.textContent=z.txt;el.style.color=z.col;el.style.background=z.bg;el.style.borderColor=z.col+'33';}
 }
 function updateBBDisplay(){
-  const bb=S.bbNow||2000;
-  const bi=S.buyIn,cc=S.curChip;
-  // bi-bb removed
-  document.getElementById('cc-bb').textContent=cc>0?(Math.round(cc/bb)+'BB'):'—';
+  const bb=S.bbNow||200;
+  const cc=S.curChip;
+  const bbCnt=cc>0?Math.round(cc/bb):0;
+  document.getElementById('cc-bb').textContent=cc>0?(bbCnt+'BB'):'—';
+  // 숏칩 뱃지
+  const shortBadge=document.getElementById('short-chip-badge');
+  if(shortBadge){
+    if(bbCnt>0&&bbCnt<10){shortBadge.classList.add('on');}
+    else{shortBadge.classList.remove('on');}
+  }
 }
 
-/* 시트용 상세 액션 */
 function getDetailedBars(hand,pi,sc){
   const raw=getActs(hand,pi,sc);
   const stk=getStackInfo();
-  const bbNow=S.bbNow||2000,chips=S.curChip||0;
+  const bbNow=S.bbNow||200,chips=S.curChip||0;
   const bbCount=stk.bbCount;
   const note=v=>chips>0?fmtC(v):'';
-
   if(sc==='fi'){
     const[r,al,l,f]=raw;
     const mult=bbCount>0&&bbCount<=30?2.5:3;
@@ -1107,7 +1017,6 @@ function getDetailedBars(hand,pi,sc){
     const isBB=pi===5;
     const items=[];
     if(bbCount>0&&bbCount<=12){
-      // ≤12BB: 올인 or 폴드
       const push=Math.min(93,al+r);
       return[{l:'올인 (push)',v:Math.round(push),c:'#E24B4A',eq:62,note:chips?fmtC(chips):'전체'},{l:'폴드',v:100-Math.round(push),c:'#555',eq:0}].filter(b=>b.v>0);
     }
@@ -1153,9 +1062,7 @@ function getDetailedBars(hand,pi,sc){
   return items.filter(b=>b.v>0);
 }
 
-/* ─ 레이즈 크기별 비교 데이터 ─ */
 function getRaiseCompareData(hand,pi){
-  const panelsSmall=['r2','r3'],panelsBig=['r5','r10'];
   function panel(sc){
     const a=getActs(hand,pi,sc);
     const[t,c,f]=a;
@@ -1166,15 +1073,10 @@ function getRaiseCompareData(hand,pi){
   return{small:panel('r3'),big:panel('r5')};
 }
 
-/* ─ 포지션별 비교 테이블 ─ */
 function getPosTableData(hand,sc){
   return[0,1,2,3,4,5].map(pi=>{
     const a=getActs(hand,pi,sc);
-    if(sc==='fi'){
-      const[r,al,l,f]=a;
-      const raise=r+al,call_limp=l;
-      return{pi,raise,call_limp,fold:f};
-    }
+    if(sc==='fi'){const[r,al,l,f]=a;return{pi,raise:r+al,call_limp:l,fold:f};}
     if(sc==='allin'){const[c,f]=a;return{pi,raise:0,call_limp:c,fold:f};}
     const[t,c,f]=a;
     return{pi,raise:t,call_limp:c,fold:f};
@@ -1183,8 +1085,8 @@ function getPosTableData(hand,sc){
 
 /* ════════════════ 렌더 ════════════════ */
 function renderScBar(){
-  const scb=document.getElementById('sc-bar');if(!scb)return;scb.innerHTML=SC_LIST.map(s=>
-    `<div class="scpill${S.sc===s.key?' on':''}" onclick="setSc('${s.key}')"><div class="sp1">${s.l1}</div><div class="sp2">${s.l2}</div></div>`).join('');
+  const scb=document.getElementById('sc-bar');if(!scb)return;
+  scb.innerHTML=SC_LIST.map(s=>`<div class="scpill${S.sc===s.key?' on':''}" onclick="setSc('${s.key}')"><div class="sp1">${s.l1}</div><div class="sp2">${s.l2}</div></div>`).join('');
 }
 function renderPositions(){
   const seats=SEATS[S.players],N=seats.length;
@@ -1226,7 +1128,6 @@ function renderLegend(){
   try{const legEl=document.getElementById('legend');if(legEl)legEl.innerHTML=it.map(([c,l])=>`<div class="li"><div class="ld" style="background:${c};"></div>${l}</div>`).join('');}catch(e){}
 }
 
-/* ─ 시트 렌더 ─ */
 function renderSheet(){
   if(!S.hand){closeSheet();return;}
   const hand=S.hand,pi=S.posIdx,sc=S.sc;
@@ -1234,9 +1135,7 @@ function renderSheet(){
   const type=isP?'포켓 페어':hand.endsWith('s')?'수티드':'오프수트';
   const scLabel=SC_LIST.find(s=>s.key===sc)?.l1||sc;
   const stk=getStackInfo();
-  const bbNow=S.bbNow||2000;
-
-  // 스택 정보 문자열
+  const bbNow=S.bbNow||200;
   const fmt=n=>n>=1000?Math.round(n/100)/10+'K':n;
   const bbCount=stk.bbCount;
   let stkParts=[];
@@ -1245,36 +1144,21 @@ function renderSheet(){
   if(S.curChip>0)stkParts.push('현재'+fmt(S.curChip));
   if(S.potPlayers>2)stkParts.push('멀티웨이 '+S.potPlayers+'명');
   if(S.limpers>0)stkParts.push('사이콜 '+S.limpers+'명');
-
-  // 액션 바 데이터
   const bars=getDetailedBars(hand,pi,sc);
   const topBar=bars.reduce((a,b)=>b.v>a.v?b:a,{v:0,l:'',c:'#888'});
-
-  // ── 팝업 내용 ──
   const _sh=document.getElementById('s-hand');if(_sh)_sh.textContent=hand;
   const _ssub=document.getElementById('s-sub');if(_ssub)_ssub.textContent=type+' · '+PFULL[pi]+' · '+scLabel+' · '+(S.mode==='trn'?'🏆대회':'🍺펍');
   const _ssi=document.getElementById('s-stack-info');
   if(_ssi)_ssi.innerHTML=stkParts.map((p,i)=>`<span style="color:${i===0?'#4ade80':'#bbb'}">${p}</span>`).join('<span style="color:#333;margin:0 4px;">·</span>');
-
-  // 팝업 최고 액션 배지
   const actEl=document.getElementById('s-top-action');
-  if(actEl&&topBar.v>0){
-    actEl.textContent=topBar.l+' '+topBar.v+'%';
-    actEl.style.background=topBar.c+'22';actEl.style.color=topBar.c;actEl.style.border='1px solid '+topBar.c+'55';
-  }
-
-  // 팝업 액션 바
+  if(actEl&&topBar.v>0){actEl.textContent=topBar.l+' '+topBar.v+'%';actEl.style.background=topBar.c+'22';actEl.style.color=topBar.c;actEl.style.border='1px solid '+topBar.c+'55';}
   document.getElementById('acts').innerHTML=bars.map(b=>`
     <div class="ar">
       <div class="albl" style="color:${b.c};">${b.l}${b.note?`<span class="anote">${b.note}</span>`:''}</div>
       <div class="abg"><div class="abar" style="width:${b.v}%;background:${b.c};"></div></div>
       <div class="apct" style="color:${b.c};">${b.v}%</div>
     </div>`).join('');
-
-  // 팁 (팝업 안)
   document.getElementById('s-tip').textContent=getTip(hand,pi,sc,stk);
-
-  // 레이즈 비교 (팝업 안)
   const rcWrap=document.getElementById('raise-compare-wrap');
   if(rcWrap&&sc!=='fi'&&sc!=='allin'){
     rcWrap.style.display='';
@@ -1285,17 +1169,11 @@ function renderSheet(){
     };
     document.getElementById('raise-compare').innerHTML=rcHtml(cd.small,'3BB 레이즈')+rcHtml(cd.big,'5BB 레이즈');
   }else if(rcWrap){rcWrap.style.display='none';}
-
-  // 올인 찬스 → 테두리 색 변경
   const isAllin=(topBar.l&&(topBar.l.includes('올인')||topBar.l.includes('push')))&&topBar.v>=55;
   const sheetEl=document.getElementById('sheet');
   if(sheetEl){sheetEl.style.borderColor=isAllin?'#ef4444':'#14532d';}
   if(isAllin&&navigator.vibrate)navigator.vibrate([80,40,80]);
-
-  // 팝업 열기
   const ovl=document.getElementById('sheet-overlay');if(ovl)ovl.classList.add('open');
-
-  // ── 하단 패널 업데이트 (팝업 닫혀도 유지) ──
   updateHandInfoPanel(hand,pi,sc,bars,stk);
 }
 
@@ -1303,8 +1181,6 @@ function updateHandInfoPanel(hand,pi,sc,bars,stk){
   const panel=document.getElementById('hand-info-panel');
   if(!panel)return;
   panel.style.display='';
-
-  // 핸드명 + 최고액션
   const fmt=n=>n>=1000?Math.round(n/100)/10+'K':n;
   const topBar=bars?bars.reduce((a,b)=>b.v>a.v?b:a,{v:0,l:'',c:'#888'}):{v:0,l:'',c:'#888'};
   const scLabel=SC_LIST.find(s=>s.key===sc)?.l1||sc;
@@ -1312,8 +1188,6 @@ function updateHandInfoPanel(hand,pi,sc,bars,stk){
   const el_act=document.getElementById('hip-top-act');
   if(el_act&&topBar.v>0){el_act.textContent=topBar.l+' '+topBar.v+'%';el_act.style.background=topBar.c+'22';el_act.style.color=topBar.c;el_act.style.border='1px solid '+topBar.c+'55';}
   const el_sub=document.getElementById('hip-sub');if(el_sub)el_sub.textContent=PFULL[pi]+' · '+scLabel;
-
-  // 액션 바 (컴팩트)
   const el_acts=document.getElementById('hip-acts');
   if(el_acts&&bars){
     el_acts.innerHTML=bars.map(b=>`<div style="display:flex;align-items:center;gap:6px;margin:3px 0;">
@@ -1325,8 +1199,6 @@ function updateHandInfoPanel(hand,pi,sc,bars,stk){
       <div style="font-size:11px;font-weight:700;color:${b.c};width:30px;text-align:right;">${b.v}%</div>
     </div>`).join('');
   }
-
-  // 포지션별 테이블 (컴팩트)
   const ptData=getPosTableData(hand,sc);
   const poNames=['UTG','HJ','CO','BTN','SB','BB'];
   const rLabel=sc==='fi'?'레이즈':sc==='allin'?'콜':'3벳';
@@ -1352,13 +1224,11 @@ function updateHandInfoPanel(hand,pi,sc,bars,stk){
 }
 function closeSheet(){
   const ovl=document.getElementById('sheet-overlay');if(ovl)ovl.classList.remove('open');
-  // hand-info-panel은 유지 (마지막 선택 핸드 표시)
   S.hand=null;
   document.querySelectorAll('.mc.sel').forEach(el=>el.classList.remove('sel'));
 }
 function selectHand(hand){
   if(S.hand===hand){
-    // 같은 핸드 클릭: 팝업 열기 (이미 열려있으면 닫기)
     const ovl=document.getElementById('sheet-overlay');
     if(ovl&&ovl.classList.contains('open')){ovl.classList.remove('open');}
     else{renderSheet();}
@@ -1383,7 +1253,6 @@ function setSc(sc){
 }
 
 /* ════════════════ 빌런 모드 ════════════════ */
-/* ════ 칩리더 모드 ════ */
 function toggleChipLeader(){
   S.chipLeader=!S.chipLeader;
   const btn=document.getElementById('chip-leader-btn');
@@ -1421,11 +1290,9 @@ function setMode(m){
   const highBtn=document.getElementById('m-high');if(highBtn)highBtn.className='mtb'+(m==='high'?' onhigh':'');
   if(m==='free'){
     initFreeLevelAtCurrentTime();
-    // 20k 칩 세팅
-    // buy-in removed
     document.getElementById('cur-chip').value=20000;
-    S.buyIn=20000; S.curChip=20000;
-    updateBBDisplay(); updateZoneBadge();
+    S.buyIn=20000;S.curChip=20000;
+    updateBBDisplay();updateZoneBadge();
     initFreeMode();
     startFreeLevel(S.freeLevel);
   }else{
@@ -1512,13 +1379,18 @@ function updateTimerUI(){
   const sumLvl=document.getElementById('sum-lvl-info');
   const fmtQ=n=>n>=1000?Math.round(n/100)/10+'K':n;
   if(sumLvl)sumLvl.textContent='Lv.'+S.blindLevel+' '+fmtQ(S.sbNow)+'/'+fmtQ(S.bbNow);
+  // btn-start 동기화
+  const startBtn=document.getElementById('btn-start');
+  if(startBtn){
+    if(S.timerRunning){startBtn.textContent='⏸ 정지';startBtn.style.cssText='flex:1;height:28px;border-radius:6px;background:#3d1400;color:#fdba74;border:0.5px solid #7c2d12;font-size:11px;font-weight:700;';}
+    else{startBtn.textContent='▶ 스타트';startBtn.style.cssText='flex:1;height:28px;border-radius:6px;background:#14532d;color:#86efac;border:0.5px solid #166534;font-size:11px;font-weight:700;';}
+  }
 }
 function resetTimer(){
   clearInterval(S.timerInterval);S.timerRunning=false;
   S.blindLevel=1;S.sbNow=S.sbBase;S.bbNow=S.bbBase;
-  S.timerTotal=parseMM(document.getElementById('t1').value)||270;
+  S.timerTotal=parseMM(document.getElementById('t1').value)||360;
   S.timerLeft=S.timerTotal;
-  const btn=document.getElementById('t-play');btn.textContent='▶';btn.className='';
   updateTimerUI();
   document.getElementById('sb').value=S.sbBase;
   document.getElementById('bb').value=S.bbBase;
@@ -1526,10 +1398,10 @@ function resetTimer(){
 function toggleTimer(){
   if(S.timerRunning){
     clearInterval(S.timerInterval);S.timerRunning=false;
-    const btn=document.getElementById('t-play');btn.textContent='▶';btn.className='';
+    updateTimerUI();
   }else{
     S.timerRunning=true;
-    const btn=document.getElementById('t-play');btn.textContent='⏸';btn.classList.add('pause');
+    updateTimerUI();
     S.timerInterval=setInterval(()=>{
       if(S.breakActive)return;
       S.timerLeft--;
@@ -1574,7 +1446,6 @@ function endBreak(auto=false){
 }
 
 /* ════════════════ 플랍 분석 ════════════════ */
-const FLOPOPEN={'flop-body':false};
 function toggleFlop(){
   const body=document.getElementById('flop-body');
   const tog=document.getElementById('flop-toggle');
@@ -1595,19 +1466,10 @@ function renderPicker(){
   document.getElementById('picker-ranks').innerHTML=rr.map(r=>`<button class="pr-btn${S.pickerRank===r?' on':''}" onclick="pickRank('${r}')">${r}</button>`).join('');
   document.getElementById('picker-suits').innerHTML=['s','h','d','c'].map(s=>`<button class="ps-btn${S.pickerSuit===s?' on':''}" style="color:${SUIT_COL[s]};" onclick="pickSuit('${s}')">${SUIT_DISP[s]}</button>`).join('');
 }
-function pickRank(r){
-  S.pickerRank=r;
-  renderPicker();
-  if(S.pickerSuit)commitCard();
-}
-function pickSuit(s){
-  S.pickerSuit=s;
-  renderPicker();
-  if(S.pickerRank)commitCard();
-}
+function pickRank(r){S.pickerRank=r;renderPicker();if(S.pickerSuit)commitCard();}
+function pickSuit(s){S.pickerSuit=s;renderPicker();if(S.pickerRank)commitCard();}
 function commitCard(){
   const card=S.pickerRank+S.pickerSuit;
-  // 중복 체크
   const others=S.flopCards.filter((_,i)=>i!==S.pickerTarget).filter(c=>c);
   if(others.includes(card))return;
   S.flopCards[S.pickerTarget]=card;
@@ -1621,13 +1483,8 @@ function commitCard(){
 function updateCardUI(){
   S.flopCards.forEach((c,i)=>{
     const rEl=document.getElementById('cr'+i),sEl=document.getElementById('csuit'+i);
-    if(c){
-      rEl.textContent=c[0];rEl.style.color='#ddd';
-      sEl.textContent=SUIT_DISP[c[1]];sEl.style.color=SUIT_COL[c[1]];
-    }else{
-      rEl.textContent='?';rEl.style.color='#222';
-      sEl.textContent='?';sEl.style.color='#222';
-    }
+    if(c){rEl.textContent=c[0];rEl.style.color='#ddd';sEl.textContent=SUIT_DISP[c[1]];sEl.style.color=SUIT_COL[c[1]];}
+    else{rEl.textContent='?';rEl.style.color='#222';sEl.textContent='?';sEl.style.color='#222';}
   });
 }
 function updateFlopPreview(){
@@ -1641,81 +1498,44 @@ function clearFlop(){
   document.getElementById('card-picker').classList.remove('show');
 }
 
-/* ─ 보드 텍스처 분석 ─ */
 function analyzeBoard(cards){
   const parsed=cards.map(c=>({r:RVAL[c[0]],s:c[1],str:c}));
   const rs=parsed.map(c=>c.r).sort((a,b)=>b-a);
   const ss=parsed.map(c=>c.s);
-  // 수트
   const sc={};ss.forEach(s=>sc[s]=(sc[s]||0)+1);
   const maxS=Math.max(...Object.values(sc));
   const mono=maxS===3,twoTone=maxS===2,rainbow=maxS===1;
-  // 페어
   const paired=rs[0]===rs[1]||rs[1]===rs[2];
   const trips=rs[0]===rs[1]&&rs[1]===rs[2];
-  // 연결성 (스트레이트 드로 가능성)
   const gaps=[rs[0]-rs[1],rs[1]-rs[2]];
   const connected=gaps.every(g=>g<=2);
   const oneGap=gaps.some(g=>g===0)||gaps.filter(g=>g===1).length>=2;
-  // 높이
   const highCard=rs[0]>=12?'broadway':rs[0]>=10?'hi':rs[0]>=7?'mid':'low';
   return{parsed,rs,ss,paired,trips,mono,twoTone,rainbow,connected,oneGap,highCard,sc};
 }
 
-/* ─ 상대 레인지 추론 ─ */
 function inferOpponentRanges(tex,potPlayers,posKey){
   const{rs,paired,trips,mono,twoTone,connected,highCard}=tex;
   const ranges=[];
   const piKey=posKey||'BTN';
-  // 포지션별 레인지 특성
   const tight=piKey==='EP';
   const wide=piKey==='BTN'||piKey==='SB';
-
-  // 셋 가능 핸드
   if(!trips){
     rs.forEach(r=>{
-      const rank=RANKS[14-r]||r;
       const pct=tight?8:wide?15:11;
       ranges.push({hand:`${RANKS[14-r]}${RANKS[14-r]} (셋)`,pct,c:'#E24B4A',desc:'레인지 내 포켓페어'});
     });
   }
-  // 투페어
-  if(!paired){
-    const pct=tight?6:wide?12:9;
-    ranges.push({hand:`투페어`,pct,c:'#D85A30',desc:'두 보드카드 히트'});
-  }
-  // 탑페어
-  {
-    const topR=RANKS[14-rs[0]];
-    const pct=tight?18:wide?28:22;
-    ranges.push({hand:`탑페어 (${topR}x)`,pct,c:'#ba7517',desc:`${topR} 히트 핸드`});
-  }
-  // 오버페어 (보드 최고카드보다 높은 포켓페어)
-  if(rs[0]<13){
-    const pct=tight?12:wide?9:10;
-    ranges.push({hand:`오버페어 (AA~${RANKS[14-rs[0]-1]}${RANKS[14-rs[0]-1]})`,pct,c:'#7c3d0e',desc:'보드 위 포켓페어'});
-  }
-  // 플러시 드로
-  if(mono||twoTone){
-    const pct=tight?10:wide?18:14;
-    ranges.push({hand:'플러시 드로',pct,c:'#378ADD',desc:mono?'모노톤 보드':'투톤 보드'});
-  }
-  // 스트레이트 드로
-  if(connected){
-    const pct=tight?8:wide?14:10;
-    ranges.push({hand:'스트레이트 드로',pct,c:'#4ade80',desc:'커넥티드 보드 드로'});
-  }
-  // 에어/오버카드
-  {
-    const pct=tight?38:wide?24:32;
-    ranges.push({hand:'에어/오버카드',pct,c:'#444',desc:'미스 or 백도어'});
-  }
-  // 총합 100으로 정규화
+  if(!paired){const pct=tight?6:wide?12:9;ranges.push({hand:`투페어`,pct,c:'#D85A30',desc:'두 보드카드 히트'});}
+  {const topR=RANKS[14-rs[0]];const pct=tight?18:wide?28:22;ranges.push({hand:`탑페어 (${topR}x)`,pct,c:'#ba7517',desc:`${topR} 히트 핸드`});}
+  if(rs[0]<13){const pct=tight?12:wide?9:10;ranges.push({hand:`오버페어 (AA~${RANKS[14-rs[0]-1]}${RANKS[14-rs[0]-1]})`,pct,c:'#7c3d0e',desc:'보드 위 포켓페어'});}
+  if(mono||twoTone){const pct=tight?10:wide?18:14;ranges.push({hand:'플러시 드로',pct,c:'#378ADD',desc:mono?'모노톤 보드':'투톤 보드'});}
+  if(connected){const pct=tight?8:wide?14:10;ranges.push({hand:'스트레이트 드로',pct,c:'#4ade80',desc:'커넥티드 보드 드로'});}
+  {const pct=tight?38:wide?24:32;ranges.push({hand:'에어/오버카드',pct,c:'#444',desc:'미스 or 백도어'});}
   const total=ranges.reduce((s,r)=>s+r.pct,0);
   return ranges.map(r=>({...r,pct:Math.round(r.pct/total*100)})).sort((a,b)=>b.pct-a.pct);
 }
 
-/* ─ 내 핸드 평가 ─ */
 function evalMyHandOnBoard(handStr,boardCards){
   if(!handStr)return null;
   const bCards=boardCards.map(c=>({r:RVAL[c[0]],s:c[1]}));
@@ -1724,33 +1544,23 @@ function evalMyHandOnBoard(handStr,boardCards){
   const isSuited=handStr.endsWith('s');
   const r1=RVAL[handStr[0]],r2=RVAL[handStr[1]];
   const myRanks=isPair?[r1,r1]:[r1,r2];
-
-  // 셋
   if(isPair&&bRanks.includes(r1))return{strength:9,name:'셋!',emoji:'🎯',col:'#E24B4A',action:'밸류 올인/레이즈'};
-  // 투페어
-  const hits=myRanks.filter((r,i,arr)=>i===0&&bRanks.includes(r));
   const hits2=myRanks.filter(r=>bRanks.includes(r));
   if(!isPair&&hits2.length>=2)return{strength:8,name:'투페어',emoji:'💪',col:'#D85A30',action:'레이즈/3벳'};
-  // 탑페어
   if(hits2.length===1&&hits2[0]===bRanks[0])return{strength:7,name:'탑페어',emoji:'👍',col:'#ba7517',action:'베팅/콜'};
-  // 미드/바텀 페어
   if(hits2.length===1)return{strength:5,name:`미드/바텀페어(${RANKS[14-hits2[0]]})`,emoji:'😐',col:'#444',action:'팟 컨트롤'};
-  // 오버페어
   if(isPair&&r1>bRanks[0])return{strength:7,name:`오버페어(${handStr})`,emoji:'💪',col:'#ba7517',action:'레이즈/베팅'};
-  // 플러시 드로 / 플러시
   if(isSuited){
     const mySuit=handStr[handStr.length-1];
     const boardSuit=bCards.filter(c=>c.s===mySuit).length;
     if(boardSuit===3)return{strength:9,name:'플러시!',emoji:'🎨',col:'#E24B4A',action:'밸류 올인/레이즈'};
     if(boardSuit===2)return{strength:6,name:'넛 플러시 드로',emoji:'🎨',col:'#378ADD',action:'세미블러프/콜'};
   }
-  // 스트레이트 드로 (간략)
   const allRanks=[...myRanks,...bRanks].sort((a,b)=>b-a);
   const uniq=[...new Set(allRanks)];
   let maxRun=1,curRun=1;
   for(let i=1;i<uniq.length;i++){if(uniq[i-1]-uniq[i]<=2)curRun++;else curRun=1;maxRun=Math.max(maxRun,curRun);}
   if(maxRun>=4)return{strength:6,name:'스트레이트 드로',emoji:'🎰',col:'#60a5fa',action:'세미블러프/콜'};
-  // 오버카드
   const overs=myRanks.filter(r=>r>bRanks[0]).length;
   if(overs===2)return{strength:4,name:'오버카드 2장',emoji:'🤔',col:'#2a4a2a',action:'블러프 가능'};
   if(overs===1)return{strength:3,name:'오버카드 1장',emoji:'😕',col:'#1e1e1e',action:'체크/폴드 경향'};
@@ -1763,8 +1573,6 @@ function runFlopAnalysis(){
   const tex=analyzeBoard(cards);
   const ranges=inferOpponentRanges(tex,S.potPlayers,S.posKey);
   const myHandEval=S.hand?evalMyHandOnBoard(S.hand,cards):null;
-
-  // 텍스처 뱃지
   const badges=[];
   if(tex.trips)badges.push({t:'트리플!',c:'#E24B4A',bg:'#2d0808'});
   else if(tex.paired)badges.push({t:'페어드',c:'#D85A30',bg:'#2d1000'});
@@ -1774,10 +1582,7 @@ function runFlopAnalysis(){
   if(tex.connected)badges.push({t:'커넥티드',c:'#fbbf24',bg:'#1a1000'});
   if(tex.highCard==='broadway')badges.push({t:'하이보드',c:'#fca5a5',bg:'#1a0808'});
   else if(tex.highCard==='low')badges.push({t:'로우보드',c:'#4ade80',bg:'#061006'});
-
   let html=`<div class="fr-texture">${badges.map(b=>`<span class="tex-badge" style="color:${b.c};background:${b.bg};border:0.5px solid ${b.c}33;">${b.t}</span>`).join('')}</div>`;
-
-  // 내 핸드 평가
   if(myHandEval){
     html+=`<div id="my-hand-eval">
       <div id="mhe-title">내 핸드 (${S.hand}) 보드 평가</div>
@@ -1785,8 +1590,6 @@ function runFlopAnalysis(){
       <div id="mhe-action" style="color:#f0c040;">추천: ${myHandEval.action}</div>
     </div>`;
   }
-
-  // 상대 예상 핸드
   html+=`<div class="fr-section-title">상대 예상 핸드 분포 (${PFULL[S.posIdx]} vs ${S.potPlayers}명)</div>`;
   html+=ranges.map(r=>`<div class="range-item">
     <div class="ri-hand" style="color:${r.c};">${r.hand}</div>
@@ -1794,16 +1597,14 @@ function runFlopAnalysis(){
     <div class="ri-prob" style="color:${r.c};">${r.pct}%</div>
     <div class="ri-desc">${r.desc}</div>
   </div>`).join('');
-
   document.getElementById('flop-result').innerHTML=html;
 }
-
 
 /* ════════════════ 무료토너 모드 ════════════════ */
 const FREE_LEVELS=[
   {sb:100,bb:200,min:6},{sb:200,bb:300,min:6},{sb:300,bb:600,min:6},
   {sb:400,bb:800,min:6},{sb:500,bb:1000,min:6},
-  {sb:0,bb:0,min:6,brk:true}, // 브레이크
+  {sb:0,bb:0,min:6,brk:true},
   {sb:1000,bb:2000,min:6},{sb:2000,bb:3000,min:6},{sb:3000,bb:6000,min:6},
   {sb:4000,bb:8000,min:6},{sb:5000,bb:10000,min:6}
 ];
@@ -1813,7 +1614,6 @@ let freeTimer=null,freeTickInterval=null,freeAutoInterval=null;
 function initFreeMode(){
   const panel=document.getElementById('free-panel');
   panel.style.display='flex';
-  // 블라인드 테이블 렌더
   const tbl=document.getElementById('free-blind-table');
   tbl.innerHTML=FREE_LEVELS.map((l,i)=>{
     if(l.brk)return '<div style="display:flex;flex-direction:column;align-items:center;padding:4px 7px;background:#1a1400;border-radius:5px;border:0.5px solid #3a3000;flex-shrink:0;"><div style="font-size:8px;color:#f0c040;font-weight:700;">BRK</div><div style="font-size:8px;color:#888;">6분</div></div>';
@@ -1837,75 +1637,52 @@ function updateFreeCountdown(){
   const diff=Math.max(0,Math.floor((target-now)/1000));
   const h=Math.floor(diff/3600),m=Math.floor((diff%3600)/60),s=diff%60;
   const el=document.getElementById('free-until');
-  if(diff>0){
-    el.textContent='시작까지 '+h+'h '+String(m).padStart(2,'0')+'m '+String(s).padStart(2,'0')+'s';
-    el.style.color='#888';
-  }else{
-    el.textContent='진행중 Lv.'+(S.freeLevel+1);
-    el.style.color='#c084fc';
-  }
+  if(diff>0){el.textContent='시작까지 '+h+'h '+String(m).padStart(2,'0')+'m '+String(s).padStart(2,'0')+'s';el.style.color='#888';}
+  else{el.textContent='진행중 Lv.'+(S.freeLevel+1);el.style.color='#c084fc';}
 }
 function startFreeLevel(lvl){
-  if(lvl>=FREE_LEVELS.length){
-    alert('무료 토너먼트 종료!'); freeEliminate(); return;
-  }
+  if(lvl>=FREE_LEVELS.length){alert('무료 토너먼트 종료!');freeEliminate();return;}
   S.freeLevel=lvl;
   clearInterval(freeTickInterval);
   const level=FREE_LEVELS[lvl];
   if(level.brk){
-    // 브레이크
-    S.sbNow=FREE_LEVELS[lvl-1].sb; S.bbNow=FREE_LEVELS[lvl-1].bb;
+    S.sbNow=FREE_LEVELS[lvl-1].sb;S.bbNow=FREE_LEVELS[lvl-1].bb;
     document.getElementById('sb').value=S.sbNow;
     document.getElementById('bb').value=S.bbNow;
     toggleBreak();
-    const dur=level.min*60;
-    let left=dur;
-    freeTickInterval=setInterval(()=>{
-      left--;
-      if(left<=0){clearInterval(freeTickInterval);startFreeLevel(lvl+1);}
-    },1000);
+    const dur=level.min*60;let left=dur;
+    freeTickInterval=setInterval(()=>{left--;if(left<=0){clearInterval(freeTickInterval);startFreeLevel(lvl+1);}},1000);
     return;
   }
-  S.sbNow=level.sb; S.bbNow=level.bb; S.blindLevel=lvl+1;
+  S.sbNow=level.sb;S.bbNow=level.bb;S.blindLevel=lvl+1;
   document.getElementById('sb').value=S.sbNow;
   document.getElementById('bb').value=S.bbNow;
-  updateTimerUI(); updateZoneBadge(); updateBBDisplay();
-  // 블라인드업 알림
+  updateTimerUI();updateZoneBadge();updateBBDisplay();
   const fmt=n=>n>=1000?n/1000+'K':n;
   document.getElementById('ba-val').textContent=fmt(S.sbNow)+' / '+fmt(S.bbNow);
   document.getElementById('ba-sub').textContent='레벨 '+(lvl+1)+' 시작';
   if(lvl>0)document.getElementById('balert').classList.add('show');
   if(navigator.vibrate)navigator.vibrate([100,60,100,60,200]);
   initFreeMode();
-  // 다음 레벨 자동 전환
-  const dur=level.min*60;
-  let left=dur;
-  S.timerTotal=dur; S.timerLeft=dur;
-  clearInterval(S.timerInterval); S.timerRunning=true;
-  const btn=document.getElementById('t-play'); btn.textContent='⏸'; btn.classList.add('pause');
+  const dur=level.min*60;let left=dur;
+  S.timerTotal=dur;S.timerLeft=dur;
+  clearInterval(S.timerInterval);S.timerRunning=true;
+  updateTimerUI();
   freeTickInterval=setInterval(()=>{
-    left--;
-    S.timerLeft=left;
-    updateTimerUI();
-    if(left<=0){clearInterval(freeTickInterval); S.timerRunning=false; btn.textContent='▶'; btn.className=''; startFreeLevel(lvl+1);}
+    left--;S.timerLeft=left;updateTimerUI();
+    if(left<=0){clearInterval(freeTickInterval);S.timerRunning=false;updateTimerUI();startFreeLevel(lvl+1);}
   },1000);
 }
 function freeEliminate(){
   if(!confirm('탈락 처리하시겠습니까? 무료 토너 모드를 초기화합니다.'))return;
-  clearInterval(freeTickInterval); clearInterval(freeAutoInterval);
-  S.timerRunning=false; document.getElementById('t-play').textContent='▶';
-  document.getElementById('t-play').className='';
-  clearInterval(S.timerInterval);
-  S.freeLevel=0;
-  setMode('trn');
-  resetTimer();
+  clearInterval(freeTickInterval);clearInterval(freeAutoInterval);
+  S.timerRunning=false;updateTimerUI();clearInterval(S.timerInterval);
+  S.freeLevel=0;setMode('trn');resetTimer();
   if(navigator.vibrate)navigator.vibrate([200,100,200]);
 }
 function initFreeLevelAtCurrentTime(){
-  // 현재 시각이 19:00 이후면 경과 시간 기준으로 레벨 계산
   const now=new Date();
-  const start=new Date();
-  start.setHours(FREE_START_HOUR,0,0,0);
+  const start=new Date();start.setHours(FREE_START_HOUR,0,0,0);
   if(now<start){S.freeLevel=0;return;}
   const elapsed=Math.floor((now-start)/1000);
   let accum=0;
@@ -1928,14 +1705,6 @@ function activateShield(){
 function unshield(){document.getElementById('shield').classList.remove('on');}
 document.addEventListener('visibilitychange',()=>{if(document.hidden)activateShield();});
 
-function toggleSettings(){
-  const el=document.getElementById('settings-panel');
-  const arr=document.getElementById('tog-arrow');
-  const collapsed=el.classList.toggle('collapsed');
-  arr.textContent=collapsed?'▶':'▼';
-}
-
-
 /* ════════════════ 헤더 설정 접기 ════════════════ */
 function toggleSettings(){
   const el=document.getElementById('settings-panel');
@@ -1953,7 +1722,6 @@ function onEnd(){
   if(S.mode==='free'){freeEliminate();return;}
   if(!confirm('게임을 종료하시겠습니까?'))return;
   clearInterval(S.timerInterval);S.timerRunning=false;
-  const btn=document.getElementById('t-play');btn.textContent='▶';btn.className='';
   resetTimer();
 }
 
@@ -1963,7 +1731,7 @@ function updateSummaryBar(){
     const seats=SEATS[S.players];
     const seat=seats[S.rotIdx]||{l:'?'};
     const fmt=n=>n>=1000?Math.round(n/100)/10+'K':n;
-    const bb=S.bbNow||2000,chips=S.curChip||0;
+    const bb=S.bbNow||200,chips=S.curChip||0;
     const bbCount=chips>0?Math.round(chips/bb):0;
     const modeLabel=S.mode==='free'?'무료':S.mode==='pub'?'펍':'대회';
     const modeBg=S.mode==='free'?'#1a0a3b':S.mode==='pub'?'#3b1c00':'#14532d';
@@ -1978,6 +1746,9 @@ function updateSummaryBar(){
     set('sum-blind',fmt(S.sbNow)+'/'+fmt(S.bbNow));
     if(bbCount>0){const stk=getStackInfo();const z=zoneBadge(stk);set('sum-zone',z.txt,{color:z.col,background:z.bg,border:'0.5px solid '+z.col+'33'});}
     else{set('sum-zone','칩미입력',{color:'#555',background:'#111',border:'0.5px solid #1a1a1a'});}
+    // 숏칩 뱃지 (10BB 미만)
+    const shortBadge=document.getElementById('short-chip-badge');
+    if(shortBadge){shortBadge.classList.toggle('on',bbCount>0&&bbCount<10);}
     // mode-desc 업데이트
     const descEl=document.getElementById('mode-desc');
     const descMap={trn:'GTO·앤티BB',pub:'표준 펍',mini:'🔥어그레시브·3만',daily:'💎데일리·5만',high:'👑하이롤·앤티',free:'🎮무료토너·20K'};
@@ -1985,8 +1756,8 @@ function updateSummaryBar(){
     // btn-start 동기화
     const startBtn=document.getElementById('btn-start');
     if(startBtn){
-      if(S.timerRunning){startBtn.textContent='⏸ 정지';startBtn.style.cssText='background:#3d1400;color:#fdba74;border-color:#7c2d12;';}
-      else{startBtn.textContent='▶ 스타트';startBtn.style.cssText='background:#14532d;color:#86efac;border-color:#166534;';}
+      if(S.timerRunning){startBtn.textContent='⏸ 정지';startBtn.style.cssText='flex:1;height:28px;border-radius:6px;background:#3d1400;color:#fdba74;border:0.5px solid #7c2d12;font-size:11px;font-weight:700;';}
+      else{startBtn.textContent='▶ 스타트';startBtn.style.cssText='flex:1;height:28px;border-radius:6px;background:#14532d;color:#86efac;border:0.5px solid #166534;font-size:11px;font-weight:700;';}
     }
   }catch(e){}
 }
@@ -2006,7 +1777,7 @@ for(let i=2;i<=8;i++){
   b.className='potb'+(i===2?' on':'');b.dataset.n=i;b.textContent=i;
   b.onclick=()=>setPotPlayers(i);potWrap.appendChild(b);
 }
-// 사이콜 버튼 초기화
+// 사이콜 버튼
 const limpWrap=document.getElementById('limp-btns');
 for(let i=0;i<=6;i++){
   const b=document.createElement('button');
@@ -2016,7 +1787,7 @@ for(let i=0;i<=6;i++){
 // 매트릭스 동적 셀 크기 계산
 function calcMatrixSize(){
   const w=window.innerWidth-12;
-  const cs=Math.floor((w-14)/14); // 13열+라벨1열, gap 1px씩 13개=13px
+  const cs=Math.floor((w-14)/14);
   const cl=Math.max(12,Math.round(cs*.55));
   document.documentElement.style.setProperty('--cs',Math.max(cs,22)+'px');
   document.documentElement.style.setProperty('--cl',Math.max(cl,12)+'px');
@@ -2025,14 +1796,10 @@ function calcMatrixSize(){
 calcMatrixSize();
 window.addEventListener('resize',calcMatrixSize);
 
-// 배경 탭으로 배너 닫기
 document.getElementById('content').addEventListener('click',function(e){
-  if(S.hand&&!e.target.closest('.mc')&&!e.target.closest('#sheet')){
-    closeSheet();
-  }
+  if(S.hand&&!e.target.closest('.mc')&&!e.target.closest('#sheet')){closeSheet();}
 });
 
-// 카드 피커 초기화
 try{renderSeatBtns();}catch(e){}
 try{renderScBar();}catch(e){const dm=document.getElementById('debug-msg');if(dm){dm.textContent='scBar:'+e.message;dm.style.display='block';}}
 try{selectByIdx(3);}catch(e){const dm=document.getElementById('debug-msg');if(dm){dm.textContent='selIdx:'+e.message;dm.style.display='block';}}
@@ -2040,15 +1807,9 @@ try{resetTimer();}catch(e){}
 try{updateSummaryBar();}catch(e){}
 try{updateZoneBadge();updateBBDisplay();}catch(e){}
 if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
-// 초기 렌더링 강제 실행
 setTimeout(()=>{
   try{
-    calcMatrixSize();
-    renderScBar();
-    renderPositions();
-    renderMatrix();
-    updateSummaryBar();
-    // 팟참여/사이콜 버튼 재확인
+    calcMatrixSize();renderScBar();renderPositions();renderMatrix();updateSummaryBar();
     if(!document.querySelector('#pot-btns .potb')){
       const pw=document.getElementById('pot-btns');
       if(pw){pw.innerHTML='';for(let i=2;i<=8;i++){const b=document.createElement('button');b.className='potb'+(i===2?' on':'');b.dataset.n=i;b.textContent=i;b.onclick=()=>setPotPlayers(i);pw.appendChild(b);}}
