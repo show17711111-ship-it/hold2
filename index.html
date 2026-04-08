@@ -440,9 +440,9 @@ input::-webkit-inner-spin-button,input::-webkit-outer-spin-button{-webkit-appear
 
 
 </div><!-- /hdr -->
-</div>
 
 <div id="content">
+  <div id="debug-msg" style="color:#f87171;font-size:10px;padding:4px 8px;display:none;"></div>
   <!-- 팟참여 + 사이콜 (항상 보임, 고정) -->
   <div id="game-row-a">
     <span class="slbl">팟참여</span>
@@ -1814,8 +1814,8 @@ document.getElementById('content').addEventListener('click',function(e){
 
 // 카드 피커 초기화
 try{renderSeatBtns();}catch(e){}
-try{renderScBar();}catch(e){}
-try{selectByIdx(3);}catch(e){console.error('selectByIdx:',e);}
+try{renderScBar();}catch(e){const dm=document.getElementById('debug-msg');if(dm){dm.textContent='scBar:'+e.message;dm.style.display='block';}}
+try{selectByIdx(3);}catch(e){const dm=document.getElementById('debug-msg');if(dm){dm.textContent='selIdx:'+e.message;dm.style.display='block';}}
 try{resetTimer();}catch(e){}
 try{updateSummaryBar();}catch(e){}
 try{updateZoneBadge();updateBBDisplay();}catch(e){}
@@ -1837,7 +1837,7 @@ setTimeout(()=>{
       const lw=document.getElementById('limp-btns');
       if(lw){lw.innerHTML='';for(let i=0;i<=6;i++){const b=document.createElement('button');b.className='potb'+(i===0?' on':'');b.dataset.n=i;b.textContent=i;b.onclick=()=>setLimpers(i);lw.appendChild(b);}}
     }
-  }catch(e){console.warn('render err:',e.message,e.stack);}
+  }catch(e){const dm=document.getElementById('debug-msg');if(dm){dm.textContent='TO:'+e.message;dm.style.display='block';}}
 },200);
 </script>
 </body>
