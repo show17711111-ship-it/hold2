@@ -1503,6 +1503,8 @@ function renderSheet(){
   if(isAllin&&navigator.vibrate)navigator.vibrate([80,40,80]);
 
   // ── 상황 분석 패널 렌더 ──
+  const nPlayers = S.potPlayers;
+  const limpers = S.limpers || 0;
   const sitSections = getSituationAdvice(hand, pi, sc, stk, nPlayers, limpers);
   const sitEl = document.getElementById('situation-analysis');
   if (sitEl && sitSections.length > 0) {
